@@ -1,0 +1,51 @@
+// app global css in SCSS form
+:root {
+  --q-hr: #4b5eaa;
+  --q-hr-light: #6b7bc4;
+  --q-office: #1a237e;
+  --q-office-light: #3949ab;
+  --q-planning: #2e7d32;
+  --q-planning-light: #43a047;
+}
+
+// Set Poppins as default font
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+// Default font weights
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+}
+
+// Utility classes for font weights
+.font-light {
+  font-weight: 300;
+}
+
+.font-regular {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
