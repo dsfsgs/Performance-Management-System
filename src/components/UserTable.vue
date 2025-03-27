@@ -47,13 +47,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.q-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-.q-th {
-  background: #f0f0f0;
-  font-weight: bold;
-}
-</style>
+<style scoped></style>
