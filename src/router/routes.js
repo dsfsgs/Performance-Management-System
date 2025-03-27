@@ -8,7 +8,8 @@ import HRDashboard from 'src/pages/HR/HRDashboard.vue'
 import HRUnitWorkPlan from 'src/pages/HR/UnitWorkPlan.vue'
 import HROPCR from 'src/pages/HR/OPCR.vue'
 import HRIPCR from 'src/pages/HR/IPCR.vue'
-import HRAccount from 'src/pages/HR/Account.vue'
+import UserPage from 'src/pages/HR/UserPage.vue'
+import ProfilePage from 'src/pages/HR/ProfilePage.vue'
 
 // Office Admin Pages
 import OfficeDashboard from 'pages/Office/OfficeDashboard.vue'
@@ -75,8 +76,13 @@ export const routes = [
         meta: { role: 'hr-admin' },
       },
       {
-        path: 'hr/account',
-        component: HRAccount,
+        path: 'hr/account/user',
+        component: UserPage,
+        meta: { role: 'hr-admin' },
+      },
+      {
+        path: 'hr/account/profile',
+        component: ProfilePage,
         meta: { role: 'hr-admin' },
       },
 

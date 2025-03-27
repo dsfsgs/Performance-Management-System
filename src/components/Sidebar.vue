@@ -23,7 +23,33 @@
     <!-- Navigation Menu -->
     <q-list>
       <template v-for="(item, index) in menuItems" :key="index">
+        <q-expansion-item v-if="item.children" expand-separator>
+          <template v-slot:header>
+            <q-item-section avatar style="padding-left: 20px">
+              <q-icon :name="item.icon" class="menu-icon" />
+            </q-item-section>
+            <q-item-section class="menu-text" style="color: white">{{ item.label }}</q-item-section>
+          </template>
+          <q-list style="overflow: hidden">
+            <q-item
+              v-for="(subItem, subIndex) in item.children"
+              :key="subIndex"
+              clickable
+              v-ripple
+              :to="subItem.route"
+              class="menu-item"
+              active-class="active-menu"
+              exact-active-class="active-menu"
+            >
+              <q-item-section avatar style="padding-left: 20px">
+                <q-icon :name="subItem.icon" class="menu-icon" />
+              </q-item-section>
+              <q-item-section>{{ subItem.label }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-expansion-item>
         <q-item
+          v-else
           clickable
           v-ripple
           :to="item.route"
@@ -80,16 +106,6 @@ export default {
       return classes[role] || 'bg-primary'
     })
 
-    const roleHoverClass = computed(() => {
-      const role = userStore.user?.role
-      const classes = {
-        'hr-admin': 'bg-red-3', // Lighter shade of #722B2B
-        'office-admin': 'bg-green-3', // Lighter shade of #205540
-        'planning-admin': 'bg-pink-3', // Lighter shade of #F7899C
-      }
-      return classes[role] || 'bg-red-3'
-    })
-
     const menuItems = computed(() => {
       const role = userStore.user?.role
 
@@ -99,7 +115,14 @@ export default {
           { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
           { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
           { label: 'IPCR', icon: 'fact_check', route: '/hr/ipcr' },
-          { label: 'Account', icon: 'person', route: '/hr/account' },
+          {
+            label: 'Account',
+            icon: 'person',
+            children: [
+              { label: 'User', icon: 'group', route: '/hr/account/user' },
+              { label: 'Profile', icon: 'person_outline', route: '/hr/account/profile' },
+            ],
+          },
         ],
         'office-admin': [
           { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
@@ -129,14 +152,13 @@ export default {
       leftDrawerOpen,
       menuItems,
       roleColorClass,
-      roleHoverClass,
       logout,
     }
   },
 }
 </script>
 
-<style scoped>
+<style>
 .sidebar {
   color: white;
   display: flex;
@@ -154,12 +176,12 @@ export default {
 
 .sidebar-header {
   text-align: center;
-  padding: 1.5rem 1.5rem 2rem;
+  padding: 0.5rem 1.5rem 0.5rem;
 }
 
 .q-list {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 0.5rem 0;
   padding-bottom: calc(1rem + 64px);
 }
