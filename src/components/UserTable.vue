@@ -1,50 +1,63 @@
 <template>
-  <q-table flat bordered :rows="rows" :columns="columns" row-key="name">
-    <template v-slot:body-cell-action="props">
-      <q-td :props="props" class="text-center"> </q-td>
-    </template>
-  </q-table>
+  <q-page class="q-pa-md">
+    <q-table
+      flat
+      bordered
+      :rows="rows"
+      :columns="columns"
+      row-key="offices"
+      table-style="min-width: 100%"
+      :pagination="{ rowsPerPage: 5 }"
+      :rows-per-page-options="[5, 10, 15]"
+    />
+  </q-page>
 </template>
 
 <script>
-import { ref } from 'vue'
-
 export default {
-  setup() {
-    const columns = [
-      { name: 'offices', label: 'OFFICES', align: 'left', field: (row) => row.offices },
-      { name: 'name', label: 'NAME', align: 'center', field: (row) => row.name },
-      {
-        name: 'datecreated',
-        label: 'DATE CREATED',
-        align: 'center',
-        field: (row) => row.datecreated,
-      },
-    ]
-
-    const rows = ref([
-      {
-        name: 'Mahusay, Jograd M.',
-        offices: 'City of Human Resource Management Office',
-        datecreated: 'June 22, 2025',
-      },
-      {
-        name: 'Mahusay, Jograd M.',
-        offices: 'City of Information, Communication and Technology Management Office',
-        datecreated: 'June 22, 2025',
-      },
-      {
-        name: 'Mahusay, Jograd M.',
-        offices: 'City of Accounting Office',
-        datecreated: 'June 22, 2025',
-      },
-      { name: 'Mahusay, Jograd M.', offices: 'City Mayor’s Office', datecreated: 'June 22, 2025' },
-      { name: 'Mahusay, Jograd M.', offices: 'City Mayor’s Office', datecreated: 'June 22, 2025' },
-    ])
-
-    return { columns, rows }
+  data() {
+    return {
+      columns: [
+        { name: 'offices', required: true, label: 'OFFICES', align: 'left', field: 'offices' },
+        { name: 'name', required: true, label: 'NAME', align: 'left', field: 'name' },
+        {
+          name: 'date_created',
+          required: true,
+          label: 'DATE CREATED',
+          align: 'left',
+          field: 'date_created',
+        },
+      ],
+      rows: [
+        {
+          offices: 'City of Human Resource Management Office',
+          name: 'Mahusay, Jograd M.',
+          date_created: 'June 22, 2025',
+        },
+        {
+          offices: 'City of Information, Communication and Technology Management Office',
+          name: 'Mahusay, Jograd M.',
+          date_created: 'June 22, 2025',
+        },
+        {
+          offices: 'City of Accounting Office',
+          name: 'Mahusay, Jograd M.',
+          date_created: 'June 22, 2025',
+        },
+        {
+          offices: 'City Mayor’s Office',
+          name: 'Mahusay, Jograd M.',
+          date_created: 'June 22, 2025',
+        },
+      ],
+    }
   },
 }
 </script>
 
-<style scoped></style>
+<style>
+.q-table__control {
+  display: flex;
+  align-items: center;
+}
+</style>

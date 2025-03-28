@@ -71,7 +71,7 @@
               >
                 <q-td key="office" :props="props">
                   <div class="row items-center">
-                    {{ props.row.office }}
+                    {{ props.row.name }}
                   </div>
                 </q-td>
               </q-tr>
@@ -162,11 +162,11 @@
               >
                 <q-td key="name" :props="props">
                   <div class="row items-center">
-                    {{ props.row.name }}
+                    {{ props.row.name4 }}
                   </div>
                 </q-td>
                 <q-td key="position" :props="props">
-                  {{ props.row.position }}
+                  {{ props.row.Designation }}
                 </q-td>
               </q-tr>
             </template>
@@ -327,6 +327,7 @@
 import UserTable from '../../components/UserTable.vue'
 import { Notify } from 'quasar'
 import { ref, onMounted } from 'vue'
+import { api } from 'boot/axios'
 
 export default {
   name: 'UserPage',
@@ -359,20 +360,9 @@ export default {
       },
     ]
 
-    const offices = ref(
-      Array.from({ length: 30 }, (_, i) => ({
-        id: i + 1,
-        office: `Office ${i + 1}`,
-      })),
-    )
+    const offices = ref([])
 
-    const employees = ref(
-      Array.from({ length: 30 }, (_, i) => ({
-        id: i + 1,
-        name: `Employee ${i + 1}`,
-        position: `Position ${(i % 5) + 1}`,
-      })),
-    )
+    const employees = ref([])
 
     const filteredEmployees = ref([])
     const filteredOffices = ref([])
@@ -499,9 +489,37 @@ export default {
       showEmployeeModal.value = true
     }
 
+    const fetchOffices = async () => {
+      loading.value = true
+      try {
+        const response = await api.get('/api/fetch_office')
+        offices.value = response.data
+        filteredOffices.value = offices.value
+      } catch (error) {
+        console.error('Error fetching offices:', error)
+        Notify.create({ message: 'Failed to load offices', color: 'negative' })
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const fetchEmployees = async () => {
+      loading.value = true
+      try {
+        const response = await api.get('/api/employee')
+        employees.value = response.data
+        filteredEmployees.value = employees.value
+      } catch (error) {
+        console.error('Error fetching employees:', error)
+        Notify.create({ message: 'Failed to load employees', color: 'negative' })
+      } finally {
+        loading.value = false
+      }
+    }
+
     onMounted(() => {
-      filteredOffices.value = offices.value
-      filteredEmployees.value = employees.value
+      fetchOffices()
+      fetchEmployees()
     })
 
     return {
@@ -532,6 +550,8 @@ export default {
       resetForm,
       goBackToOfficeModal,
       goBackToEmployeeModal,
+      fetchOffices,
+      fetchEmployees,
     }
   },
 }
@@ -539,7 +559,7 @@ export default {
 
 <style scoped>
 .modal-card {
-  width: 600px;
+  width: 800px;
   max-width: 90vw;
   border-radius: 8px;
 }
