@@ -99,7 +99,7 @@ import {
   QForm,
   QCard,
 } from 'quasar'
-import { useUserStore } from '../../stores/userStore'
+import { useAuthStore } from 'stores/auth.js'
 
 export default {
   name: 'LoginPage',
@@ -114,7 +114,7 @@ export default {
     QCard,
   },
   setup() {
-    const userStore = useUserStore()
+    const authStore = useAuthStore()
     const router = useRouter()
     const $q = useQuasar()
     const imageLoaded = ref(false)
@@ -152,7 +152,7 @@ export default {
       }
     }
 
-    // Login function with validation check
+    // Login function with API authentication
     const login = async () => {
       validateUsername()
       validatePassword()
@@ -160,41 +160,24 @@ export default {
       if (!usernameError.value && !passwordError.value) {
         isLoading.value = true
         try {
-          // Simulate API call delay
-          await new Promise((resolve) => setTimeout(resolve, 1000))
+          const response = await authStore.login(username.value, password.value)
 
-          // Handle login based on username
-          if (username.value === 'hr') {
-            userStore.setUser({ role: 'hr-admin' })
+          if (response.success) {
             if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'hr-admin' }),
-              )
+              localStorage.setItem('rememberedUser', JSON.stringify({ username: username.value }))
             }
-            router.push('/hr/dashboard')
-          } else if (username.value === 'office') {
-            userStore.setUser({ role: 'office-admin' })
-            if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'office-admin' }),
-              )
-            }
-            router.push('/office/dashboard')
-          } else if (username.value === 'planning') {
-            userStore.setUser({ role: 'planning-admin' })
-            if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'planning-admin' }),
-              )
-            }
-            router.push('/planning/dashboard')
+
+            const role = response.role
+            let route = '/'
+            if (role === 3) route = '/hr/dashboard'
+            else if (role === 2) route = '/planning/dashboard'
+            else if (role === 1) route = '/office/dashboard'
+
+            router.push(route)
           } else {
             $q.notify({
               color: 'negative',
-              message: 'Invalid credentials',
+              message: response.message,
               position: 'top',
             })
           }
@@ -216,10 +199,9 @@ export default {
     const checkRememberedUser = () => {
       const rememberedUser = localStorage.getItem('rememberedUser')
       if (rememberedUser) {
-        const { username: rememberedUsername, role } = JSON.parse(rememberedUser)
+        const { username: rememberedUsername } = JSON.parse(rememberedUser)
         username.value = rememberedUsername
         rememberMe.value = true
-        userStore.setUser({ role })
       }
     }
 

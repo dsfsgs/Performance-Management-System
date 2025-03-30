@@ -19,7 +19,6 @@
 
     <UserTable />
 
-    <!-- Office Selection Modal -->
     <q-dialog v-model="showOfficeModal" persistent transition-show="scale" transition-hide="scale">
       <q-card class="modal-card">
         <q-card-section class="modal-header">
@@ -601,7 +600,7 @@ export default {
 }
 
 :deep(.q-table__middle) {
-  max-height: calc(300px - 50px);
+  height: auto; /* Adjusted from max-height */
   overflow-y: auto;
 }
 
@@ -611,6 +610,7 @@ export default {
   background: white;
   top: 0;
   padding: 8px 16px;
+  width: auto; /* Ensures proper alignment */
 }
 
 :deep(.q-td) {
@@ -630,10 +630,10 @@ export default {
   padding: 8px 16px;
   cursor: pointer;
   transition: background-color 0.2s;
+}
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.03);
-  }
+:deep(.q-item:hover) {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .confirmation-details {
@@ -673,10 +673,13 @@ export default {
 }
 
 :deep(.q-table__bottom) {
-  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-height: 48px;
-  padding: 8px 16px;
+  padding: 12px 16px;
   background-color: #f8f8f8;
+  width: 100%; /* Ensures full width alignment */
 }
 
 :deep(.text-body2) {

@@ -87,30 +87,30 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
+import { useAuthStore } from 'stores/auth.js'
 
 export default {
   name: 'AppSidebar',
   setup() {
     const router = useRouter()
-    const userStore = useUserStore()
+    const authStore = useAuthStore()
     const leftDrawerOpen = ref(true)
 
     const roleColorClass = computed(() => {
-      const role = userStore.user?.role
+      const role = authStore.user?.role_id
       const classes = {
-        'hr-admin': 'bg-primary',
-        'office-admin': 'bg-secondary',
-        'planning-admin': 'bg-accent',
+        3: 'bg-primary', // HR Admin
+        1: 'bg-secondary', // Office Admin
+        2: 'bg-accent', // Planning Admin
       }
       return classes[role] || 'bg-primary'
     })
 
     const menuItems = computed(() => {
-      const role = userStore.user?.role
+      const role = authStore.user?.role_id
 
       const items = {
-        'hr-admin': [
+        3: [
           { label: 'Dashboard', icon: 'dashboard', route: '/hr/dashboard' },
           { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
           { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
@@ -124,7 +124,7 @@ export default {
             ],
           },
         ],
-        'office-admin': [
+        1: [
           { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
           { label: 'Employee', icon: 'people', route: '/office/employee' },
           { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
@@ -132,7 +132,7 @@ export default {
           { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
           { label: 'Account', icon: 'person', route: '/office/account' },
         ],
-        'planning-admin': [
+        2: [
           { label: 'Dashboard', icon: 'dashboard', route: '/planning/dashboard' },
           { label: 'Unit Work Plan', icon: 'event_note', route: '/planning/unit-work-plan' },
           { label: 'OPCR', icon: 'assignment', route: '/planning/opcr' },
@@ -144,7 +144,7 @@ export default {
     })
 
     const logout = () => {
-      userStore.clearUser()
+      authStore.logout()
       router.push('/login')
     }
 
