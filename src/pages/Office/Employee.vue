@@ -1,12 +1,23 @@
-<template>
-  <q-page padding>
-    <h2>Employee Management</h2>
-    <p>Office Employee management content goes here</p>
-  </q-page>
-</template>
+<!-- eslint-disable vue/multi-word-component-names -->
+<script setup>
+import { ref } from 'vue';
+import DivisionList from 'src/components/DivisionList.vue';
+import AddEmployee from 'src/components/AddEmployee.vue';
 
-<script>
-export default {
-  name: 'OfficeEmployee',
-}
+const currentView = ref('division');
+
+const navigateToAddEmployee = () => {
+  currentView.value = 'addEmployee';
+};
+
+const goBackToDivision = () => {
+  currentView.value = 'division';
+};
 </script>
+
+<template>
+  <div class="employee-container">
+    <DivisionList v-if="currentView === 'division'" @navigate="navigateToAddEmployee" />
+    <AddEmployee v-if="currentView === 'addEmployee'" @back="goBackToDivision" />
+  </div>
+</template>
