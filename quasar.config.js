@@ -90,6 +90,7 @@ export default defineConfig((/* ctx */) => {
           info: '#31ccec',
           warning: '#f2c037',
         },
+        
       },
 
       // iconSet: 'material-icons', // Quasar icon set

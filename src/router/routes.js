@@ -1,7 +1,7 @@
-import { useUserStore } from '../stores/userStore'
-import AuthLayout from 'layouts/AuthLayout.vue'
-import AdminLayout from 'layouts/MainLayout.vue'
-import Login from '../pages/Auth/LoginPage.vue'
+import { useUserStore } from 'src/stores/userStore'
+import AuthLayout from 'src/layouts/AuthLayout.vue'
+import AdminLayout from 'src/layouts/MainLayout.vue'
+import Login from 'src/pages/Auth/LoginPage.vue'
 
 // HR Admin Pages
 import HRDashboard from 'src/pages/HR/HRDashboard.vue'
@@ -12,48 +12,61 @@ import UserPage from 'src/pages/HR/UserPage.vue'
 import ProfilePage from 'src/pages/HR/ProfilePage.vue'
 
 // Office Admin Pages
-import OfficeDashboard from 'pages/Office/OfficeDashboard.vue'
-import OfficeEmployee from 'pages/Office/Employee.vue'
-import OfficeUnitWorkPlan from 'pages/Office/UnitWorkPlan.vue'
-import OfficeOPCR from 'pages/Office/OPCR.vue'
-import OfficeIPCR from 'pages/Office/IPCR.vue'
-import OfficeAccount from 'pages/Office/Account.vue'
+import OfficeDashboard from 'src/pages/Office/OfficeDashboard.vue'
+import OfficeEmployee from 'src/pages/Office/Employee.vue'
+import OfficeUnitWorkPlan from 'src/pages/Office/UnitWorkPlan.vue'
+import OfficeOPCR from 'src/pages/Office/OPCR.vue'
+import OfficeIPCR from 'src/pages/Office/IPCR.vue'
+import OfficeAccount from 'src/pages/Office/Account.vue'
 
 // Planning Admin Pages
-import PlanningDashboard from 'pages/Planning/PlanningDashboard.vue'
-import PlanningUnitWorkPlan from 'pages/Planning/UnitWorkPlan.vue'
-import PlanningOPCR from 'pages/Planning/OPCR.vue'
-import PlanningAccount from 'pages/Planning/Account.vue'
+import PlanningDashboard from 'src/pages/Planning/PlanningDashboard.vue'
+import PlanningUnitWorkPlan from 'src/pages/Planning/UnitWorkPlan.vue'
+import PlanningOPCR from 'src/pages/Planning/OPCR.vue'
+import PlanningAccount from 'src/pages/Planning/Account.vue'
+import Library from 'src/pages/Office/Library.vue'
+
+
 
 export const routes = [
   {
     path: '/login',
     component: AuthLayout,
-    children: [{ path: '', component: Login }],
+    children: [{ path: '',
+       component: Login,
+
+
+      }],
   },
   {
     path: '/',
     component: AdminLayout,
     children: [
       // Root redirect
-      {
-        path: '',
-        redirect: () => {
-          const userStore = useUserStore()
-          const role = userStore.user?.role
+   {
+  path: '',
+  redirect: () => {
+    const userStore = useUserStore()
+    userStore.loadUser()
+    const role = userStore.role
 
-          switch (role) {
-            case 'hr-admin':
-              return '/hr/dashboard'
-            case 'office-admin':
-              return '/office/dashboard'
-            case 'planning-admin':
-              return '/planning/dashboard'
-            default:
-              return '/login'
-          }
-        },
-      },
+    if (!role) {
+      return '/login'
+    }
+
+    switch (role) {
+      case 'hr-admin':
+        return '/hr/dashboard'
+      case 'office-admin':
+        return '/office/dashboard'
+      case 'planning-admin':
+        return '/planning/dashboard'
+      default:
+        return '/login'
+    }
+  },
+},
+
       // HR Admin Routes
       {
         path: 'hr/dashboard',
@@ -85,6 +98,11 @@ export const routes = [
         component: ProfilePage,
         meta: { role: 'hr-admin' },
       },
+      //  {
+      //   path: 'hr/library',
+      //   component:Library,
+      //   meta: { role: 'hr-admin' },
+      // },
 
       // Office Admin Routes
       {
@@ -110,6 +128,11 @@ export const routes = [
       {
         path: 'office/ipcr',
         component: OfficeIPCR,
+        meta: { role: 'office-admin' },
+      },
+        {
+        path: 'office/library',
+        component: Library,
         meta: { role: 'office-admin' },
       },
       {
@@ -143,18 +166,41 @@ export const routes = [
   },
 ]
 
-// Route Guard to Protect Routes
 export function setupRouterGuard(router) {
-  router.beforeEach((to, from, next) => {
+  router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
-    userStore.loadUser() // Load user from storage
 
-    if (to.path !== '/login' && !userStore.user?.role) {
-      next('/login') // Redirect if not logged in
-    } else if (to.meta.role && to.meta.role !== userStore.user?.role) {
-      next('/login') // Redirect if the user doesn't have the correct role
-    } else {
-      next()
+    // Ensure user data is loaded properly
+    await userStore.loadUser()
+
+    const isAuthenticated = !!userStore.user?.role_id
+    const userRole = userStore.role
+
+    // Redirect to login if not authenticated and not already on login
+    if (!isAuthenticated && to.path !== '/login') {
+      return next('/login')
     }
+
+    // Prevent logged-in users from accessing login
+    if (isAuthenticated && to.path === '/login') {
+      switch (userRole) {
+        case 'hr-admin':
+          return next('/hr/dashboard')
+        case 'office-admin':
+          return next('/office/dashboard')
+        case 'planning-admin':
+          return next('/planning/dashboard')
+        default:
+          return next('/login')
+      }
+    }
+
+    // Role-based access control
+    if (to.meta?.role && to.meta.role !== userRole) {
+      return next('/login')
+    }
+
+    next()
   })
 }
+
