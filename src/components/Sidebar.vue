@@ -87,67 +87,77 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '../stores/userStore'
+import { useUserStore } from 'src/stores/userStore'
 
 export default {
   name: 'AppSidebar',
   setup() {
+
     const router = useRouter()
     const userStore = useUserStore()
     const leftDrawerOpen = ref(true)
 
-    const roleColorClass = computed(() => {
-      const role = userStore.user?.role
-      const classes = {
-        'hr-admin': 'bg-primary',
-        'office-admin': 'bg-secondary',
-        'planning-admin': 'bg-accent',
-      }
-      return classes[role] || 'bg-primary'
-    })
+    // Class management for role-based styling
+   const roleColorClass = computed(() => {
+  const role = userStore.user?.role_id
+  const classes = {
+    1: 'bg-secondary',   // Office Admin
+    2: 'bg-accent',     // Planning Admin
+    3: 'bg-primary',      // HR Admin
+  }
+  return classes[role] || 'bg-primary'
+})
 
-    const menuItems = computed(() => {
-      const role = userStore.user?.role
+    // Sidebar items filtered based on role_id
+  const menuItems = computed(() => {
+  const role = userStore.user?.role_id
 
-      const items = {
-        'hr-admin': [
-          { label: 'Dashboard', icon: 'dashboard', route: '/hr/dashboard' },
-          { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
-          { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
-          { label: 'IPCR', icon: 'fact_check', route: '/hr/ipcr' },
-          {
-            label: 'Account',
-            icon: 'person',
-            children: [
-              { label: 'User', icon: 'group', route: '/hr/account/user' },
-              { label: 'Profile', icon: 'person_outline', route: '/hr/account/profile' },
-            ],
-          },
+  const items = {
+
+    1: [ // Office Admin
+      { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
+      { label: 'Employee', icon: 'people', route: '/office/employee' },
+      { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
+      { label: 'OPCR', icon: 'assignment', route: '/office/opcr' },
+      { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
+      { label: 'Library', icon: 'fact_check', route: '/office/library' },
+      { label: 'Account', icon: 'person', route: '/office/account' },
+    ],
+    2: [ // Planning Admin
+      { label: 'Dashboard', icon: 'dashboard', route: '/planning/dashboard' },
+      { label: 'Unit Work Plan', icon: 'event_note', route: '/planning/unit-work-plan' },
+      { label: 'OPCR', icon: 'assignment', route: '/planning/opcr' },
+      { label: 'Account', icon: 'person', route: '/planning/account' },
+    ],
+    3: [ // HR Admin
+      { label: 'Dashboard', icon: 'dashboard', route: '/hr/dashboard' },
+      { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
+      { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
+      { label: 'IPCR', icon: 'fact_check', route: '/hr/ipcr' },
+      {
+        label: 'Account',
+        icon: 'person',
+        children: [
+          { label: 'User', icon: 'group', route: '/hr/account/user' },
+          { label: 'Profile', icon: 'person_outline', route: '/hr/account/profile' },
         ],
-        'office-admin': [
-          { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
-          { label: 'Employee', icon: 'people', route: '/office/employee' },
-          { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
-          { label: 'OPCR', icon: 'assignment', route: '/office/opcr' },
-          { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
-          { label: 'Account', icon: 'person', route: '/office/account' },
-        ],
-        'planning-admin': [
-          { label: 'Dashboard', icon: 'dashboard', route: '/planning/dashboard' },
-          { label: 'Unit Work Plan', icon: 'event_note', route: '/planning/unit-work-plan' },
-          { label: 'OPCR', icon: 'assignment', route: '/planning/opcr' },
-          { label: 'Account', icon: 'person', route: '/planning/account' },
-        ],
-      }
+      },
+    ],
+  }
 
-      return items[role] || []
-    })
+  return items[role] || []
+})
 
-    const logout = () => {
-      userStore.clearUser()
-      router.push('/login')
-    }
-
+    // Logout function
+const logout = async () => {
+  try {
+    await userStore.logout(router)
+  } catch (error) {
+    console.error('Logout failed:', error)
+    // Fallback navigation in case the store method fails
+    router.push('/login')
+  }
+}
     return {
       leftDrawerOpen,
       menuItems,

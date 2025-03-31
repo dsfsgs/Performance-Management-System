@@ -87,7 +87,9 @@
 
 <script>
 import { ref } from 'vue'
+
 import { useRouter } from 'vue-router'
+import {api} from '../../boot/axios'
 import {
   useQuasar,
   QImg,
@@ -99,7 +101,7 @@ import {
   QForm,
   QCard,
 } from 'quasar'
-import { useUserStore } from '../../stores/userStore'
+import {useUserStore} from '../../stores/userStore'
 
 export default {
   name: 'LoginPage',
@@ -114,7 +116,7 @@ export default {
     QCard,
   },
   setup() {
-    const userStore = useUserStore()
+
     const router = useRouter()
     const $q = useQuasar()
     const imageLoaded = ref(false)
@@ -153,79 +155,56 @@ export default {
     }
 
     // Login function with validation check
-    const login = async () => {
-      validateUsername()
-      validatePassword()
+ const login = async () => {
+  if (!username.value || !password.value) {
+    $q.notify({
+      color: 'negative',
+      message: 'Please enter both username and password',
+    })
+    return
+  }
 
-      if (!usernameError.value && !passwordError.value) {
-        isLoading.value = true
-        try {
-          // Simulate API call delay
-          await new Promise((resolve) => setTimeout(resolve, 1000))
+  isLoading.value = true
 
-          // Handle login based on username
-          if (username.value === 'hr') {
-            userStore.setUser({ role: 'hr-admin' })
-            if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'hr-admin' }),
-              )
-            }
-            router.push('/hr/dashboard')
-          } else if (username.value === 'office') {
-            userStore.setUser({ role: 'office-admin' })
-            if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'office-admin' }),
-              )
-            }
-            router.push('/office/dashboard')
-          } else if (username.value === 'planning') {
-            userStore.setUser({ role: 'planning-admin' })
-            if (rememberMe.value) {
-              localStorage.setItem(
-                'rememberedUser',
-                JSON.stringify({ username: username.value, role: 'planning-admin' }),
-              )
-            }
-            router.push('/planning/dashboard')
-          } else {
-            $q.notify({
-              color: 'negative',
-              message: 'Invalid credentials',
-              position: 'top',
-            })
-          }
-        } catch {
-          $q.notify({
-            color: 'negative',
-            message: 'An error occurred during login',
-            position: 'top',
-          })
-        } finally {
-          isLoading.value = false
-        }
-      } else {
-        console.log('Form validation failed')
-      }
+  try {
+    const response = await api.post('/user_login', {
+      name: username.value,
+      password: password.value,
+    })
+
+    const { token, user } = response.data
+
+    // Store token and user data
+    localStorage.setItem('token', token)
+
+    const userStore = useUserStore()
+    userStore.setUser(user)
+
+    $q.notify({
+      color: 'positive',
+      message: 'Login successful',
+    })
+
+    // Check role and redirect
+    const role = userStore.role
+    if (role === 'hr-admin') {
+      router.push('/hr/dashboard')
+    } else if (role === 'office-admin') {
+      router.push('/office/dashboard')
+    } else if (role === 'planning-admin') {
+      router.push('/planning/dashboard')
+    } else {
+      router.push('/login')
     }
-
-    // Check for remembered user on component mount
-    const checkRememberedUser = () => {
-      const rememberedUser = localStorage.getItem('rememberedUser')
-      if (rememberedUser) {
-        const { username: rememberedUsername, role } = JSON.parse(rememberedUser)
-        username.value = rememberedUsername
-        rememberMe.value = true
-        userStore.setUser({ role })
-      }
-    }
-
-    // Call checkRememberedUser when component mounts
-    checkRememberedUser()
-
+  } catch (error) {
+    $q.notify({
+      color: 'negative',
+      message: error.response?.data?.errors?.name?.[0] || 'Login failed',
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
     return {
       username,
       password,
@@ -334,28 +313,28 @@ export default {
   border-radius: 8px;
 }
 
-.input :deep(.q-field--focused) {
-  .q-field__label {
-    color: #00903e !important;
-  }
-  .q-field__control {
-    color: #00903e !important;
-  }
-  .q-field__control:before {
-    border-color: #00903e !important;
-  }
+.input :deep(.q-field--focused .q-field__label) {
+  color: #00903e !important;
 }
 
-.input :deep(.q-field--highlighted) {
-  .q-field__label {
-    color: #00903e !important;
-  }
-  .q-field__control {
-    color: #00903e !important;
-  }
-  .q-field__control:before {
-    border-color: #00903e !important;
-  }
+.input :deep(.q-field--focused .q-field__control) {
+  color: #00903e !important;
+}
+
+.input :deep(.q-field--focused .q-field__control:before) {
+  border-color: #00903e !important;
+}
+
+.input :deep(.q-field--highlighted .q-field__label) {
+  color: #00903e !important;
+}
+
+.input :deep(.q-field--highlighted .q-field__control) {
+  color: #00903e !important;
+}
+
+.input :deep(.q-field--highlighted .q-field__control:before) {
+  border-color: #00903e !important;
 }
 
 .input :deep(.q-field__control) {
