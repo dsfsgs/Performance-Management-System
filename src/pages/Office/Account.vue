@@ -1,12 +1,8 @@
-<template>
-  <q-page padding>
-    <h2>Account</h2>
-    <p>Office Account settings and management</p>
-  </q-page>
-</template>
-
-<script>
-export default {
-  name: 'OfficeAccount',
-}
+<!-- eslint-disable vue/multi-word-component-names -->
+<script setup>
+import AccPageComponent from 'src/components/AccPageComponent.vue'
 </script>
+
+<template>
+  <AccPageComponent />  
+</template>

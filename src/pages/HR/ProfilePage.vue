@@ -1,12 +1,8 @@
-<template>
-  <q-page padding>
-    <h2>Profile</h2>
-    <p>Profile content goes here</p>
-  </q-page>
-</template>
-
-<script>
-export default {
-  name: 'ProfilePage',
-}
+<!-- eslint-disable vue/multi-word-component-names -->
+<script setup>
+import AccPageComponent from 'src/components/AccPageComponent.vue'
 </script>
+
+<template>
+  <AccPageComponent />
+</template>
