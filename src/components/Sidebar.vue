@@ -1,20 +1,10 @@
 <template>
-  <q-drawer
-    v-model="leftDrawerOpen"
-    side="left"
-    bordered
-    :width="230"
-    :class="['sidebar', roleColorClass]"
-    :breakpoint="600"
-    :overlay="$q.screen.lt.md"
-  >
+  <q-drawer v-model="leftDrawerOpen" side="left" bordered :width="230" :class="['sidebar', roleColorClass]"
+    :breakpoint="600" :overlay="$q.screen.lt.md">
     <!-- Header -->
     <div class="sidebar-header">
-      <img
-        class="logo"
-        alt="City of Tagum Logo"
-        src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png"
-      />
+      <img class="logo" alt="City of Tagum Logo"
+        src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
       <div class="Title">
         <h5 class="main-title">Performance Management System</h5>
       </div>
@@ -31,16 +21,8 @@
             <q-item-section class="menu-text" style="color: white">{{ item.label }}</q-item-section>
           </template>
           <q-list style="overflow: hidden">
-            <q-item
-              v-for="(subItem, subIndex) in item.children"
-              :key="subIndex"
-              clickable
-              v-ripple
-              :to="subItem.route"
-              class="menu-item"
-              active-class="active-menu"
-              exact-active-class="active-menu"
-            >
+            <q-item v-for="(subItem, subIndex) in item.children" :key="subIndex" clickable v-ripple :to="subItem.route"
+              class="menu-item" active-class="active-menu" exact-active-class="active-menu">
               <q-item-section avatar style="padding-left: 20px">
                 <q-icon :name="subItem.icon" class="menu-icon" />
               </q-item-section>
@@ -48,15 +30,8 @@
             </q-item>
           </q-list>
         </q-expansion-item>
-        <q-item
-          v-else
-          clickable
-          v-ripple
-          :to="item.route"
-          class="menu-item"
-          active-class="active-menu"
-          exact-active-class="active-menu"
-        >
+        <q-item v-else clickable v-ripple :to="item.route" class="menu-item" active-class="active-menu"
+          exact-active-class="active-menu">
           <q-item-section avatar>
             <q-icon :name="item.icon" class="menu-icon" />
           </q-item-section>
@@ -74,14 +49,8 @@
     </div>
   </q-drawer>
 
-  <q-btn
-    dense
-    round
-    icon="menu"
-    class="floating-menu-btn"
-    @click="leftDrawerOpen = !leftDrawerOpen"
-    v-if="$q.screen.lt.md"
-  />
+  <q-btn dense round icon="menu" class="floating-menu-btn" @click="leftDrawerOpen = !leftDrawerOpen"
+    v-if="$q.screen.lt.md" />
 </template>
 
 <script>
@@ -98,66 +67,66 @@ export default {
     const leftDrawerOpen = ref(true)
 
     // Class management for role-based styling
-   const roleColorClass = computed(() => {
-  const role = userStore.user?.role_id
-  const classes = {
-    1: 'bg-secondary',   // Office Admin
-    2: 'bg-accent',     // Planning Admin
-    3: 'bg-primary',      // HR Admin
-  }
-  return classes[role] || 'bg-primary'
-})
+    const roleColorClass = computed(() => {
+      const role = userStore.user?.role_id
+      const classes = {
+        1: 'bg-office-admin',   // Office Admin
+        2: 'bg-planning-admin', // Planning Admin
+        3: 'bg-hr-admin',       // HR Admin
+      }
+      return classes[role] || 'bg-primary'
+    })
 
     // Sidebar items filtered based on role_id
-  const menuItems = computed(() => {
-  const role = userStore.user?.role_id
+    const menuItems = computed(() => {
+      const role = userStore.user?.role_id
 
-  const items = {
+      const items = {
 
-    1: [ // Office Admin
-      { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
-      { label: 'Employee', icon: 'people', route: '/office/employee' },
-      { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
-      { label: 'OPCR', icon: 'assignment', route: '/office/opcr' },
-      { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
-      { label: 'Library', icon: 'fact_check', route: '/office/library' },
-      { label: 'Account', icon: 'person', route: '/office/account' },
-    ],
-    2: [ // Planning Admin
-      { label: 'Dashboard', icon: 'dashboard', route: '/planning/dashboard' },
-      { label: 'Unit Work Plan', icon: 'event_note', route: '/planning/unit-work-plan' },
-      { label: 'OPCR', icon: 'assignment', route: '/planning/opcr' },
-      { label: 'Account', icon: 'person', route: '/planning/account' },
-    ],
-    3: [ // HR Admin
-      { label: 'Dashboard', icon: 'dashboard', route: '/hr/dashboard' },
-      { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
-      { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
-      { label: 'IPCR', icon: 'fact_check', route: '/hr/ipcr' },
-      {
-        label: 'Account',
-        icon: 'person',
-        children: [
-          { label: 'User', icon: 'group', route: '/hr/account/user' },
-          { label: 'Profile', icon: 'person_outline', route: '/hr/account/profile' },
+        1: [ // Office Admin
+          { label: 'Dashboard', icon: 'dashboard', route: '/office/dashboard' },
+          { label: 'Employee', icon: 'people', route: '/office/employee' },
+          { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
+          { label: 'OPCR', icon: 'assignment', route: '/office/opcr' },
+          { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
+          { label: 'Library', icon: 'fact_check', route: '/office/library' },
+          { label: 'Account', icon: 'person', route: '/office/account' },
         ],
-      },
-    ],
-  }
+        2: [ // Planning Admin
+          { label: 'Dashboard', icon: 'dashboard', route: '/planning/dashboard' },
+          { label: 'Unit Work Plan', icon: 'event_note', route: '/planning/unit-work-plan' },
+          { label: 'OPCR', icon: 'assignment', route: '/planning/opcr' },
+          { label: 'Account', icon: 'person', route: '/planning/account' },
+        ],
+        3: [ // HR Admin
+          { label: 'Dashboard', icon: 'dashboard', route: '/hr/dashboard' },
+          { label: 'Unit Work Plan', icon: 'event_note', route: '/hr/unit-work-plan' },
+          { label: 'OPCR', icon: 'assignment', route: '/hr/opcr' },
+          { label: 'IPCR', icon: 'fact_check', route: '/hr/ipcr' },
+          {
+            label: 'Account',
+            icon: 'person',
+            children: [
+              { label: 'User', icon: 'group', route: '/hr/account/user' },
+              { label: 'Profile', icon: 'person_outline', route: '/hr/account/profile' },
+            ],
+          },
+        ],
+      }
 
-  return items[role] || []
-})
+      return items[role] || []
+    })
 
     // Logout function
-const logout = async () => {
-  try {
-    await userStore.logout(router)
-  } catch (error) {
-    console.error('Logout failed:', error)
-    // Fallback navigation in case the store method fails
-    router.push('/login')
-  }
-}
+    const logout = async () => {
+      try {
+        await userStore.logout(router)
+      } catch (error) {
+        console.error('Logout failed:', error)
+        // Fallback navigation in case the store method fails
+        router.push('/login')
+      }
+    }
     return {
       leftDrawerOpen,
       menuItems,
@@ -199,6 +168,7 @@ const logout = async () => {
 .logo {
   width: 90px;
   height: auto;
+  margin-top: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
@@ -208,7 +178,7 @@ const logout = async () => {
 }
 
 .main-title {
-  font-size: 1.25rem;
+  font-size: 18px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
   letter-spacing: -0.01em;
@@ -219,7 +189,8 @@ const logout = async () => {
 }
 
 .menu-item {
-  padding: 0.875rem 1.25rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   border-radius: 0.5rem;
   color: white !important;
   transition: all 0.2s ease-in-out;
@@ -340,5 +311,17 @@ const logout = async () => {
   .q-list {
     padding-bottom: calc(1rem + 56px);
   }
+}
+
+.bg-office-admin {
+  background-color: #205540;
+}
+
+.bg-planning-admin {
+  background-color: #F7899C;
+}
+
+.bg-hr-admin {
+  background-color: #722B2B;
 }
 </style>

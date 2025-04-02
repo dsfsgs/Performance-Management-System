@@ -78,20 +78,7 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {
-        brand: {
-          primary: '#722B2B', // HR color
-          secondary: '#205540', // Office color
-          accent: '#F7899C', // Planning color
-          dark: '#1d1d1d',
-
-          positive: '#21ba45',
-          negative: '#c10015',
-          info: '#31ccec',
-          warning: '#f2c037',
-        },
-        
-      },
+      config: {},
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack

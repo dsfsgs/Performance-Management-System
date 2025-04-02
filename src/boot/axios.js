@@ -3,32 +3,35 @@ import axios from 'axios'
 
 // Configure Axios instance
 const api = axios.create({
-  // baseURL: 'http://192.168.150.57:8000/api',
-  baseURL: 'http://192.168.100.105:8000/api',
+  baseURL: 'http://192.168.8.104:8000/api',
+  // baseURL: 'http://192.168.100.105:8000/api',
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'X-Requested-With': 'XMLHttpRequest',
   },
-  withCredentials: true
-});
+  withCredentials: true,
+})
 
 // Ensure credentials are used globally
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true
 // Add Authorization Token Interceptor
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  },
+)
 export default defineBoot(({ app }) => {
   // Register Axios globally for Vue Options API
-  app.config.globalProperties.$axios = axios;
-  app.config.globalProperties.$api = api;
-});
+  app.config.globalProperties.$axios = axios
+  app.config.globalProperties.$api = api
+})
 
-export { api };
+export { api }
