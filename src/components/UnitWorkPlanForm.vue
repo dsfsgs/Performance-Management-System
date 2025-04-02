@@ -16,8 +16,12 @@
                         <q-input filled v-model="targetPeriod" label="Target Period" />
                     </div>
                 </div>
+            </q-card-section>
 
-                <div class="row q-col-gutter-md q-mt-sm">
+            <q-separator />
+
+            <q-card-section>
+                <div class="row q-col-gutter-md">
                     <div class="col-md-4 col-sm-12">
                         <q-input filled v-model="employeeName" label="Employee Name" />
                     </div>
@@ -33,8 +37,17 @@
             <q-separator />
 
             <q-card-section>
-                <q-table title="Performance Indicators" :rows="rows" :columns="columns" row-key="id" hide-bottom flat
-                    bordered>
+                <q-table :rows="rows" :columns="columns" row-key="id" hide-bottom flat :column-widths="columnWidths">
+                    <template v-slot:body-cell-mfo="props">
+                        <q-td :props="props">
+                            <div class="dropdown-container">
+                                <span v-if="!props.row.mfo">{{ getDropdownLabel(props.row.id) }}</span>
+                                <q-select v-model="props.row.mfo" :options="getMfoOptions(props.row.id)" dense
+                                    borderless emit-value map-options behavior="menu" />
+                            </div>
+                        </q-td>
+                    </template>
+
                     <template v-slot:body-cell-competency="props">
                         <q-td :props="props">
                             <q-select v-model="props.row.competency" :options="competencyOptions" dense borderless />
@@ -53,20 +66,19 @@
                         </q-td>
                     </template>
 
-                    <template v-slot:body-cell-ratings="props">
-                        <q-td :props="props">
-                            <q-radio v-model="props.row.rating" val="5" label="5" dense />
-                            <q-radio v-model="props.row.rating" val="4" label="4" dense />
-                            <q-radio v-model="props.row.rating" val="3" label="3" dense />
-                            <q-radio v-model="props.row.rating" val="2" label="2" dense />
-                            <q-radio v-model="props.row.rating" val="1" label="1" dense />
-                        </q-td>
+                    <template v-slot:bottom>
+                        <q-tr>
+                            <q-td colspan="4" class="text-center">
+                                Core, Technical, Leadership
+                            </q-td>
+                        </q-tr>
                     </template>
                 </q-table>
             </q-card-section>
 
             <q-card-actions align="right">
-                <q-btn label="Save" color="primary" @click="saveForm" />
+                <q-btn icon="save" label="Save" :style="{ backgroundColor: '#077A37' }" text-color="white"
+                    @click="saveForm" />
                 <q-btn label="Reset" color="negative" flat @click="resetForm" />
             </q-card-actions>
         </q-card>
@@ -77,11 +89,32 @@
 export default {
     data() {
         return {
-            division: 'Recruitment, Selection and Records Management Division',
+            division: '',
             targetPeriod: '',
             employeeName: '',
             rank: '',
+            position: '',
             competencyOptions: ['Core', 'Technical', 'Leadership'],
+            categoryOptions: [
+                { label: 'A. Strategic Function', value: 'A' },
+                { label: 'B. Core Function', value: 'B' },
+                { label: 'C. Support Function', value: 'C' }
+            ],
+            dropdownLabels: {
+                1: 'Select Category',
+                2: 'Select MFO',
+                3: 'Select Output'
+            },
+            mfoOptions: [
+                { label: 'MFO 1', value: 'M1' },
+                { label: 'MFO 2', value: 'M2' },
+                { label: 'MFO 3', value: 'M3' }
+            ],
+            outputOptions: [
+                { label: 'Output 1', value: 'O1' },
+                { label: 'Output 2', value: 'O2' },
+                { label: 'Output 3', value: 'O3' }
+            ],
             columns: [
                 {
                     name: 'mfo',
@@ -89,68 +122,84 @@ export default {
                     label: 'MFO',
                     align: 'left',
                     field: 'mfo',
-                    sortable: true
+                    sortable: true,
+                    style: "width: 20%"
                 },
                 {
                     name: 'competency',
                     label: 'Required Competency & Proficiency Level',
                     align: 'left',
-                    field: 'competency'
+                    field: 'competency',
+                    style: "width: 40%"
                 },
                 {
                     name: 'successIndicator',
                     label: 'Success Indicator',
                     align: 'left',
-                    field: 'successIndicator'
+                    field: 'successIndicator',
+                    style: "width: 20%"
                 },
                 {
                     name: 'requiredOutput',
                     label: 'Required Output',
                     align: 'left',
-                    field: 'requiredOutput'
+                    field: 'requiredOutput',
+                    style: "width: 20%"
                 }
             ],
             rows: [
                 {
                     id: 1,
-                    mfo: 'Select Category',
+                    mfo: '',
                     competency: '',
                     successIndicator: '',
-                    requiredOutput: '',
+                    requiredOutput: ''
                 },
                 {
                     id: 2,
-                    mfo: 'Select MFO',
+                    mfo: '',
                     competency: '',
                     successIndicator: '',
-                    requiredOutput: '',
+                    requiredOutput: ''
                 },
                 {
                     id: 3,
-                    mfo: 'Select Output',
+                    mfo: '',
                     competency: '',
                     successIndicator: '',
-                    requiredOutput: '',
+                    requiredOutput: ''
                 }
             ]
         }
     },
     methods: {
+        getDropdownLabel(rowId) {
+            return this.dropdownLabels[rowId] || ''
+        },
+        getMfoOptions(rowId) {
+            if (rowId === 1) return this.categoryOptions
+            if (rowId === 2) return this.mfoOptions
+            if (rowId === 3) return this.outputOptions
+            return []
+        },
         saveForm() {
+            // Handle form submission
             this.$q.notify({
                 message: 'Work plan saved successfully',
                 color: 'positive'
             })
         },
         resetForm() {
+            this.division = ''
+            this.targetPeriod = ''
             this.employeeName = ''
             this.rank = ''
-            this.targetPeriod = ''
+            this.position = ''
             this.rows.forEach(row => {
+                row.mfo = ''
                 row.competency = ''
                 row.successIndicator = ''
                 row.requiredOutput = ''
-                row.rating = ''
             })
         }
     }
@@ -158,11 +207,18 @@ export default {
 </script>
 
 <style scoped>
-.my-card {
-    min-height: calc(100vh - 100px);
+.dropdown-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-.q-card-section {
-    padding: 15px;
+.q-input :deep(.q-field--focused .q-field__label) {
+    color: #00903e !important;
+}
+
+.q-input :deep(.q-field--focused .q-field__control) {
+    color: #00903e !important;
 }
 </style>
