@@ -3,17 +3,62 @@
     <q-card class="edit-account-modal">
       <q-card-section class="modal-header">
         <div class="title">Edit Account Details</div>
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          class="close-btn"
+        />
       </q-card-section>
 
-      <q-card-section>
-        <q-input dense filled v-model="tempUsername" label="Username" class="input-field" />
-        <q-input dense filled v-model="password" type="password" label="Password" class="input-field" />
-        <q-input dense filled v-model="confirmPassword" type="password" label="Confirm Password" class="input-field" />
+      <q-card-section class="modal-body">
+        <q-input
+          dense
+          outlined
+          v-model="tempUsername"
+          label="Username"
+          class="input-field"
+          :rules="[val => !!val || 'Username is required']"
+        />
+        <q-input
+          dense
+          outlined
+          v-model="password"
+          type="password"
+          label="New Password"
+          class="input-field"
+          hint="Leave blank to keep current password"
+        />
+        <q-input
+          dense
+          outlined
+          v-model="confirmPassword"
+          type="password"
+          label="Confirm Password"
+          class="input-field"
+          :rules="[
+            val => !password || val === password || 'Passwords must match'
+          ]"
+        />
       </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn label="Cancel" color="grey" flat @click="cancelChanges" />
-        <q-btn label="Save" color="green" @click="saveChanges" />
+      <q-card-actions align="right" class="modal-footer">
+        <q-btn
+          label="Cancel"
+          color="grey"
+          flat
+          @click="cancelChanges"
+          class="action-btn"
+        />
+        <q-btn
+          label="Save Changes"
+          color="primary"
+          @click="saveChanges"
+          class="action-btn"
+          :disable="!tempUsername"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -23,7 +68,7 @@
 export default {
   props: {
     isOpen: Boolean,
-    username: String, // Get username from parent component
+    username: String,
   },
   data() {
     return {
@@ -33,6 +78,9 @@ export default {
     };
   },
   watch: {
+    username(newVal) {
+      this.tempUsername = newVal;
+    },
     isOpen(newVal) {
       if (newVal) {
         this.storeOriginalData();
@@ -45,7 +93,11 @@ export default {
     },
     saveChanges() {
       if (this.password && this.password !== this.confirmPassword) {
-        this.$q.notify({ type: "negative", message: "Passwords do not match!" });
+        this.$q.notify({
+          type: "negative",
+          message: "Passwords do not match!",
+          position: "top"
+        });
         return;
       }
 
@@ -54,7 +106,6 @@ export default {
         password: this.password || null,
       });
 
-      this.$q.notify({ type: "positive", message: "Account details saved successfully!" });
       this.closeModal();
     },
     cancelChanges() {
@@ -75,23 +126,75 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
 .edit-account-modal {
-  width: 400px;
-  max-width: 90vw;
-  padding: 20px;
+  width: 420px;
+  max-width: 95vw;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .modal-header {
+  background: #f8f9fa;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: bold;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.close-btn {
+  color: #95a5a6;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 65vh;
+  overflow-y: auto;
 }
 
 .input-field {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+@media (max-width: 600px) {
+  .edit-account-modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .modal-body {
+    padding: 16px;
+    max-height: 60vh;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 12px 16px;
+  }
 }
 </style>
