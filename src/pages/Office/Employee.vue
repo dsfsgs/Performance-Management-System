@@ -2,7 +2,7 @@
 <script setup>
 import { ref } from 'vue';
 import DivisionList from 'src/components/DivisionList.vue';
-import AddEmployee from 'src/components/AddEmployee.vue';
+// import AddEmployee from 'src/components/AddEmployee.vue';
 
 const currentView = ref('division');
 

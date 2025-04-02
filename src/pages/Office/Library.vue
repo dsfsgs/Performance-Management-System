@@ -16,11 +16,5 @@ export default {
 };
 </script>
 
-<style scoped>
-.library-container {
-  font-family: Arial, sans-serif;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
+<style>
 </style>

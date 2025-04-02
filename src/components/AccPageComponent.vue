@@ -28,8 +28,11 @@
         </div>
         <div class="details-column">
           <strong>Password</strong>
-          <p>********</p> <!-- Masked password for security -->
+          <p>********</p>
         </div>
+      </div>
+      <div class="last-updated">
+        Last updated: {{ lastUpdated }}
       </div>
     </div>
 
@@ -50,6 +53,13 @@ export default {
       account: {
         username: "jmahusay",
       },
+      lastUpdated: new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     };
   },
   methods: {
@@ -58,13 +68,19 @@ export default {
     },
     handleSave(updatedData) {
       this.account.username = updatedData.username;
+      this.lastUpdated = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
       this.$q.notify({ type: "positive", message: "Account details updated successfully!" });
       this.isModalOpen = false;
     },
   },
 };
 </script>
-
 
 <style scoped>
 .account-container {
@@ -73,31 +89,35 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 30px;
+  justify-content: flex-start;
+  gap: 25px;
   background: #f8f9fa;
-  padding: 40px 20px;
+  padding: 30px 20px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .details-card {
-  width: 80%; /* Increased width */
+  width: 80%;
   background: white;
-  padding: 30px;
+  padding: 25px;
   border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .account-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 15px;
 }
 
 h2 {
-  font-size: 28px;
+  font-size: 1.6rem;
   font-weight: 700;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  color: #2c3e50;
 }
 
 .details-grid {
@@ -108,27 +128,74 @@ h2 {
 .details-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+  width: 48%;
 }
 
 strong {
-  font-size: 16px;
+  font-size: 1rem;
+  color: #34495e;
+  display: block;
+  margin-bottom: 5px;
 }
 
 p {
-  font-size: 18px;
-  color: #333;
+  font-size: 1.1rem;
+  color: #2c3e50;
   margin: 0;
+  padding: 6px 0;
+  border-bottom: 1px solid #ecf0f1;
 }
 
 .edit-btn {
-  background: #f39c12;
+  background: #3498db;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #2980b9;
+}
+
+.last-updated {
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  text-align: right;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .account-container {
+    padding: 20px 15px;
+  }
+
+  .details-grid {
+    flex-direction: column;
+  }
+
+  .details-column {
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .details-card {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .last-updated {
+    text-align: left;
+    margin-top: 15px;
+  }
 }
 </style>
