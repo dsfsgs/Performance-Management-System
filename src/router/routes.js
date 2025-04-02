@@ -46,13 +46,13 @@ export const routes = [
    {
   path: '',
   redirect: () => {
-    const userStore = useUserStore()
-    userStore.loadUser()
-    const role = userStore.role
+          const userStore = useUserStore();
+          userStore.loadUserData();
+          const role = userStore.role;
 
-    if (!role) {
-      return '/login'
-    }
+          if (!role) {
+            return '/login';
+          }
 
     switch (role) {
       case 'hr-admin':
@@ -171,7 +171,8 @@ export function setupRouterGuard(router) {
     const userStore = useUserStore()
 
     // Ensure user data is loaded properly
-    await userStore.loadUser()
+    // await userStore.loadUser()
+   await userStore.loadUserData()  // <-- Change this line
 
     const isAuthenticated = !!userStore.user?.role_id
     const userRole = userStore.role
