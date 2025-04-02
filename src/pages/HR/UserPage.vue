@@ -11,7 +11,7 @@
     </div>
 
     <q-table flat bordered :rows="rows" :columns="columns" row-key="name" :loading="loading">
-      <!-- :rows-per-page-options="[0]" -->
+   
       <template v-slot:body-cell-action="props">
         <q-td :props="props" class="text-center"> </q-td>
       </template>
