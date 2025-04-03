@@ -4,6 +4,7 @@
       <div>
         <h6 class="text-h6 q-mb-xs">Unit Work Plan</h6>
       </div>
+      <q-btn v-if="showUWP" flat round icon="close" @click="showUWP = false" color="negative" class="q-pa-none" />
     </div>
 
     <div class="row justify-end" v-if="!showUWP && !selectedRow">
@@ -12,10 +13,6 @@
     </div>
     <br>
     <q-page v-if="showUWP">
-      <div class="q-mb-md row justify-center">
-        <q-btn flat round icon="close" @click="showUWP = false" color="negative" class="q-pa-none"
-          style="position: absolute; top: 10px; right: 10px;" />
-      </div>
       <UnitWorkPlanForm />
     </q-page>
 
@@ -111,10 +108,5 @@ export default {
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-}
-
-.q-page {
-  padding-top: 20px;
-  padding-bottom: 20px;
 }
 </style>
