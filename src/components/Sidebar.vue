@@ -6,7 +6,9 @@
       <img class="logo" alt="City of Tagum Logo"
         src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
       <div class="Title">
-        <h5 class="main-title">Performance Management System</h5>
+        <!-- <h5 class="main-title">Performance Management System</h5> -->
+        <h1 class="main-title">{{ userStore.officeName }}</h1>
+        <!-- <p>Your Office ID: {{ userStore.user?.office_id }}</p> -->
       </div>
     </div>
 
@@ -54,7 +56,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed,onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from 'src/stores/userStore'
 
@@ -65,7 +67,9 @@ export default {
     const router = useRouter()
     const userStore = useUserStore()
     const leftDrawerOpen = ref(true)
-
+    onMounted(() => {
+      userStore.loadUserData();
+    });
     // Class management for role-based styling
     const roleColorClass = computed(() => {
       const role = userStore.user?.role_id
@@ -132,6 +136,7 @@ export default {
       menuItems,
       roleColorClass,
       logout,
+      userStore,
     }
   },
 }

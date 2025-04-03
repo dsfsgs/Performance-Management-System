@@ -11,7 +11,7 @@
     </div>
 
     <q-table flat bordered :rows="rows" :columns="columns" row-key="name" :loading="loading">
-   
+
       <template v-slot:body-cell-action="props">
         <q-td :props="props" class="text-center"> </q-td>
       </template>
@@ -271,6 +271,7 @@ export default {
     const showConfirmation = ref(false);
     const selectedOffice = ref(null);
     const selectedEmployee = ref(null);
+    // const Designation = ref(null);
     const selectedRole = ref(null);
     const search = ref("");
     const officeSearch = ref("");
@@ -314,6 +315,7 @@ export default {
         const userData = {
           name: selectedEmployee.value.name4,
           password: password,
+          designation:selectedEmployee.value.Designation,
           office_id: selectedOffice.value.id,
           role_id: selectedRole.value.value,
         };
