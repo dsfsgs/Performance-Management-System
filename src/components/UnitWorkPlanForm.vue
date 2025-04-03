@@ -44,11 +44,12 @@
                             style="min-width: 200px;">
                             <template v-slot:body-cell-mfo="props">
                                 <q-td :props="props">
-                                    <div class="dropdown-container">
-                                        <span v-if="!props.row.mfo">{{ getDropdownLabel(props.row.id) }}</span>
-                                        <q-select v-model="props.row.mfo" :options="getMfoOptions(props.row.id)" dense
-                                            borderless emit-value map-options behavior="menu" />
-                                    </div>
+                                    <!-- <div class="dropdown-container"> -->
+                                    <!-- <span v-if="!props.row.mfo">{{ getDropdownLabel(props.row.id) }}</span> -->
+                                    <q-select v-model="props.row.mfo" :label="getDropdownLabel(props.row.id)"
+                                        :options="getMfoOptions(props.row.id)" dense borderless emit-value map-options
+                                        behavior="menu" />
+                                    <!-- </div> -->
                                 </q-td>
                             </template>
                         </q-table>
