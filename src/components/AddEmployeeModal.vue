@@ -1,12 +1,21 @@
 <template>
-  <q-dialog :model-value="showModal" @update:model-value="closeModal">
-    <q-card class="add-employee-modal">
+  <q-dialog
+    :model-value="showModal"
+    @update:model-value="closeModal"
+    persistent
+  >
+    <q-card class="employee-selection-modal">
+      <q-card-section class="modal-header">
+        <div class="text-h6">Select Employees</div>
+      </q-card-section>
+
       <q-card-section>
         <q-input
-          dense
-          filled
           v-model="searchQuery"
-          placeholder="Search by name, position, or others..."
+          placeholder="Search by name or position..."
+          dense
+          outlined
+          clearable
           class="search-input"
         >
           <template v-slot:prepend>
@@ -15,7 +24,7 @@
         </q-input>
       </q-card-section>
 
-      <q-card-section class="table-container">
+      <q-card-section class="table-section">
         <q-table
           :rows="filteredEmployees"
           :columns="columns"
@@ -23,65 +32,117 @@
           flat
           bordered
           hide-pagination
-          dense
-          class="scroll-table"
+          :rows-per-page-options="[0]"
+          class="employee-table"
+          :filter="searchQuery"
         >
-          <template v-slot:body-cell-select="props">
+          <template v-slot:body-cell-selection="props">
             <q-td :props="props">
-              <q-checkbox v-model="props.row.selected" />
+              <q-checkbox
+                v-model="props.row.selected"
+                dense
+              />
             </q-td>
           </template>
         </q-table>
       </q-card-section>
-      <q-card-actions align="right">
-  <q-btn label="Cancel" color="red" flat @click="closeModal" />
-  <q-btn color="green" @click="addEmployee">
-    <q-icon name="add" />
-  </q-btn>
-</q-card-actions>
 
+      <q-card-actions align="right" class="modal-actions">
+        <q-btn
+          label="Cancel"
+          color="grey"
+          flat
+          @click="closeModal"
+        />
+        <q-btn
+          label="Add Selected"
+          color="primary"
+          :disable="!hasSelection"
+          @click="addEmployee"
+          icon="add"
+        />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
+const COLUMNS = [
+  {
+    name: 'selection',
+    label: '',
+    field: 'selected',
+    align: 'left',
+    headerStyle: 'width: 50px'
+  },
+  {
+    name: 'name',
+    label: 'Name',
+    field: 'name',
+    align: 'left',
+    sortable: true
+  },
+  {
+    name: 'position',
+    label: 'Position',
+    field: 'position',
+    align: 'left',
+    sortable: true
+  }
+];
+
+const EMPLOYEES = [
+  { name: "JANYLENE A. PALERMO, MM", position: "City Human Resource Management Officer - 25", selected: false },
+  { name: "FRUNNIE A. BOISER", position: "Supervising Administrative Officer (HRMO IV) - 22", selected: false },
+  { name: "DAVE MARK P. LUZANO", position: "Senior Administrative Assistant I (Data Controller IV) - 13", selected: false },
+  { name: "JOGRAD M. MAHUSAY", position: "Computer Programmer II", selected: false },
+  { name: "NEW EMPLOYEE 1", position: "Example Position", selected: false },
+  { name: "NEW EMPLOYEE 2", position: "Example Position", selected: false },
+  { name: "NEW EMPLOYEE 3", position: "Example Position", selected: false }
+];
+
 export default {
   props: {
     showModal: Boolean
   },
+
   data() {
     return {
       searchQuery: "",
-      employees: [
-        { name: "JANYLENE A. PALERMO, MM", position: "City Human Resource Management Officer - 25", selected: false },
-        { name: "FRUNNIE A. BOISER", position: "Supervising Administrative Officer (HRMO IV) - 22", selected: false },
-        { name: "DAVE MARK P. LUZANO", position: "Senior Administrative Assistant I (Data Controller IV) - 13", selected: false },
-        { name: "JOGRAD M. MAHUSAY", position: "Computer Programmer II", selected: false },
-        { name: "NEW EMPLOYEE 1", position: "Example Position", selected: false },
-        { name: "NEW EMPLOYEE 2", position: "Example Position", selected: false },
-        { name: "NEW EMPLOYEE 3", position: "Example Position", selected: false }
-      ],
-      columns: [
-        { name: "select", label: "", field: "selected", align: "left" },
-        { name: "name", label: "Name", field: "name", align: "left" },
-        { name: "position", label: "Position", field: "position", align: "left" }
-      ]
+      employees: [...EMPLOYEES],
+      columns: COLUMNS
     };
   },
+
   computed: {
     filteredEmployees() {
+      if (!this.searchQuery) return this.employees;
+
+      const query = this.searchQuery.toLowerCase();
       return this.employees.filter(employee =>
-        employee.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        employee.position.toLowerCase().includes(this.searchQuery.toLowerCase())
+        employee.name.toLowerCase().includes(query) ||
+        employee.position.toLowerCase().includes(query)
       );
+    },
+
+    hasSelection() {
+      return this.employees.some(emp => emp.selected);
     }
   },
+
   methods: {
     closeModal() {
+      // Reset selections when closing
+      this.employees.forEach(emp => emp.selected = false);
+      this.searchQuery = "";
       this.$emit("update:showModal", false);
     },
+
     addEmployee() {
-      const selectedEmployees = this.employees.filter(emp => emp.selected);
+      const selectedEmployees = this.employees
+        .filter(emp => emp.selected)
+        .map(({ name, position }) => ({ name, position }));
+
       this.$emit("add", selectedEmployees);
       this.closeModal();
     }
@@ -89,24 +150,35 @@ export default {
 };
 </script>
 
-<style scoped>
-.add-employee-modal {
+<style scoped lang="scss">
+.employee-selection-modal {
   width: 800px;
   max-width: 95vw;
-  padding: 20px;
-}
 
-.search-input {
-  margin-bottom: 10px;
-}
+  .modal-header {
+    padding-bottom: 0;
+  }
 
-.table-container {
-  max-height: 400px;
-  overflow-y: auto;
-}
+  .search-input {
+    margin-bottom: 16px;
+  }
 
-.scroll-table {
-  max-height: 300px;
-  overflow-y: auto;
+  .table-section {
+    padding-top: 0;
+    max-height: 60vh;
+  }
+
+  .employee-table {
+    height: 100%;
+
+    :deep(.q-table__top) {
+      padding-top: 0;
+    }
+  }
+
+  .modal-actions {
+    padding: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
 }
 </style>
