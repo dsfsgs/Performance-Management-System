@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // Configure Axios instance
 const api = axios.create({
-  baseURL: 'http://192.168.8.104:8000/api',
+  baseURL: 'http://10.0.2.81:8000/api',
   // baseURL: 'http://192.168.100.105:8000/api',
   headers: {
     Accept: 'application/json',
