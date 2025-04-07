@@ -113,9 +113,11 @@
                     bordered flat dense class="standard-outcome-table">
                     <template v-slot:header-cell-quantity="props">
                         <q-th :props="props" class="bordered-cell">
-                            <q-select v-model="quantityType" :options="[
-                                { label: 'Quantity (Conditional)', value: 'conditional' },
-                                { label: 'Quantity (Numeric)', value: 'numeric' }
+                            <!-- Only show A/B/C Quantity Indicator Type -->
+                            <q-select v-model="quantityIndicatorType" :options="[
+                                { label: 'Quantity (A. Custom target)', value: 'numeric' },
+                                { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
+                                { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
                             ]" dense borderless emit-value map-options class="header-select" />
                         </q-th>
                     </template>
@@ -139,12 +141,16 @@
                     <!-- Body cell templates remain the same -->
                     <template v-slot:body-cell-quantity="props">
                         <q-td :props="props" class="bordered-cell">
-                            <q-input v-if="quantityType === 'conditional'" v-model="props.row.quantity" dense borderless
-                                class="full-width" placeholder="Enter condition" />
-                            <q-input v-else v-model="props.row.quantity" dense borderless class="full-width"
-                                placeholder="Enter number or range" :rules="[validateStrictNumeric]"
-                                @keydown="blockInvalidChars"
-                                @update:model-value="sanitizeNumericInput(props.row, 'quantity')" />
+                            <!-- Type A (numeric): Editable input -->
+                            <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense
+                                borderless class="full-width" placeholder="Enter custom target"
+                                :rules="[validateStrictNumeric]" @keydown="blockInvalidChars"
+                                @update:model-value="sanitizeNumericInput(props.row, 'effectiveness')" />
+
+                            <!-- Type B/C: Display-only text (no input/validation) -->
+                            <div v-else class="text-caption full-width q-pa-xs">
+                                {{ props.row.quantity || '-' }}
+                            </div>
                         </q-td>
                     </template>
 
@@ -170,6 +176,25 @@
                         </q-td>
                     </template>
                 </q-table>
+
+                <q-dialog v-model="showTargetModal" persistent>
+                    <q-card style="min-width: 300px;">
+                        <q-card-section>
+                            <div class="text-h6">Enter Target Output</div>
+                        </q-card-section>
+
+                        <q-card-section>
+                            <q-input v-model.number="targetValue" label="Target Output" type="number"
+                                @keypress="blockInvalidChars" min="1" />
+                        </q-card-section>
+
+                        <q-card-actions align="right">
+                            <q-btn flat label="Cancel" v-close-popup @click="cancelTargetInput" />
+                            <q-btn flat label="OK" color="primary" @click="computeQuantities" />
+                        </q-card-actions>
+                    </q-card>
+                </q-dialog>
+
             </q-card-section>
 
             <q-card-actions align="right">
@@ -195,6 +220,8 @@ export default {
             mergedTechnicalCompetency: 'RM-3',
             mergedSuccessIndicator: '',
             mergedRequiredOutput: '',
+            showTargetModal: false,
+            targetValue: null,
             mergedRow: { id: 0 },
             categoryOptions: [
                 { label: 'A. Strategic Function', value: 'A' },
@@ -216,7 +243,12 @@ export default {
                 { label: 'Output 2', value: 'O2' },
                 { label: 'Output 3', value: 'O3' }
             ],
-            quantityType: 'conditional',
+            quantityIndicatorType: 'numeric',
+            quantityIndicator: [
+                { label: 'Quantity (A. Custom target)', value: 'numeric' },
+                { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
+                { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
+            ],
             timelinessType: 'conditional',
             effectivenessType: 'conditional',
             inputTypeOptions: [
@@ -426,6 +458,51 @@ export default {
             if (min >= max) return 'Min must be less than max';
 
             return true;
+        },
+        computeQuantities() {
+            if (!this.targetValue || isNaN(this.targetValue)) {
+                this.$q.notify({ message: 'Please enter a valid number', color: 'negative' });
+                return;
+            }
+
+            const base = Number(this.targetValue);
+            const type = this.quantityIndicatorType;
+
+            // Reset rows before recomputing
+            this.standardOutcomeRows.forEach(row => {
+                row.quantity = '';
+            });
+
+            if (type === 'B') {
+                // Type B: Can exceed 100% (130%, 115%, 100%, 51%, 50%)
+                this.standardOutcomeRows[0].quantity = `${Math.ceil(base * 1.3)} and above`;       // 130%
+                this.standardOutcomeRows[1].quantity = `${Math.ceil(base * 1.15)} - ${Math.floor(base * 1.3) - 1}`; // 115%
+                this.standardOutcomeRows[2].quantity = `${base} - ${Math.floor(base * 1.15) - 1}`;  // 100%
+                this.standardOutcomeRows[3].quantity = `${Math.ceil(base * 0.51)} - ${Math.floor(base * 0.99)}`;    // 51%
+                this.standardOutcomeRows[4].quantity = `${Math.floor(base * 0.5)} and below`;      // 50%
+            }
+            else if (type === 'C') {
+                // Type C: Cannot exceed 100% (100%, 88-99%, 77-87%, 38-76%, ≤37%)
+                this.standardOutcomeRows[0].quantity = `${base} and above`;                        // 100%
+                this.standardOutcomeRows[1].quantity = `${Math.ceil(base * 0.88)} - ${Math.floor(base * 0.99)}`;  // 88-99%
+                this.standardOutcomeRows[2].quantity = `${Math.ceil(base * 0.77)} - ${Math.floor(base * 0.87)}`;  // 77-87%
+                this.standardOutcomeRows[3].quantity = `${Math.ceil(base * 0.38)} - ${Math.floor(base * 0.76)}`;  // 38-76%
+                this.standardOutcomeRows[4].quantity = `${Math.floor(base * 0.37)} and below`;    // ≤37%
+            }
+
+            this.showTargetModal = false;
+        },
+        cancelTargetInput() {
+            this.showTargetModal = false;
+            this.quantityIndicatorType = 'A'; // Revert back or handle as needed
+        }
+    },
+    watch: {
+        quantityIndicatorType(val) {
+            if (val === 'B' || val === 'C') {
+                this.targetValue = null;
+                this.showTargetModal = true;
+            }
         }
     }
 }
