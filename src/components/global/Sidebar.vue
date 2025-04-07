@@ -7,7 +7,7 @@
         src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
       <div class="Title">
         <!-- <h5 class="main-title">Performance Management System</h5> -->
-        <h1 class="main-title">{{ userStore.officeName }}</h1>
+        <h3 class="main-title">{{ userStore.officeName }}</h3>
         <!-- <p>Your Office ID: {{ userStore.user?.office_id }}</p> -->
       </div>
     </div>
@@ -183,8 +183,8 @@ export default {
 }
 
 .main-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   font-family: 'Poppins', sans-serif;
   letter-spacing: -0.01em;
   line-height: 1.4;

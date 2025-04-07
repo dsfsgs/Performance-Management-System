@@ -14,7 +14,8 @@
       <template v-slot:body-cell-action="props">
         <q-td :props="props" class="text-center"> </q-td>
       </template>
-      <template v-slot:loading>
+
+      <template v-slot:loading >
         <q-inner-loading showing color="primary">
           <q-spinner-dots size="50px" color="primary" />
         </q-inner-loading>
@@ -73,7 +74,9 @@
           </q-input>
           <q-table :rows="filteredEmployees" :columns="employeeColumns" row-key="id" :loading="loading" virtual-scroll>
             <template v-slot:body="props">
-              <q-tr :props="props" @click="selectedEmployee = props.row">
+              <q-tr :props="props" :class="{
+                  'selected-employee-row': selectedEmployee?.id === props.row.id,
+                }" @click="selectedEmployee = props.row" class="cursor-pointer">
                 <q-td key="name4" :props="props">
                   {{ props.row.name4 }}
                 </q-td>
@@ -468,5 +471,169 @@ export default {
 };
 </script>
 <style scoped>
-/* Removed all custom table styles */
+/* Apply green background to selected rows */
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.modal-card {
+  width: 600px;
+  max-width: 90vw;
+  border-radius: 8px;
+}
+
+.modal-header {
+  padding-bottom: 12px;
+}
+
+/* Create separate styles for office and employee rows */
+.q-tr.selected-office-row {
+  background-color: var(--q-primary) !important;
+  color: white !important;
+}
+
+.q-tr.selected-employee-row {
+  background-color: var(--q-primary) !important;
+  color: white !important;
+}
+
+/* Default background for non-selected rows */
+.q-tr:not(.selected-office-row):not(.selected-employee-row) {
+  background-color: white !important;
+  color: black !important;
+}
+
+.selected-info {
+  border-radius: 8px;
+}
+
+.selected-info .text-subtitle2 {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+:deep(.q-table) {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+:deep(.q-card-section) {
+  padding: 24px;
+}
+
+:deep(.q-card-section.q-pt-none) {
+  padding-top: 0;
+}
+
+:deep(.q-card-actions) {
+  padding: 12px 24px;
+}
+
+:deep(.q-table__middle) {
+  max-height: calc(300px - 50px);
+  overflow-y: auto;
+}
+
+:deep(.q-table thead tr th) {
+  position: sticky;
+  z-index: 1;
+  background: white;
+  top: 0;
+  padding: 8px 16px;
+}
+
+:deep(.q-td) {
+  padding: 8px 16px;
+}
+
+:deep(.q-virtual-scroll__content) {
+  scroll-behavior: smooth;
+}
+
+:deep(.q-field) {
+  margin-bottom: 24px;
+}
+
+:deep(.q-item) {
+  min-height: 48px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+:deep(.q-item:hover) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.confirmation-details {
+  background-color: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.confirmation-details .text-weight-medium {
+  font-size: 14px;
+}
+
+.confirmation-details .text-caption {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.confirmation-details .q-icon {
+  opacity: 0.8;
+}
+
+:deep(.q-mb-lg) {
+  margin-bottom: 24px;
+}
+
+:deep(.q-dialog__backdrop) {
+  backdrop-filter: blur(4px);
+}
+
+:deep(.q-dialog__inner) {
+  padding: 16px;
+}
+
+:deep(.q-card) {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.q-table__bottom) {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  min-height: 48px;
+  padding: 8px 16px;
+  background-color: #f8f8f8;
+}
+
+:deep(.text-body2) {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+:deep(.q-mb-md) {
+  margin-bottom: 24px;
+}
+
+:deep(.q-mb-sm) {
+  margin-bottom: 12px;
+}
+
+:deep(.q-mb-xs) {
+  margin-bottom: 8px;
+}
+
+:deep(.q-px-md) {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+:deep(.q-py-sm) {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
 </style>
