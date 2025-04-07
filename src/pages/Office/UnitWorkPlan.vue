@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import UnitWorkPlanForm from 'components/UnitWorkPlanForm.vue';
+import UnitWorkPlanForm from 'src/components/office/UnitWorkPlanForm.vue';
 
 export default {
   components: {
