@@ -16,9 +16,9 @@
         <q-td :props="props" class="text-center"> </q-td>
       </template>
 
-      <template v-slot:loading >
+      <template v-slot:loading>
         <q-inner-loading showing color="primary">
-          <q-spinner-dots size="50px" color="primary"  />
+          <q-spinner-dots size="50px" color="primary" />
         </q-inner-loading>
       </template>
     </q-table>
@@ -100,8 +100,8 @@
             class="q-mt-sm custom-table" style="max-height: 300px" virtual-scroll :rows-per-page-options="[0]">
             <template v-slot:body="props">
               <q-tr :props="props" :class="{
-                  'selected-employee-row': selectedEmployee?.id === props.row.id,
-                }" @click="selectedEmployee = props.row" class="cursor-pointer">
+                'selected-employee-row': selectedEmployee?.id === props.row.id,
+              }" @click="selectedEmployee = props.row" class="cursor-pointer">
                 <q-td key="name4" :props="props">
                   {{ props.row.name4 }}
                 </q-td>
@@ -315,7 +315,7 @@ export default {
         const userData = {
           name: selectedEmployee.value.name4,
           password: password,
-          designation:selectedEmployee.value.Designation,
+          designation: selectedEmployee.value.Designation,
           office_id: selectedOffice.value.id,
           role_id: selectedRole.value.value,
         };
@@ -576,7 +576,7 @@ export default {
 }
 
 .modal-card {
-  width: 600px;
+  width: 850px;
   max-width: 90vw;
   border-radius: 8px;
 }
@@ -591,10 +591,10 @@ export default {
   color: white !important;
 }
 
-.q-tr.selected-employee-row {
+/* .q-tr.selected-employee-row {
   background-color: var(--q-primary) !important;
   color: white !important;
-}
+} */
 
 /* Default background for non-selected rows */
 .q-tr:not(.selected-office-row):not(.selected-employee-row) {
