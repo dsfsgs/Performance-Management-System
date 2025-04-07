@@ -1,79 +1,75 @@
 <template>
-  <q-dialog
-    :model-value="showModal"
-    @update:model-value="closeModal"
-    persistent
-  >
+  <q-dialog :model-value="showModal" @update:model-value="closeModal" persistent>
     <q-card class="employee-selection-modal">
       <q-card-section class="modal-header">
         <div class="text-h6">Select Employees</div>
       </q-card-section>
 
-      <q-card-section>
-        <q-input
-          v-model="searchQuery"
-          placeholder="Search by name or position..."
-          dense
-          outlined
-          clearable
-          class="search-input"
-        >
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+      <q-card-section class="filter-section">
+        <div class="row q-gutter-md items-center">
+          <q-input v-model="searchQuery" placeholder="Search by name, position, or office..." dense outlined clearable
+            class="col-grow">
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
+          <q-toggle v-model="showAllOffices" label="Show all offices" color="primary" left-label />
+        </div>
       </q-card-section>
 
       <q-card-section class="table-section">
-        <q-table
-          :rows="filteredEmployees"
-          :columns="columns"
-          row-key="name"
-          flat
-          bordered
-          hide-pagination
-          :rows-per-page-options="[0]"
-          class="employee-table"
-          :filter="searchQuery"
-        >
+        <q-table :rows="filteredEmployees" :columns="columns" row-key="name" flat bordered :pagination="pagination"
+          class="employee-table" :filter="searchQuery" :loading="employeeStore.loading">
           <template v-slot:body-cell-selection="props">
             <q-td :props="props">
-              <q-checkbox
-                v-model="props.row.selected"
-                dense
-              />
+              <q-checkbox v-model="props.row.selected" dense />
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-office="props">
+            <q-td :props="props">
+              {{ props.row.office }}
             </q-td>
           </template>
         </q-table>
       </q-card-section>
 
       <q-card-actions align="right" class="modal-actions">
-        <q-btn
-          label="Cancel"
-          color="grey"
-          flat
-          @click="closeModal"
-        />
-        <q-btn
-          label="Add Selected"
-          color="primary"
-          :disable="!hasSelection"
-          @click="addEmployee"
-          icon="add"
-        />
+        <q-btn label="Cancel" color="grey" flat @click="closeModal" class="action-btn" />
+        <q-btn label="Add Employee" color="primary" :disable="!hasSelection" @click="addEmployee" icon="add"
+          class="action-btn" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
-<script>
-const COLUMNS = [
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useEmployeeStore } from 'stores/office/employee'
+
+const props = defineProps({
+  showModal: Boolean
+})
+const emit = defineEmits(['update:showModal', 'add'])
+
+const searchQuery = ref('')
+const showAllOffices = ref(false)
+const employeeStore = useEmployeeStore()
+
+const pagination = ref({
+  sortBy: 'name',
+  descending: false,
+  page: 1,
+  rowsPerPage: 10
+})
+
+const columns = [
   {
     name: 'selection',
-    label: '',
+    label: 'Select',
     field: 'selected',
-    align: 'left',
-    headerStyle: 'width: 50px'
+    align: 'left'
   },
   {
     name: 'name',
@@ -88,88 +84,97 @@ const COLUMNS = [
     field: 'position',
     align: 'left',
     sortable: true
+  },
+
+]
+
+// Load employees when modal is shown or when showAllOffices changes
+watch(() => props.showModal, async (showModalValue) => {
+  if (showModalValue) {
+    await employeeStore.fetchEmployeesByOffice()
   }
-];
+}, { immediate: true })
 
-const EMPLOYEES = [
-  { name: "JANYLENE A. PALERMO, MM", position: "City Human Resource Management Officer - 25", selected: false },
-  { name: "FRUNNIE A. BOISER", position: "Supervising Administrative Officer (HRMO IV) - 22", selected: false },
-  { name: "DAVE MARK P. LUZANO", position: "Senior Administrative Assistant I (Data Controller IV) - 13", selected: false },
-  { name: "JOGRAD M. MAHUSAY", position: "Computer Programmer II", selected: false },
-  { name: "NEW EMPLOYEE 1", position: "Example Position", selected: false },
-  { name: "NEW EMPLOYEE 2", position: "Example Position", selected: false },
-  { name: "NEW EMPLOYEE 3", position: "Example Position", selected: false }
-];
+const employees = computed(() => employeeStore.employees)
 
-export default {
-  props: {
-    showModal: Boolean
-  },
+const filteredEmployees = computed(() => {
+  let filtered = employees.value
 
-  data() {
-    return {
-      searchQuery: "",
-      employees: [...EMPLOYEES],
-      columns: COLUMNS
-    };
-  },
-
-  computed: {
-    filteredEmployees() {
-      if (!this.searchQuery) return this.employees;
-
-      const query = this.searchQuery.toLowerCase();
-      return this.employees.filter(employee =>
-        employee.name.toLowerCase().includes(query) ||
-        employee.position.toLowerCase().includes(query)
-      );
-    },
-
-    hasSelection() {
-      return this.employees.some(emp => emp.selected);
-    }
-  },
-
-  methods: {
-    closeModal() {
-      // Reset selections when closing
-      this.employees.forEach(emp => emp.selected = false);
-      this.searchQuery = "";
-      this.$emit("update:showModal", false);
-    },
-
-    addEmployee() {
-      const selectedEmployees = this.employees
-        .filter(emp => emp.selected)
-        .map(({ name, position }) => ({ name, position }));
-
-      this.$emit("add", selectedEmployees);
-      this.closeModal();
-    }
+  // Apply office filter if showAllOffices is false
+  if (!showAllOffices.value && employeeStore.userOffice) {
+    filtered = filtered.filter(emp => emp.office === employeeStore.userOffice)
   }
-};
+
+  // Apply search filter if searchQuery exists
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(emp =>
+      emp.name.toLowerCase().includes(query) ||
+      emp.position.toLowerCase().includes(query) ||
+      (emp.office && emp.office.toLowerCase().includes(query))
+    )
+  }
+
+  return filtered
+})
+
+const hasSelection = computed(() => {
+  return employees.value.some(emp => emp.selected)
+})
+
+function closeModal() {
+  employeeStore.employees.forEach(emp => emp.selected = false)
+  searchQuery.value = ''
+  showAllOffices.value = false
+  emit('update:showModal', false)
+}
+
+function addEmployee() {
+  const selectedEmployees = employees.value
+    .filter(emp => emp.selected)
+    .map(({ id, name, position }) => ({
+      id,
+      name,
+      position
+    }));
+
+  emit('add', selectedEmployees);
+  closeModal();
+}
 </script>
 
 <style scoped lang="scss">
 .employee-selection-modal {
-  width: 800px;
+  width: 900px;
   max-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 
   .modal-header {
     padding-bottom: 0;
   }
 
-  .search-input {
-    margin-bottom: 16px;
+  .filter-section {
+    padding-bottom: 0;
   }
 
   .table-section {
     padding-top: 0;
-    max-height: 60vh;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .employee-table {
-    height: 100%;
+    flex: 1;
+
+    :deep(.q-table__middle) {
+      max-height: calc(70vh - 150px);
+      overflow-y: auto;
+    }
 
     :deep(.q-table__top) {
       padding-top: 0;
@@ -179,6 +184,13 @@ export default {
   .modal-actions {
     padding: 16px;
     border-top: 1px solid rgba(0, 0, 0, 0.12);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .action-btn {
+      min-width: 120px;
+    }
   }
 }
 </style>
