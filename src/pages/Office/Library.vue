@@ -2,11 +2,6 @@
   <q-page class="q-pa-md full-width">
     <div class="text-h6 q-mb-sm">MFO</div>
 
-    <!-- Add Button -->
-    <div class="button-container">
-      <q-btn color="green" icon="add" label="Add" @click="openAddModal" size="sm" />
-    </div>
-
     <!-- Loading indicator -->
     <div v-if="loading" class="flex justify-center q-pa-sm">
       <q-spinner color="primary" size="2em" />
@@ -18,9 +13,24 @@
       <table class="mfo-table full-width-table">
         <thead>
           <tr>
-            <th class="category-column">A. STRATEGIC FUNCTION</th>
-            <th class="category-column">B. CORE FUNCTION</th>
-            <th class="category-column">C. SUPPORT FUNCTION</th>
+            <th class="category-column">
+              <div class="header-content">
+                A. STRATEGIC FUNCTION
+                <q-btn icon="add" size="sm" flat dense @click="openAddModal('strategic')" class="q-ml-sm" />
+              </div>
+            </th>
+            <th class="category-column">
+              <div class="header-content">
+                B. CORE FUNCTION
+                <q-btn icon="add" size="sm" flat dense @click="openAddModal('core')" class="q-ml-sm" />
+              </div>
+            </th>
+            <th class="category-column">
+              <div class="header-content">
+                C. SUPPORT FUNCTION
+                <q-btn icon="add" size="sm" flat dense @click="openAddModal('support')" class="q-ml-sm" />
+              </div>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -29,7 +39,9 @@
               <ul>
                 <li v-for="(mfo, index) in strategicMfos" :key="mfo.id" class="mfo-item">
                   <div class="item-container">
-                    <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    <div class="text-content">
+                      <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    </div>
                     <div class="item-actions">
                       <q-btn icon="edit" size="xs" flat round dense @click="editMfo(mfo, 'strategic')" />
                       <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
@@ -38,7 +50,9 @@
                   <ul>
                     <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id" class="output-item">
                       <div class="item-container">
-                        <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
+                        <div class="text-content">
+                          <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
+                        </div>
                         <div class="item-actions">
                           <q-btn icon="edit" size="xs" flat round dense @click="editOutput(output, mfo, 'strategic')" />
                           <q-btn icon="delete" size="xs" flat round dense color="negative"
@@ -59,7 +73,9 @@
               <ul>
                 <li v-for="(mfo, index) in coreMfos" :key="mfo.id" class="mfo-item">
                   <div class="item-container">
-                    <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    <div class="text-content">
+                      <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    </div>
                     <div class="item-actions">
                       <q-btn icon="edit" size="xs" flat round dense @click="editMfo(mfo, 'core')" />
                       <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
@@ -68,7 +84,9 @@
                   <ul>
                     <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id" class="output-item">
                       <div class="item-container">
-                        <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
+                        <div class="text-content">
+                          <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
+                        </div>
                         <div class="item-actions">
                           <q-btn icon="edit" size="xs" flat round dense @click="editOutput(output, mfo, 'core')" />
                           <q-btn icon="delete" size="xs" flat round dense color="negative"
@@ -89,7 +107,9 @@
               <ul>
                 <li v-for="(mfo, index) in supportMfos" :key="mfo.id" class="mfo-item">
                   <div class="item-container">
-                    <span class="output-text">{{ `OUTPUT ${index + 1}. ${mfo.name}` }}</span>
+                    <div class="text-content">
+                      <span class="output-text">{{ `OUTPUT ${index + 1}. ${mfo.name}` }}</span>
+                    </div>
                     <div class="item-actions">
                       <q-btn icon="edit" size="xs" flat round dense @click="editSupport(mfo)" />
                       <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
@@ -109,32 +129,31 @@
     <!-- Add/Edit Modal -->
     <q-dialog v-model="modal.show" persistent>
       <q-card class="modal-card">
-        <q-card-section>
+        <q-card-section class="row items-center q-pb-none">
           <div class="text-subtitle1">{{ modal.title }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup
+            @click="form.showOutputField ? resetOutputField() : closeModal()" />
         </q-card-section>
         <q-card-section>
-
-          <!-- Category Selection -->
-          <!-- <q-select v-model="form.category" :options="categoryOptions" label="Select Category"
-            :disable="modal.mode === 'edit' || modal.context?.mfo" @update:model-value="handleCategoryChange"
-            :rules="[val => !!val || 'Category is required']" dense option-value="id" option-label="name" map-options /> -->
-
-          <q-select v-model="form.category" :options="categoryOptions" label="Select Category"
-            :disable="modal.mode === 'edit' || form.showOutputField" @update:model-value="handleCategoryChange"
-            :rules="[val => !!val || 'Category is required']" dense option-value="id" option-label="name" map-options />
+          <!-- Category Display (not editable) -->
+          <div v-if="form.category" class="q-mb-sm">
+            <div class="text-caption">Category</div>
+            <div class="text-body1">{{ form.category.name }}</div>
+          </div>
 
           <!-- MFO/Support Input -->
           <q-input v-model="form.mfo.name" :label="isSupportCategory ? 'Support Output Name' : 'MFO Name'"
             class="q-mt-sm" :disable="modal.context?.mfo && form.showOutputField"
             :rules="[val => !!val || (isSupportCategory ? 'Support output name is required' : 'MFO name is required')]"
-            dense />
+            dense ref="mfoInput" />
 
           <!-- Output Input (only shown when adding outputs to existing MFOs) -->
           <q-input v-if="modal.context?.mfo && form.showOutputField && !isSupportCategory" v-model="form.output.name"
-            label="Output Name" class="q-mt-sm" :rules="[val => !!val || 'Output name is required']" dense />
+            label="Output Name" class="q-mt-sm" :rules="[val => !!val || 'Output name is required']" dense
+            ref="outputInput" />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn label="Cancel" color="red" flat size="sm" @click="closeModal" />
           <q-btn label="Save" color="green" size="sm" @click="saveEntry" :loading="modal.loading" />
         </q-card-actions>
       </q-card>
@@ -271,17 +290,52 @@ export default {
       return this.outputs.filter(output => output.mfo_id === mfoId);
     },
 
-    openAddModal() {
+    openAddModal(categoryType) {
       this.resetForm();
       this.modal = {
         show: true,
-        title: "Add MFO / Output",
+        title: `Add ${this.getCategoryName(categoryType)}`,
         mode: "add",
         loading: false,
-        context: null
+        context: { categoryType }
       };
-      // Setting showOutputField to false - only show output field when adding output to existing MFO
+
+      // Set the category based on the type - this will now be fixed and not editable
+      const categoryForType = this.findCategoryByType(categoryType);
+      if (!categoryForType) {
+        console.error('Could not find appropriate category for type:', categoryType);
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to set category. Please try again.',
+          position: 'top'
+        });
+        this.closeModal();
+        return;
+      }
+
+      this.form.category = categoryForType;
       this.form.showOutputField = false;
+    },
+
+    findCategoryByType(categoryType) {
+      return this.categoryOptions.find(cat => {
+        if (categoryType === 'strategic') {
+          return cat.name.includes("STRATEGIC") || cat.name.includes("A.");
+        } else if (categoryType === 'core') {
+          return cat.name.includes("CORE") || cat.name.includes("B.");
+        } else {
+          return cat.name.includes("SUPPORT") || cat.name.includes("C.");
+        }
+      });
+    },
+
+    getCategoryName(categoryType) {
+      switch (categoryType) {
+        case 'strategic': return 'Strategic MFO';
+        case 'core': return 'Core MFO';
+        case 'support': return 'Support Output';
+        default: return 'MFO/Output';
+      }
     },
 
     openAddOutputModal(mfo, categoryType) {
@@ -295,15 +349,7 @@ export default {
       };
 
       // Find the category based on categoryType
-      this.form.category = this.categoryOptions.find(cat => {
-        if (categoryType === 'strategic') {
-          return cat.name.includes("STRATEGIC") || cat.name.includes("A.");
-        } else if (categoryType === 'core') {
-          return cat.name.includes("CORE") || cat.name.includes("B.");
-        }
-        return false;
-      });
-
+      this.form.category = this.findCategoryByType(categoryType);
       this.form.mfo = { ...mfo };
       this.form.showOutputField = true;
     },
@@ -318,22 +364,8 @@ export default {
         context: { categoryType }
       };
 
-      // Use mfo's category or find it based on mfo's categoryType
-      if (mfo.category) {
-        this.form.category = mfo.category;
-      } else {
-        this.form.category = this.categoryOptions.find(cat => {
-          if (categoryType === 'strategic') {
-            return cat.name.includes("STRATEGIC") || cat.name.includes("A.");
-          } else if (categoryType === 'core') {
-            return cat.name.includes("CORE") || cat.name.includes("B.");
-          } else if (categoryType === 'support') {
-            return cat.name.includes("SUPPORT") || cat.name.includes("C.");
-          }
-          return false;
-        });
-      }
-
+      // Use mfo's category or find it based on categoryType
+      this.form.category = mfo.category || this.findCategoryByType(categoryType);
       this.form.mfo = { ...mfo };
     },
 
@@ -347,20 +379,8 @@ export default {
         context: { output, mfo, categoryType }
       };
 
-      // Use mfo's category or find it based on mfo's categoryType
-      if (mfo.category) {
-        this.form.category = mfo.category;
-      } else {
-        this.form.category = this.categoryOptions.find(cat => {
-          if (categoryType === 'strategic') {
-            return cat.name.includes("STRATEGIC") || cat.name.includes("A.");
-          } else if (categoryType === 'core') {
-            return cat.name.includes("CORE") || cat.name.includes("B.");
-          }
-          return false;
-        });
-      }
-
+      // Use mfo's category or find it based on categoryType
+      this.form.category = mfo.category || this.findCategoryByType(categoryType);
       this.form.mfo = { ...mfo };
       this.form.output = { ...output };
       this.form.showOutputField = true;
@@ -377,24 +397,8 @@ export default {
       };
 
       // Set category to Support
-      this.form.category = this.categoryOptions.find(cat =>
-        cat.name.includes("SUPPORT") || cat.name.includes("C.")
-      );
-
+      this.form.category = this.findCategoryByType('support');
       this.form.mfo = { ...mfo };
-    },
-
-    handleCategoryChange() {
-      this.form.mfo = { id: null, name: "" };
-      this.form.output = { id: null, name: "" };
-
-      // For new MFO additions, we don't want to show output field regardless of category
-      if (!this.modal.context?.mfo) {
-        this.form.showOutputField = false;
-      } else {
-        // For adding outputs to existing MFOs, respect Support vs Strategic/Core
-        this.form.showOutputField = !this.isSupportCategory;
-      }
     },
 
     async saveEntry() {
@@ -402,37 +406,69 @@ export default {
         this.modal.loading = true;
 
         if (!this.form.category || !this.form.category.id) {
-          throw new Error("Please select a valid category");
+          throw new Error("Category is required");
         }
 
         if (!this.form.mfo.name) {
+          this.$refs.mfoInput.validate();
           throw new Error(this.isSupportCategory ? "Support output name is required" : "MFO name is required");
         }
 
-        if (this.modal.mode === 'add') {
-          await this.addEntry();
-        } else {
-          await this.updateEntry();
+        if (this.form.showOutputField && !this.form.output.name) {
+          this.$refs.outputInput.validate();
+          throw new Error("Output name is required");
         }
 
+        let successMessage = '';
+
+        if (this.modal.mode === 'add') {
+          await this.addEntry();
+          successMessage = this.form.showOutputField
+            ? 'Output added successfully'
+            : (this.isSupportCategory ? 'Support output added successfully' : 'MFO added successfully');
+        } else {
+          await this.updateEntry();
+          successMessage = this.form.showOutputField
+            ? 'Output updated successfully'
+            : (this.isSupportCategory ? 'Support output updated successfully' : 'MFO updated successfully');
+        }
+
+        // Show success notification
         this.$q.notify({
           type: 'positive',
-          message: 'Entry saved successfully',
+          message: successMessage,
           position: 'top'
         });
 
-        // Refresh data after save
+        // Refresh data
         await this.fetchData();
-        this.closeModal();
+
+        // Close modal unless we're adding outputs (where we want to keep it open)
+        if (!(this.modal.mode === 'add' && this.form.showOutputField)) {
+          this.closeModal();
+        } else {
+          // For output addition, just reset the output field
+          this.form.output = { id: null, name: "" };
+          this.$refs.outputInput.resetValidation();
+        }
       } catch (error) {
-        console.error('Save error:', error);
-        this.$q.notify({
-          type: 'negative',
-          message: error.response?.data?.message || error.message || 'Failed to save entry',
-          position: 'top'
-        });
+        if (!error.message.includes("required")) {
+          console.error('Save error:', error);
+          this.$q.notify({
+            type: 'negative',
+            message: error.response?.data?.message || error.message || 'Failed to save entry',
+            position: 'top'
+          });
+        }
       } finally {
         this.modal.loading = false;
+      }
+    },
+
+    resetOutputField() {
+      this.form.output = { id: null, name: "" };
+      if (this.$refs.outputInput) {
+        this.$refs.outputInput.resetValidation();
       }
     },
 
@@ -553,10 +589,13 @@ export default {
         output: { id: null, name: "" },
         showOutputField: false
       };
+      if (this.$refs.mfoInput) this.$refs.mfoInput.resetValidation();
+      if (this.$refs.outputInput) this.$refs.outputInput.resetValidation();
     }
   }
 };
 </script>
+
 <style scoped>
 .full-width {
   width: 100%;
@@ -579,11 +618,15 @@ export default {
   margin-bottom: 8px;
 }
 
-/* Button container */
-.button-container {
+/* Header content styles */
+.header-content {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-content .q-btn {
+  margin-left: 8px;
 }
 
 /* Enhanced Table Styling */
@@ -621,6 +664,7 @@ export default {
   vertical-align: top;
   height: 100%;
   border-right: 1px solid #e0e0e0;
+  position: relative;
 }
 
 .category-cell:last-child {
@@ -637,7 +681,7 @@ export default {
 }
 
 .output-item {
-  padding: 8px 10px 8px 20px;
+  padding: 8px 10px;
   margin: 6px 0;
   background: #f9f9f9;
   border-radius: 4px;
@@ -647,16 +691,40 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  width: 100%;
+  position: relative;
+  padding-right: 70px;
+  /* Make space for the buttons */
+}
+
+.text-content {
+  flex-grow: 1;
+  padding-right: 10px;
+  min-width: 0;
+  /* This prevents text overflow */
+  overflow: hidden;
 }
 
 .item-actions {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   gap: 6px;
 }
 
+.mfo-text,
+.output-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
 .mfo-text {
   font-size: 0.85rem;
+  font-weight: bold;
 }
 
 .output-text {
@@ -668,6 +736,21 @@ export default {
   width: 600px;
   max-width: 90%;
   padding: 16px;
+}
+
+.modal-card .q-card__section:first-child {
+  padding-bottom: 0;
+}
+
+/* Category display */
+.text-caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+}
+
+.text-body1 {
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 /* Responsive adjustments */
@@ -687,7 +770,7 @@ export default {
   }
 
   .output-item {
-    padding: 6px 8px 6px 18px;
+    padding: 6px 8px;
   }
 }
 
@@ -703,6 +786,34 @@ export default {
 
   .q-pa-md {
     padding: 12px;
+  }
+
+  .button-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .button-container .q-btn {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .item-container {
+    padding-right: 60px;
+  }
+
+  .item-actions {
+    right: 5px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-content .q-btn {
+    margin-left: 0;
+    margin-top: 8px;
   }
 }
 </style>
