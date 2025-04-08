@@ -27,14 +27,14 @@
         </template>
       </q-table>
     </div>
-
-    <div v-if="selectedRow">
+    <!-- UWP Details View -->
+    <div v-if="selectedRow && !selectedDivision">
       <div class="row items-center justify-between q-mb-md">
         <q-btn flat label="Back" icon="arrow_back" @click="selectedRow = null" />
         <q-btn elevated rounded color="primary" label="Generate OPCR" icon="print" />
       </div>
 
-      <q-table :rows="detailsRows" :columns="detailsColumns" row-key="id" class="q-mb-md">
+      <q-table :rows="detailsRows" :columns="detailsColumns" row-key="id" class="q-mb-md" @row-click="onDivisionClick">
         <template v-slot:header>
           <q-tr>
             <q-th v-for="col in detailsColumns" :key="col.name" style="background-color: #EBEBEB; text-align: left;">
@@ -44,33 +44,40 @@
         </template>
       </q-table>
     </div>
+
+    <!-- DivisionEmployee View -->
+    <div v-if="selectedDivision">
+      <DivisionEmployee :division="selectedDivision" @back="selectedDivision = null" />
+    </div>
   </q-page>
 </template>
 
 <script>
 import UnitWorkPlanForm from 'src/components/office/UnitWorkPlanForm.vue';
+import DivisionEmployee from 'src/components/office/DivisionEmployee.vue';
 
 export default {
   components: {
-    UnitWorkPlanForm
+    UnitWorkPlanForm,
+    DivisionEmployee
   },
   data() {
     return {
       showUWP: false,
       search: "",
       selectedRow: null,
+      selectedDivision: null,
       columns: [
-        { name: "office", label: "Office", field: "office", align: "left" },
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
         { name: "status", label: "Status", field: "status", align: "left" }
       ],
       rows: [
-        { id: 1, office: "CICTMO", targetPeriod: "January - June 2025", dateCreated: "December 3, 2024", status: "Pending" },
-        { id: 2, office: "CICTMO", targetPeriod: "July - December 2024", dateCreated: "June 3, 2024", status: "Reviewed" },
-        { id: 3, office: "CICTMO", targetPeriod: "January - June 2024", dateCreated: "December 3, 2023", status: "Reviewed" },
-        { id: 4, office: "CICTMO", targetPeriod: "July - December 2023", dateCreated: "June 3, 2023", status: "Reviewed" },
-        { id: 5, office: "CICTMO", targetPeriod: "January - June 2023", dateCreated: "December 3, 2022", status: "Reviewed" }
+        { id: 1, targetPeriod: "January - June 2025", dateCreated: "December 3, 2024", status: "Pending" },
+        { id: 2, targetPeriod: "July - December 2024", dateCreated: "June 3, 2024", status: "Reviewed" },
+        { id: 3, targetPeriod: "January - June 2024", dateCreated: "December 3, 2023", status: "Reviewed" },
+        { id: 4, targetPeriod: "July - December 2023", dateCreated: "June 3, 2023", status: "Reviewed" },
+        { id: 5, targetPeriod: "January - June 2023", dateCreated: "December 3, 2022", status: "Reviewed" }
       ],
       detailsColumns: [
         { name: "division", label: "Division", field: "division", align: "left" },
@@ -98,6 +105,9 @@ export default {
   methods: {
     onRowClick(evt, row) {
       this.selectedRow = row;
+    },
+    onDivisionClick(evt, row) {
+      this.selectedDivision = row.division;
     }
   }
 };

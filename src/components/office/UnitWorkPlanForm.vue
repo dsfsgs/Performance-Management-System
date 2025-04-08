@@ -36,166 +36,35 @@
 
             <q-separator />
 
-            <q-card-section>
-                <div class="text-subtitle2 q-mb-md">Performance Indicator</div>
-                <div class="row no-wrap">
-                    <div class="col-auto">
-                        <q-table :rows="rows" :columns="[columns[0]]" row-key="id" hide-bottom bordered flat
-                            style="min-width: 200px;">
-                            <template v-slot:body-cell-mfo="props">
-                                <q-td :props="props">
-                                    <!-- <div class="dropdown-container"> -->
-                                    <!-- <span v-if="!props.row.mfo">{{ getDropdownLabel(props.row.id) }}</span> -->
-                                    <q-select v-model="props.row.mfo" :label="getDropdownLabel(props.row.id)"
-                                        :options="getMfoOptions(props.row.id)" dense borderless emit-value map-options
-                                        behavior="menu" />
-                                    <!-- </div> -->
-                                </q-td>
-                            </template>
-                        </q-table>
+            <!-- Iterate through performance standards components -->
+            <div v-for="(standard, index) in performanceStandards" :key="index">
+                <q-card-section class="performance-standard-container">
+                    <div class="standard-header row items-center justify-between q-mb-md">
+                        <div class="text-subtitle2">Performance Standard #{{ index + 1 }}</div>
+                        <!-- Remove button for all except the first one -->
+                        <q-btn v-if="index > 0" icon="delete" color="negative" flat round dense
+                            @click="removePerformanceStandard(index)" />
                     </div>
 
-                    <div class="col" style="flex-grow: 2; min-width: 400px;">
-                        <q-table :rows="[mergedRow]" :columns="competencyColumns" row-key="id" hide-bottom bordered flat
-                            class="full-width" style="width: 100%;">
-                            <template v-slot:body-cell-core="props">
-                                <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                    <q-input v-model="mergedCoreCompetency" type="text" dense borderless
-                                        class="full-width full-height" input-style="height: 100%; width: 100%;" />
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-leadership="props">
-                                <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                    <q-input v-model="mergedLeadershipCompetency" type="text" dense borderless
-                                        class="full-width full-height" input-style="height: 100%; width: 100%;" />
-                                </q-td>
-                            </template>
-                            <template v-slot:body-cell-technical="props">
-                                <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                    <q-input v-model="mergedTechnicalCompetency" type="text" dense borderless
-                                        class="full-width full-height" input-style="height: 100%; width: 100%;" />
-                                </q-td>
-                            </template>
-                        </q-table>
-                    </div>
+                    <!-- Include the PerformanceStandardsComponent -->
+                    <performance-standards :ref="'performanceStandards_' + index"
+                        :initialMergedCoreCompetency="standard.coreCompetency"
+                        :initialMergedLeadershipCompetency="standard.leadershipCompetency"
+                        :initialMergedTechnicalCompetency="standard.technicalCompetency" />
+                </q-card-section>
 
-                    <div class="col-auto">
-                        <q-table :rows="[mergedRow]" :columns="[columns[2]]" row-key="id" hide-bottom bordered flat
-                            style="min-width: 200px;">
-                            <template v-slot:body-cell-successIndicator="props">
-                                <q-td :props="props" style="height: 162px;">
-                                    <q-input v-model="mergedSuccessIndicator" type="text" dense borderless
-                                        class="full-height" input-style="height: 100%;" />
-                                </q-td>
-                            </template>
-                        </q-table>
-                    </div>
+                <q-separator v-if="index < performanceStandards.length - 1" />
+            </div>
 
-                    <div class="col-auto">
-                        <q-table :rows="[mergedRow]" :columns="[columns[3]]" row-key="id" hide-bottom bordered flat
-                            style="min-width: 200px;">
-                            <template v-slot:body-cell-requiredOutput="props">
-                                <q-td :props="props" style="height: 162px;">
-                                    <q-input v-model="mergedRequiredOutput" type="text" dense borderless
-                                        class="full-height" input-style="height: 100%;" />
-                                </q-td>
-                            </template>
-                        </q-table>
-                    </div>
+            <!-- Add button section -->
+            <q-card-section class="q-pt-none">
+                <div class="row justify-center q-mt-md">
+                    <q-btn icon="add" label="Add Another Performance Standard" color="primary"
+                        @click="addPerformanceStandard" />
                 </div>
             </q-card-section>
 
             <q-separator />
-
-            <q-card-section>
-                <div class="text-subtitle2 q-mb-md">Standard Outcome</div>
-                <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom
-                    bordered flat dense class="standard-outcome-table">
-                    <template v-slot:header-cell-quantity="props">
-                        <q-th :props="props" class="bordered-cell">
-                            <!-- Only show A/B/C Quantity Indicator Type -->
-                            <q-select v-model="quantityIndicatorType" :options="[
-                                { label: 'Quantity (A. Custom target)', value: 'numeric' },
-                                { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
-                                { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
-                            ]" dense borderless emit-value map-options class="header-select" />
-                        </q-th>
-                    </template>
-                    <template v-slot:header-cell-effectiveness="props">
-                        <q-th :props="props" class="bordered-cell">
-                            <q-select v-model="effectivenessType" :options="[
-                                { label: 'Effectiveness (Conditional)', value: 'conditional' },
-                                { label: 'Effectiveness (Numeric)', value: 'numeric' }
-                            ]" dense borderless emit-value map-options class="header-select" />
-                        </q-th>
-                    </template>
-                    <template v-slot:header-cell-timeliness="props">
-                        <q-th :props="props" class="bordered-cell">
-                            <q-select v-model="timelinessType" :options="[
-                                { label: 'Timeliness (Conditional)', value: 'conditional' },
-                                { label: 'Timeliness (Numeric)', value: 'numeric' }
-                            ]" dense borderless emit-value map-options class="header-select" />
-                        </q-th>
-                    </template>
-
-                    <!-- Body cell templates remain the same -->
-                    <template v-slot:body-cell-quantity="props">
-                        <q-td :props="props" class="bordered-cell">
-                            <!-- Type A (numeric): Editable input -->
-                            <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense
-                                borderless class="full-width" placeholder="Enter custom target"
-                                :rules="[validateStrictNumeric]" @keydown="blockInvalidChars"
-                                @update:model-value="sanitizeNumericInput(props.row, 'effectiveness')" />
-
-                            <!-- Type B/C: Display-only text (no input/validation) -->
-                            <div v-else class="text-caption full-width q-pa-xs">
-                                {{ props.row.quantity || '-' }}
-                            </div>
-                        </q-td>
-                    </template>
-
-                    <template v-slot:body-cell-effectiveness="props">
-                        <q-td :props="props" class="bordered-cell">
-                            <q-input v-if="effectivenessType === 'conditional'" v-model="props.row.effectiveness" dense
-                                borderless class="full-width" placeholder="Enter condition" />
-                            <q-input v-else v-model="props.row.effectiveness" dense borderless class="full-width"
-                                placeholder="Enter number or range" :rules="[validateStrictNumeric]"
-                                @keydown="blockInvalidChars"
-                                @update:model-value="sanitizeNumericInput(props.row, 'effectiveness')" />
-                        </q-td>
-                    </template>
-
-                    <template v-slot:body-cell-timeliness="props">
-                        <q-td :props="props" class="bordered-cell">
-                            <q-input v-if="timelinessType === 'conditional'" v-model="props.row.timeliness" dense
-                                borderless class="full-width" placeholder="Enter condition" />
-                            <q-input v-else v-model="props.row.timeliness" dense borderless class="full-width"
-                                placeholder="Enter number or range" :rules="[validateStrictNumeric]"
-                                @keydown="blockInvalidChars"
-                                @update:model-value="sanitizeNumericInput(props.row, 'timeliness')" />
-                        </q-td>
-                    </template>
-                </q-table>
-
-                <q-dialog v-model="showTargetModal" persistent>
-                    <q-card style="min-width: 300px;">
-                        <q-card-section>
-                            <div class="text-h6">Enter Target Output</div>
-                        </q-card-section>
-
-                        <q-card-section>
-                            <q-input v-model.number="targetValue" label="Target Output" type="number"
-                                @keypress="blockInvalidChars" min="1" />
-                        </q-card-section>
-
-                        <q-card-actions align="right">
-                            <q-btn flat label="Cancel" v-close-popup @click="cancelTargetInput" />
-                            <q-btn flat label="OK" color="primary" @click="computeQuantities" />
-                        </q-card-actions>
-                    </q-card>
-                </q-dialog>
-
-            </q-card-section>
 
             <q-card-actions align="right">
                 <q-btn icon="save" label="Save" :style="{ backgroundColor: '#077A37' }" text-color="white"
@@ -207,7 +76,12 @@
 </template>
 
 <script>
+import PerformanceStandards from "../office/PerformanceStandard.vue";
+
 export default {
+    components: {
+        PerformanceStandards
+    },
     data() {
         return {
             division: '',
@@ -215,176 +89,36 @@ export default {
             employeeName: '',
             rank: '',
             position: '',
-            mergedCoreCompetency: 'DSE-4',
-            mergedLeadershipCompetency: 'TSC-4',
-            mergedTechnicalCompetency: 'RM-3',
-            mergedSuccessIndicator: '',
-            mergedRequiredOutput: '',
-            showTargetModal: false,
-            targetValue: null,
-            mergedRow: { id: 0 },
-            categoryOptions: [
-                { label: 'A. Strategic Function', value: 'A' },
-                { label: 'B. Core Function', value: 'B' },
-                { label: 'C. Support Function', value: 'C' }
-            ],
-            dropdownLabels: {
-                1: 'Select Category',
-                2: 'Select MFO',
-                3: 'Select Output'
-            },
-            mfoOptions: [
-                { label: 'MFO 1', value: 'M1' },
-                { label: 'MFO 2', value: 'M2' },
-                { label: 'MFO 3', value: 'M3' }
-            ],
-            outputOptions: [
-                { label: 'Output 1', value: 'O1' },
-                { label: 'Output 2', value: 'O2' },
-                { label: 'Output 3', value: 'O3' }
-            ],
-            quantityIndicatorType: 'numeric',
-            quantityIndicator: [
-                { label: 'Quantity (A. Custom target)', value: 'numeric' },
-                { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
-                { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
-            ],
-            timelinessType: 'conditional',
-            effectivenessType: 'conditional',
-            inputTypeOptions: [
-                { label: 'Quantity (Conditional)', value: 'conditional' },
-                { label: 'Quantity (Numeric)', value: 'numeric' }
-            ],
-            standardOutcomeColumns: [
-                { name: 'rating', label: 'Ratings', field: 'rating', align: 'center' },
-                { name: 'quantity', label: 'Quantity', field: 'quantity', align: 'center' },
-                { name: 'timeliness', label: 'Timeliness', field: 'timeliness', align: 'center' },
-                { name: 'effectiveness', label: 'Effectiveness', field: 'effectiveness', align: 'center' }
-            ],
-            standardOutcomeRows: [
-                { rating: '5', quantity: '', timeliness: '', effectiveness: '' },
-                { rating: '4', quantity: '', timeliness: '', effectiveness: '' },
-                { rating: '3', quantity: '', timeliness: '', effectiveness: '' },
-                { rating: '2', quantity: '', timeliness: '', effectiveness: '' },
-                { rating: '1', quantity: '', timeliness: '', effectiveness: '' }
-            ],
-            competencyColumns: [
+            performanceStandards: [
                 {
-                    name: 'core',
-                    label: 'Core',
-                    align: 'left',
-                    field: 'core',
-                    style: "width: 33%"
-                },
-                {
-                    name: 'leadership',
-                    label: 'Leadership',
-                    align: 'left',
-                    field: 'leadership',
-                    style: "width: 33%"
-                },
-                {
-                    name: 'technical',
-                    label: 'Technical',
-                    align: 'left',
-                    field: 'technical',
-                    style: "width: 34%"
-                }
-            ],
-            columns: [
-                {
-                    name: 'mfo',
-                    required: true,
-                    label: 'MFO',
-                    align: 'left',
-                    field: 'mfo',
-                    sortable: true,
-                    style: "width: 20%"
-                },
-                {
-                    name: 'competency',
-                    label: 'Required Competency & Proficiency Level',
-                    align: 'left',
-                    field: 'competency',
-                    style: "width: 40%"
-                },
-                {
-                    name: 'successIndicator',
-                    label: 'Success Indicator',
-                    align: 'left',
-                    field: 'successIndicator',
-                    style: "width: 20%"
-                },
-                {
-                    name: 'requiredOutput',
-                    label: 'Required Output',
-                    align: 'left',
-                    field: 'requiredOutput',
-                    style: "width: 20%"
-                }
-            ],
-            rows: [
-                {
-                    id: 1,
-                    mfo: '',
-                    core: '',
-                    leadership: '',
-                    technical: '',
-                    successIndicator: '',
-                    requiredOutput: ''
-                },
-                {
-                    id: 2,
-                    mfo: '',
-                    core: '',
-                    leadership: '',
-                    technical: '',
-                    successIndicator: '',
-                    requiredOutput: ''
-                },
-                {
-                    id: 3,
-                    mfo: '',
-                    core: '',
-                    leadership: '',
-                    technical: '',
-                    successIndicator: '',
-                    requiredOutput: ''
+                    coreCompetency: 'DSE-4',
+                    leadershipCompetency: 'TSC-4',
+                    technicalCompetency: 'RM-3'
                 }
             ]
-        }
+        };
     },
     methods: {
-        getDropdownLabel(rowId) {
-            return this.dropdownLabels[rowId] || ''
-        },
-        getMfoOptions(rowId) {
-            if (rowId === 1) return this.categoryOptions
-            if (rowId === 2) return this.mfoOptions
-            if (rowId === 3) return this.outputOptions
-            return []
-        },
         saveForm() {
+            // Get data from all performance standards components
+            const performanceData = [];
+
+            this.performanceStandards.forEach((_, index) => {
+                const refName = 'performanceStandards_' + index;
+                const compRef = this.$refs[refName];
+
+                if (compRef && compRef[0]) {
+                    performanceData.push(compRef[0].getFormData());
+                }
+            });
+
             const savedData = {
                 division: this.division,
                 targetPeriod: this.targetPeriod,
                 employeeName: this.employeeName,
                 rank: this.rank,
                 position: this.position,
-                rows: this.rows.map(row => ({
-                    mfo: row.mfo,
-                    core: row.core,
-                    leadership: row.leadership,
-                    technical: row.technical,
-                    successIndicator: row.successIndicator,
-                    requiredOutput: row.requiredOutput
-                })),
-                standardOutcomeRows: this.standardOutcomeRows.map(row => ({
-                    rating: row.rating,
-                    quantity: row.quantity,
-                    timeliness: row.timeliness,
-                    effectiveness: row.effectiveness
-                }))
+                performanceStandards: performanceData
             };
 
             console.log('Saved Data:', savedData); // Replace with actual save logic (e.g., API call)
@@ -395,147 +129,67 @@ export default {
             });
         },
         resetForm() {
-            this.division = ''
-            this.targetPeriod = ''
-            this.employeeName = ''
-            this.rank = ''
-            this.position = ''
-            this.mergedCoreCompetency = ''
-            this.mergedLeadershipCompetency = ''
-            this.mergedTechnicalCompetency = ''
-            this.mergedSuccessIndicator = ''
-            this.mergedRequiredOutput = ''
-            this.standardOutcomeRows.forEach(row => {
-                row.quantity = ''
-                row.timeliness = ''
-                row.effectiveness = ''
-            })
-            this.rows.forEach(row => {
-                row.mfo = ''
-                row.core = ''
-                row.leadership = ''
-                row.technical = ''
-                row.successIndicator = ''
-                row.requiredOutput = ''
-            })
-        },
-        blockInvalidChars(e) {
-            const allowedKeys = [
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                '-', 'Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'
+            this.division = '';
+            this.targetPeriod = '';
+            this.employeeName = '';
+            this.rank = '';
+            this.position = '';
+
+            // Reset to just one performance standards component
+            this.performanceStandards = [
+                {
+                    coreCompetency: 'DSE-4',
+                    leadershipCompetency: 'TSC-4',
+                    technicalCompetency: 'RM-3'
+                }
             ];
 
-            if (!allowedKeys.includes(e.key) && !e.ctrlKey) {
-                e.preventDefault();
+            // Reset the first performance standards component
+            const refName = 'performanceStandards_0';
+            if (this.$refs[refName] && this.$refs[refName][0]) {
+                this.$refs[refName][0].resetComponentData();
             }
         },
-        sanitizeNumericInput(row, field) {
-            // Remove all non-numeric chars except hyphen
-            row[field] = row[field].replace(/[^0-9-]/g, '');
-
-            // Allow only one hyphen
-            const hyphens = row[field].split('-').length - 1;
-            if (hyphens > 1) {
-                row[field] = row[field].substring(0, row[field].lastIndexOf('-'));
-            }
-        },
-        validateStrictNumeric(val) {
-            if (!val) return "Value required";
-
-            // Case 1: Single number
-            if (!val.includes('-')) {
-                return !isNaN(val) || 'Must be a number';
-            }
-
-            // Case 2: Range
-            const parts = val.split('-');
-            if (parts.length !== 2 || parts.some(p => !p)) return 'Use format: min-max';
-
-            const min = Number(parts[0]);
-            const max = Number(parts[1]);
-
-            if (isNaN(min) || isNaN(max)) return 'Both must be numbers';
-            if (min >= max) return 'Min must be less than max';
-
-            return true;
-        },
-        computeQuantities() {
-            if (!this.targetValue || isNaN(this.targetValue)) {
-                this.$q.notify({ message: 'Please enter a valid number', color: 'negative' });
-                return;
-            }
-
-            const base = Number(this.targetValue);
-            const type = this.quantityIndicatorType;
-
-            // Reset rows before recomputing
-            this.standardOutcomeRows.forEach(row => {
-                row.quantity = '';
+        addPerformanceStandard() {
+            // Add a new performance standard form
+            this.performanceStandards.push({
+                coreCompetency: 'DSE-4',
+                leadershipCompetency: 'TSC-4',
+                technicalCompetency: 'RM-3'
             });
 
-            if (type === 'B') {
-                // Type B: Can exceed 100% (130%, 115%, 100%, 51%, 50%)
-                this.standardOutcomeRows[0].quantity = `${Math.ceil(base * 1.3)} and above`;       // 130%
-                this.standardOutcomeRows[1].quantity = `${Math.ceil(base * 1.15)} - ${Math.floor(base * 1.3) - 1}`; // 115%
-                this.standardOutcomeRows[2].quantity = `${base} - ${Math.floor(base * 1.15) - 1}`;  // 100%
-                this.standardOutcomeRows[3].quantity = `${Math.ceil(base * 0.51)} - ${Math.floor(base * 0.99)}`;    // 51%
-                this.standardOutcomeRows[4].quantity = `${Math.floor(base * 0.5)} and below`;      // 50%
-            }
-            else if (type === 'C') {
-                // Type C: Cannot exceed 100% (100%, 88-99%, 77-87%, 38-76%, ≤37%)
-                this.standardOutcomeRows[0].quantity = `${base} and above`;                        // 100%
-                this.standardOutcomeRows[1].quantity = `${Math.ceil(base * 0.88)} - ${Math.floor(base * 0.99)}`;  // 88-99%
-                this.standardOutcomeRows[2].quantity = `${Math.ceil(base * 0.77)} - ${Math.floor(base * 0.87)}`;  // 77-87%
-                this.standardOutcomeRows[3].quantity = `${Math.ceil(base * 0.38)} - ${Math.floor(base * 0.76)}`;  // 38-76%
-                this.standardOutcomeRows[4].quantity = `${Math.floor(base * 0.37)} and below`;    // ≤37%
-            }
-
-            this.showTargetModal = false;
+            this.$q.notify({
+                message: 'New performance standard added',
+                color: 'info'
+            });
         },
-        cancelTargetInput() {
-            this.showTargetModal = false;
-            this.quantityIndicatorType = 'A'; // Revert back or handle as needed
-        }
-    },
-    watch: {
-        quantityIndicatorType(val) {
-            if (val === 'B' || val === 'C') {
-                this.targetValue = null;
-                this.showTargetModal = true;
-            }
+        removePerformanceStandard(index) {
+            // Confirm before removing
+            this.$q.dialog({
+                title: 'Confirm',
+                message: 'Are you sure you want to remove this performance standard?',
+                cancel: true,
+                persistent: true
+            }).onOk(() => {
+                this.performanceStandards.splice(index, 1);
+
+                this.$q.notify({
+                    message: 'Performance standard removed',
+                    color: 'warning'
+                });
+            });
         }
     }
-}
+};
 </script>
 
 <style scoped>
-.dropdown-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.performance-standard-container {
+    position: relative;
+    padding-top: 24px;
 }
 
-.standard-outcome-table {
-    border-collapse: collapse;
-}
-
-.standard-outcome-table th,
-.standard-outcome-table td {
-    border: 1px solid #ddd !important;
-}
-
-.bordered-cell {
-    padding: 4px 8px !important;
-    border: 1px solid #ddd !important;
-}
-
-.bordered-cell .q-field__control {
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-.bordered-cell .q-field__control:before {
-    border: none !important;
+.standard-header {
+    margin-bottom: 16px;
 }
 </style>
