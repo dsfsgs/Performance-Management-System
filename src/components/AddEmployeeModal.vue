@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useEmployeeStore } from 'stores/office/employee'
+import { useEmployeeStore } from 'src/stores/office/employeeStore'
 
 const props = defineProps({
   showModal: Boolean
@@ -89,9 +89,13 @@ const columns = [
 ]
 
 // Load employees when modal is shown or when showAllOffices changes
-watch(() => props.showModal, async (showModalValue) => {
+watch([() => props.showModal, showAllOffices], async ([showModalValue, showAll]) => {
   if (showModalValue) {
-    await employeeStore.fetchEmployeesByOffice()
+    if (showAll) {
+      await employeeStore.fetchAllEmployees()
+    } else {
+      await employeeStore.fetchEmployeesByOffice()
+    }
   }
 }, { immediate: true })
 
@@ -100,12 +104,10 @@ const employees = computed(() => employeeStore.employees)
 const filteredEmployees = computed(() => {
   let filtered = employees.value
 
-  // Apply office filter if showAllOffices is false
   if (!showAllOffices.value && employeeStore.userOffice) {
     filtered = filtered.filter(emp => emp.office === employeeStore.userOffice)
   }
 
-  // Apply search filter if searchQuery exists
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(emp =>
@@ -117,6 +119,7 @@ const filteredEmployees = computed(() => {
 
   return filtered
 })
+
 
 const hasSelection = computed(() => {
   return employees.value.some(emp => emp.selected)
