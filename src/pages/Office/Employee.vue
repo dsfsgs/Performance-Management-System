@@ -8,56 +8,75 @@
           <span>Loading organization structure...</span>
         </div>
 
-        <div v-else v-for="division in divisions" :key="division.id" class="tree-item">
-          <div class="tree-node division" @click="selectDivision(division)"
-            :class="{ active: selectedNode?.type === 'division' && selectedNode?.id === division.id }">
-            <span class="toggle-icon" @click.stop="toggleDivision(division)">
-              <q-icon :name="division.expanded ? 'expand_more' : 'chevron_right'" />
-            </span>
-            <span class="node-content">
-              {{ division.name }}
-              <span class="employee-count">{{ getDivisionEmployees(division).length }}</span>
-            </span>
-          </div>
-
-          <div v-if="division.expanded" class="sub-items division-items">
-            <!-- Render sections if they exist -->
-            <div v-for="(section) in division.sections" :key="section.id" class="tree-item">
-              <div class="tree-node section" @click="selectSection(section)"
-                :class="{ active: selectedNode?.type === 'section' && selectedNode?.id === section.id }">
-                <span class="toggle-icon" @click.stop="toggleSection(section)">
-                  <q-icon :name="section.expanded ? 'expand_more' : 'chevron_right'" />
-                </span>
-                <span class="node-content">
-                  {{ section.name }}
-                  <span class="employee-count">{{ getSectionEmployees(section).length }}</span>
-                  <!-- <span class="employee-count">{{ divisionCounts[division.id] || 0 }}</span> -->
-                </span>
-              </div>
-
-              <div v-if="section.expanded" class="sub-items section-items">
-                <div v-for="(unit) in section.units" :key="unit.id" class="tree-item">
-                  <div class="tree-node unit" @click="selectUnit(unit)"
-                    :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
-                    <span class="unit-icon">•</span>
-                    <span class="node-content">
-                      {{ unit.name }}
-                      <span class="employee-count">{{ getUnitEmployees(unit).length }}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
+        <div v-else>
+          <!-- Office Level -->
+          <div class="tree-item">
+            <div class="tree-node office"
+                 @click="selectOffice"
+                 :class="{ active: selectedNode?.type === 'office' }">
+              <span class="toggle-icon" @click.stop="toggleOffice">
+                <q-icon :name="officeExpanded ? 'expand_more' : 'chevron_right'" />
+              </span>
+              <span class="node-content">
+                {{ officeName }}
+                <span class="employee-count">{{ getOfficeEmployees().length }}</span>
+              </span>
             </div>
 
-            <div v-if="division.units && division.units.length > 0" class="tree-item">
-              <div v-for="(unit) in division.units" :key="unit.id" class="tree-item">
-                <div class="tree-node unit" @click="selectUnit(unit)"
-                  :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
-                  <span class="unit-icon">•</span>
-                  <span class="node-content">
-                    {{ unit.name }}
-                    <span class="employee-count">{{ getUnitEmployees(unit).length }}</span>
+            <!-- Divisions under Office -->
+            <div v-if="officeExpanded" class="sub-items office-items">
+              <div v-for="division in divisions" :key="division.id" class="tree-item">
+                <div class="tree-node division" @click="selectDivision(division)"
+                  :class="{ active: selectedNode?.type === 'division' && selectedNode?.id === division.id }">
+                  <span class="toggle-icon" @click.stop="toggleDivision(division)">
+                    <q-icon :name="division.expanded ? 'expand_more' : 'chevron_right'" />
                   </span>
+                  <span class="node-content">
+                    {{ division.name }}
+                    <span class="employee-count">{{ getDivisionEmployees(division).length }}</span>
+                  </span>
+                </div>
+
+                <div v-if="division.expanded" class="sub-items division-items">
+                  <!-- Render sections if they exist -->
+                  <div v-for="(section) in division.sections" :key="section.id" class="tree-item">
+                    <div class="tree-node section" @click="selectSection(section)"
+                      :class="{ active: selectedNode?.type === 'section' && selectedNode?.id === section.id }">
+                      <span class="toggle-icon" @click.stop="toggleSection(section)">
+                        <q-icon :name="section.expanded ? 'expand_more' : 'chevron_right'" />
+                      </span>
+                      <span class="node-content">
+                        {{ section.name }}
+                        <span class="employee-count">{{ getSectionEmployees(section).length }}</span>
+                      </span>
+                    </div>
+
+                    <div v-if="section.expanded" class="sub-items section-items">
+                      <div v-for="(unit) in section.units" :key="unit.id" class="tree-item">
+                        <div class="tree-node unit" @click="selectUnit(unit)"
+                          :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
+                          <span class="unit-icon">•</span>
+                          <span class="node-content">
+                            {{ unit.name }}
+                            <span class="employee-count">{{ getUnitEmployees(unit).length }}</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="division.units && division.units.length > 0" class="tree-item">
+                    <div v-for="(unit) in division.units" :key="unit.id" class="tree-item">
+                      <div class="tree-node unit" @click="selectUnit(unit)"
+                        :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
+                        <span class="unit-icon">•</span>
+                        <span class="node-content">
+                          {{ unit.name }}
+                          <span class="employee-count">{{ getUnitEmployees(unit).length }}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -69,7 +88,7 @@
     <div class="employee-list-panel">
       <div class="employee-list-container">
         <div class="table-title-container">
-          <h3>{{ selectedNodeTitle || 'Select a division, section, or unit' }}</h3>
+          <h3>{{ selectedNodeTitle || 'Select an office, division, section, or unit' }}</h3>
           <button v-if="selectedNode" class="add-employee-btn" @click="showAddModal = true">
             <q-icon name="add" />
             Select Employees
@@ -96,7 +115,6 @@
             <div v-else v-for="employee in filteredEmployees" :key="employee.id" class="table-row">
               <div class="table-cell">{{ employee.name }}</div>
               <div class="table-cell">{{ employee.position }}</div>
-              <!-- <div class="table-cell">{{ employee.rank }}</div> -->
               <div class="table-cell">
                 <select v-model="employee.rank" @change="updateEmployeeRank(employee)" class="rank-select">
                   <option value="">None</option>
@@ -124,6 +142,7 @@ import AddEmployeeModal from '../../components/AddEmployeeModal.vue';
 import { api } from 'src/boot/axios';
 import { useUserStore } from 'src/stores/userStore';
 import { useEmployeeStore } from 'stores/office/employee'
+
 export default {
   components: {
     AddEmployeeModal
@@ -138,8 +157,8 @@ export default {
       selectedNode: null,
       divisions: [],
       userStore: useUserStore(),
-      loading: false, // Add loading state
-
+      loading: false,
+      officeExpanded: false // Added for office expansion state
     }
   },
 
@@ -147,10 +166,11 @@ export default {
     filteredEmployees() {
       if (!this.selectedNode) return [];
 
-      // Use the store's employees
       const employees = this.employeeStore.employees;
 
       switch (this.selectedNode.type) {
+        case 'office':
+          return employees.filter(emp => emp.office_id === this.userStore.user?.office_id);
         case 'division':
           return employees.filter(emp => emp.division === this.selectedNode.name);
         case 'section':
@@ -173,18 +193,42 @@ export default {
     await this.fetchOrganizationStructure();
   },
   methods: {
+    toggleOffice() {
+      this.officeExpanded = !this.officeExpanded;
+      if (this.officeExpanded && !this.selectedNode) {
+        this.selectOffice();
+      }
+    },
+    selectOffice() {
+      this.selectedNode = {
+        type: 'office',
+        id: this.userStore.user?.office_id,
+        name: this.officeName
+      };
+      this.employeeStore.fetchEmployeesByNode(this.selectedNode)
+        .catch(error => {
+          console.error("Error fetching employees:", error);
+          this.$q.notify({
+            type: 'negative',
+            message: 'Failed to load employees'
+          });
+        });
+    },
+    getOfficeEmployees() {
+      return this.employeeStore.employees.filter(emp =>
+        emp.office_id === this.userStore.user?.office_id
+      );
+    },
     async fetchOrganizationStructure() {
-      this.loading = true; // Set loading to true when starting fetch
+      this.loading = true;
       try {
         const response = await api.get('/plantilla');
         const officeData = response.data.find(office =>
           office.office === this.userStore.officeName
         );
-        // Now fetch all employees for this office
 
         if (officeData) {
           this.divisions = officeData.divisions.map((div, divIndex) => {
-            // Check if division has units directly (without sections)
             const hasDirectUnits = div.units && div.units.length > 0;
 
             const divisionObj = {
@@ -192,14 +236,9 @@ export default {
               name: div.division,
               expanded: false,
               sections: [],
-              units: [] // Add units property at division level
+              units: []
             };
 
-            // Calculate initial counts
-
-
-
-            // If division has sections, process them
             if (div.sections && div.sections.length > 0) {
               divisionObj.sections = div.sections.map((sec, secIndex) => ({
                 id: (divIndex + 1) * 100 + secIndex + 1,
@@ -212,19 +251,16 @@ export default {
               }));
             }
 
-            // If division has direct units, add them to division object
             if (hasDirectUnits) {
               divisionObj.units = div.units.map((unit, unitIndex) => ({
-                id: (divIndex + 1) * 1000 + unitIndex + 1, // Use different multiplier to avoid ID conflicts
+                id: (divIndex + 1) * 1000 + unitIndex + 1,
                 name: unit
               }));
             }
 
-
             return divisionObj;
           });
 
-          // Add sections without division if they exist
           if (officeData.sections_without_division) {
             this.divisions.push({
               id: this.divisions.length + 1,
@@ -245,7 +281,6 @@ export default {
       } finally {
         this.loading = false;
       }
-
     },
     calculateDivisionCount(division) {
       return this.employeeStore.employees.filter(emp =>
@@ -274,7 +309,6 @@ export default {
           });
         });
     },
-
     selectSection(section) {
       this.selectedNode = {
         type: 'section',
@@ -283,7 +317,6 @@ export default {
       };
       this.employeeStore.fetchEmployeesByNode(this.selectedNode);
     },
-
     selectUnit(unit) {
       this.selectedNode = {
         type: 'unit',
@@ -292,19 +325,24 @@ export default {
       };
       this.employeeStore.fetchEmployeesByNode(this.selectedNode);
     },
-
     getDivisionEmployees(division) {
-      return this.employeeStore.employees.filter(emp => emp.division === division.name)
+      return this.employeeStore.employees.filter(emp =>
+        emp.division === division.name &&
+        emp.office_id === this.userStore.user?.office_id
+      );
     },
-
     getSectionEmployees(section) {
-      return this.employeeStore.employees.filter(emp => emp.section === section.name)
+      return this.employeeStore.employees.filter(emp =>
+        emp.section === section.name &&
+        emp.office_id === this.userStore.user?.office_id
+      );
     },
-
     getUnitEmployees(unit) {
-      return this.employeeStore.employees.filter(emp => emp.unit === unit.name)
+      return this.employeeStore.employees.filter(emp =>
+        emp.unit === unit.name &&
+        emp.office_id === this.userStore.user?.office_id
+      );
     },
-
     async handleAddEmployees(selectedEmployees) {
       try {
         const userStore = useUserStore();
@@ -315,21 +353,22 @@ export default {
         }
 
         if (!this.selectedNode) {
-          throw new Error('Please select a division, section, or unit before adding employees.');
+          throw new Error('Please select an office, division, section, or unit before adding employees.');
         }
 
         const employeesToAdd = selectedEmployees.map(emp => ({
           name: emp.name,
           position: emp.position,
           office_id: officeId,
-          division: this.selectedNode?.type === 'division' ? this.selectedNode.name : null,
-          section: this.selectedNode?.type === 'section' ? this.selectedNode.name : null,
+          division: this.selectedNode?.type === 'division' ? this.selectedNode.name :
+                   this.selectedNode?.type === 'section' || this.selectedNode?.type === 'unit' ?
+                   this.getDivisionForNode(this.selectedNode)?.name : null,
+          section: this.selectedNode?.type === 'section' ? this.selectedNode.name :
+                  this.selectedNode?.type === 'unit' ? this.getSectionForUnit(this.selectedNode)?.name : null,
           unit: this.selectedNode?.type === 'unit' ? this.selectedNode.name : null
         }));
 
         await this.employeeStore.addEmployees({ employees: employeesToAdd });
-
-        // Do not refresh employees list here
 
         this.$q.notify({
           type: 'positive',
@@ -343,8 +382,34 @@ export default {
         });
       }
     },
-
-
+    getDivisionForNode(node) {
+      if (node.type === 'division') return { name: node.name };
+      if (node.type === 'section' || node.type === 'unit') {
+        for (const division of this.divisions) {
+          if (node.type === 'section') {
+            const section = division.sections.find(s => s.id === node.id);
+            if (section) return division;
+          } else {
+            for (const section of division.sections) {
+              const unit = section.units.find(u => u.id === node.id);
+              if (unit) return division;
+            }
+            const unit = division.units.find(u => u.id === node.id);
+            if (unit) return division;
+          }
+        }
+      }
+      return null;
+    },
+    getSectionForUnit(unitNode) {
+      for (const division of this.divisions) {
+        for (const section of division.sections) {
+          const unit = section.units.find(u => u.id === unitNode.id);
+          if (unit) return section;
+        }
+      }
+      return null;
+    },
     updateEmployeeRank(updatedEmployee) {
       if (updatedEmployee.rank === 'Head') {
         this.employeeStore.employees.forEach(emp => {
@@ -358,7 +423,6 @@ export default {
         })
       }
     },
-
     isHeadOptionDisabled(employee) {
       return this.employeeStore.employees.some(emp =>
         emp.id !== employee.id &&
@@ -366,20 +430,19 @@ export default {
         emp.rank === 'Head'
       )
     },
-
     isSameOrganizationalUnit(emp1, emp2) {
-      if (this.selectedNode?.type === 'division') {
-        return emp1.division === emp2.division
+      if (this.selectedNode?.type === 'office') {
+        return emp1.office_id === emp2.office_id;
+      } else if (this.selectedNode?.type === 'division') {
+        return emp1.division === emp2.division;
       } else if (this.selectedNode?.type === 'section') {
-        return emp1.section === emp2.section
+        return emp1.section === emp2.section;
       } else if (this.selectedNode?.type === 'unit') {
-        return emp1.unit === emp2.unit
+        return emp1.unit === emp2.unit;
       }
-      return false
+      return false;
     },
-
     deleteEmployee(employeeId) {
-      // Implement the delete functionality
       this.employeeStore.deleteEmployee(employeeId).then(() => {
         this.$q.notify({
           type: 'positive',
@@ -392,9 +455,58 @@ export default {
         })
       })
     }
-  },
-
-
+  }
 }
 </script>
+
+<style scoped>
+/* Add office-specific styles */
+.tree-node.office {
+  padding-left: 10px;
+  font-weight: 700;
+  color: #1a237e;
+  font-size: 1.1em;
+}
+
+.sub-items.office-items {
+  padding-left: 20px;
+}
+
+/* Update existing styles to accommodate new hierarchy */
+.tree-node.division {
+  padding-left: 40px;
+}
+
+.tree-node.section {
+  padding-left: 70px;
+}
+
+.tree-node.unit {
+  padding-left: 100px;
+}
+
+/* Adjust the connecting lines for the new hierarchy */
+.sub-items.office-items::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: -10px;
+  bottom: 10px;
+  width: 1px;
+  background-color: #ccc;
+}
+
+.tree-node.division::before {
+  left: 30px;
+}
+
+.tree-node.section::before {
+  left: 60px;
+}
+
+.tree-node.unit::before {
+  left: 90px;
+}
+</style>
+
 <style src="../../assets/office/employee.css" scoped></style>
