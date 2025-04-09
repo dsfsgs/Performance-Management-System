@@ -9,35 +9,41 @@ export const useEmployeeStore = defineStore('employee', {
     loading: false,
     error: null,
     currentOfficeId: null,
-    userOffice: null // Make sure this exists to store the user's office name
+    userOffice: null, // Make sure this exists to store the user's office name
+    assignedEmployees: [], // Employees assigned to the current node
+    unassignedEmployees: [], // Employees available for assignment
+    currentNode: null,
+    softDeletedEmployees: [], // Store for soft-deleted employees
   }),
 
   actions: {
+
     async fetchEmployeeCounts(officeId) {
-  this.loading = true;
-  this.error = null;
+      this.loading = true;
+      this.error = null;
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/employee/counts', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { office_id: officeId }
+        });
 
-  try {
-    const token = localStorage.getItem('token');
-    const response = await api.get('/employee/counts', {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { office_id: officeId }
-    });
+        if (response.data.success) {
+          this.employeeCounts = response.data.data;
+          return response.data.data;
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch employee counts');
+        }
+      } catch (error) {
+        console.error('Failed to fetch employee counts:', error);
+        this.error = error.message || 'Failed to fetch employee counts';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
 
-    if (response.data.success) {
-      this.employeeCounts = response.data.data;
-      return response.data.data;
-    } else {
-      throw new Error(response.data.message || 'Failed to fetch employee counts');
-    }
-  } catch (error) {
-    console.error('Failed to fetch employee counts:', error);
-    this.error = error.message || 'Failed to fetch employee counts';
-    throw error;
-  } finally {
-    this.loading = false;
-  }
-},
+
     async fetchAllEmployees() {
       this.loading = true
       this.error = null
@@ -47,9 +53,8 @@ export const useEmployeeStore = defineStore('employee', {
         const response = await api.get('/employees-by-office', {
           headers: { Authorization: `Bearer ${token}` },
           params: {
-            show_all: true, // This tells the backend to return all employees
-                  unassigned_only: true // Only get unassigned employees
-
+          show_all: true, // This tells the backend to return all employees
+          unassigned_only: true // Only get unassigned employees
           }
         })
 
@@ -65,6 +70,7 @@ export const useEmployeeStore = defineStore('employee', {
         } else {
           throw new Error(response.data.message || 'Failed to fetch all employees')
         }
+
       } catch (error) {
         console.error('Failed to fetch all employees:', error)
         this.error = error.message || 'Failed to fetch all employees'
@@ -73,9 +79,10 @@ export const useEmployeeStore = defineStore('employee', {
       }
     },
 
-    async fetchEmployeesByNode(node) {
+     async fetchEmployeesByNode(node) {
       this.loading = true;
       this.error = null;
+      this.currentNode = node;
 
       try {
         const token = localStorage.getItem('token');
@@ -100,7 +107,7 @@ export const useEmployeeStore = defineStore('employee', {
         });
 
         if (response.data.success) {
-          this.employees = response.data.data.map(emp => ({
+          this.assignedEmployees = response.data.data.map(emp => ({
             id: emp.id,
             name: emp.name,
             position: emp.position,
@@ -122,6 +129,7 @@ export const useEmployeeStore = defineStore('employee', {
         this.loading = false;
       }
     },
+
 
     async fetchEmployeesByOffice() {
       this.loading = true
@@ -157,46 +165,234 @@ export const useEmployeeStore = defineStore('employee', {
         this.loading = false
       }
     },
-async fetchUnassignedEmployees() {
-  // This can now just call fetchEmployeesByOffice with unassigned_only=true
-  return this.fetchEmployeesByOffice();
-},
+      // async fetchUnassignedEmployees() {
+      //   // This can now just call fetchEmployeesByOffice with unassigned_only=true
+      //   return this.fetchEmployeesByOffice();
+      // },
+
+    async fetchUnassignedEmployees() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/employees-by-office', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            show_all: false,
+            unassigned_only: true
+          }
+        });
+
+        if (response.data.success) {
+          this.unassignedEmployees = response.data.data.map(emp => ({
+            id: emp.id || null,
+            name: emp.name,
+            position: emp.position,
+            office: emp.office,
+            selected: false
+          }));
+          this.userOffice = response.data.user_office;
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch unassigned employees');
+        }
+      } catch (error) {
+        console.error('Failed to fetch unassigned employees:', error);
+        this.error = error.message || 'Failed to fetch unassigned employees';
+      } finally {
+        this.loading = false;
+      }
+    },
 
 
     async addEmployees(payload) {
-  this.loading = true
-  this.error = null
+      this.loading = true
+      this.error = null
+
+      try {
+        const token = localStorage.getItem('token')
+        const response = await api.post(
+          '/add/employee',
+          { employees: payload.employees },
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        )
+
+        if (response.data.success) {
+          // Don't add to local state - these are now assigned employees
+          // Instead, refresh the current view
+          if (this.currentNode) {
+            await this.fetchEmployeesByNode(this.currentNode)
+          } else {
+            await this.fetchEmployeesByOffice()
+          }
+
+          // Fetch updated counts after adding employees
+          await this.fetchEmployeeCounts(this.currentOfficeId || useUserStore().user?.office_id)
+
+          return response.data
+        } else {
+          throw new Error(response.data.message || 'Failed to add employees')
+        }
+      } catch (error) {
+        console.error('Failed to add employees:', error)
+        this.error = error.message || 'Failed to add employees'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+async softDeleteEmployee(employeeId) {
+  this.loading = true;
+  this.error = null;
 
   try {
-    const token = localStorage.getItem('token')
-    const response = await api.post(
-      '/add/employee',
-      { employees: payload.employees },
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    )
+    const token = localStorage.getItem('token');
+    const response = await api.delete(`/employee/${employeeId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-    if (response.data.success) {
-      // Don't add to local state - these are now assigned employees
-      // Instead, refresh the current view
-      if (this.currentNode) {
-        await this.fetchEmployeesByNode(this.currentNode)
-      } else {
-        await this.fetchEmployeesByOffice()
-      }
+    // Find the employee in all possible lists
+    const deletedEmployee = this.employees.find(e => e.id === employeeId) ||
+                          this.assignedEmployees.find(e => e.id === employeeId) ||
+                          this.unassignedEmployees.find(e => e.id === employeeId);
 
-      return response.data
-    } else {
-      throw new Error(response.data.message || 'Failed to add employees')
+    if (deletedEmployee) {
+      // Add to softDeletedEmployees
+      this.softDeletedEmployees.push({...deletedEmployee});
+
+      // Remove from all active employee lists
+      this.employees = this.employees.filter(e => e.id !== employeeId);
+      this.assignedEmployees = this.assignedEmployees.filter(e => e.id !== employeeId);
+      this.unassignedEmployees = this.unassignedEmployees.filter(e => e.id !== employeeId);
+
+      // Return the deleted employee data for count updates
+      return {
+        success: true,
+        message: 'Employee soft deleted successfully',
+        deletedEmployee: deletedEmployee,
+        counts: response.data.counts // Assuming your backend returns updated counts
+      };
     }
+
+    throw new Error('Employee not found');
+
   } catch (error) {
-    console.error('Failed to add employees:', error)
-    this.error = error.message || 'Failed to add employees'
-    throw error
+    console.error('Failed to soft delete employee:', error);
+    this.error = error.message || 'Failed to soft delete employee';
+    throw error;
   } finally {
-    this.loading = false
+    this.loading = false;
   }
-}
+},
+     // Restore a soft-deleted employee
+    async restoreEmployee(employeeId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.patch(`/employee/restore/${employeeId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          // Remove from softDeletedEmployees and add back to appropriate list
+          const restoredEmployee = this.softDeletedEmployees.find(e => e.id === employeeId);
+
+          if (restoredEmployee) {
+            this.softDeletedEmployees = this.softDeletedEmployees.filter(e => e.id !== employeeId);
+
+            // Determine where to add the employee back
+            if (restoredEmployee.division || restoredEmployee.section || restoredEmployee.unit) {
+              // It's an assigned employee
+              this.assignedEmployees.push(restoredEmployee);
+            } else {
+              // It's an unassigned employee
+              this.unassignedEmployees.push(restoredEmployee);
+            }
+          }
+
+          // Refresh counts
+          if (this.currentNode) {
+            await this.fetchEmployeesByNode(this.currentNode);
+          }
+          if (this.currentOfficeId) {
+            await this.fetchEmployeeCounts(this.currentOfficeId);
+          }
+
+          return response.data;
+        } else {
+          throw new Error(response.data.message || 'Failed to restore employee');
+        }
+      } catch (error) {
+        console.error('Failed to restore employee:', error);
+        this.error = error.message || 'Failed to restore employee';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Fetch soft-deleted employees
+    async fetchSoftDeletedEmployees() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/employee/soft-deleted', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          this.softDeletedEmployees = response.data.data;
+          return response.data.data;
+        } else {
+          throw new Error(response.data.message || 'Failed to fetch soft-deleted employees');
+        }
+      } catch (error) {
+        console.error('Failed to fetch soft-deleted employees:', error);
+        this.error = error.message || 'Failed to fetch soft-deleted employees';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+     // Update your existing deleteEmployee method to use softDeleteEmployee
+   async deleteEmployee(employeeId) {
+  this.$q.dialog({
+    title: 'Confirm Delete',
+    message: 'Are you sure you want to delete this employee?',
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    try {
+      const result = await this.employeeStore.softDeleteEmployee(employeeId);
+
+      if (result?.success) {
+        this.$q.notify({
+          type: 'positive',
+          message: result.message || 'Employee moved to trash'
+        });
+
+        // Manually update the local counts in the component
+        if (this.employeeStore.currentOfficeId) {
+          const counts = await this.employeeStore.fetchEmployeeCounts(this.employeeStore.currentOfficeId);
+          this.updateLocalCounts(counts);
+        }
+      } else {
+        throw new Error(result?.message || 'Failed to delete employee');
+      }
+    } catch (error) {
+      this.$q.notify({
+        type: 'negative',
+        message: error.message || 'Failed to delete employee'
+      });
+    }
+  });
+},
   }
+
 });

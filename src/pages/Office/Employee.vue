@@ -66,14 +66,6 @@
                   <!-- Render units directly under division if they exist -->
                   <div v-if="division.units && division.units.length > 0">
                     <div v-for="unit in division.units" :key="unit.id" class="tree-item">
-                      <!-- <div class="tree-node unit" @click="selectUnit(unit)"
-                        :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
-                        <div class="unit-icon">•</div>
-                        <div class="node-content">
-                          {{ unit.name }}
-                          <span class="employee-count">{{ getUnitEmployees(unit).length }}</span>
-                        </div>
-                      </div> -->
                       <div class="tree-node unit" @click="selectUnit(unit)"
                         :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
                         <div class="unit-icon">•</div>
@@ -96,52 +88,84 @@
       <div class="employee-list-container">
         <div class="table-title-container">
           <h3>{{ selectedNodeTitle || 'Select an office, division, section, or unit' }}</h3>
-          <button v-if="selectedNode" class="add-employee-btn" @click="showAddModal = true">
+          <!-- <q-btn label="View Deleted Employees" color="grey" @click="showSoftDeletedEmployees" class="q-ml-sm" /> -->
+          <button v-if="selectedNode" class="add-employee-btn" @click="openAddModal">
             <q-icon name="add" />
             Select Employees
           </button>
+
         </div>
         <div class="employee-table">
+          <q-table v-if="!loading && !employeeStore.loading" :rows="filteredEmployees" :columns="columns" row-key="id"
+            flat bordered :loading="employeeStore.loading" :pagination="{ rowsPerPage: 10 }"
+            :rows-per-page-options="[10, 20, 50]">
+            <!-- Custom loading state -->
+            <template v-slot:loading>
+              <div class="loading-container">
+                <q-spinner color="primary" size="2em" />
+                <span>Loading employees...</span>
+              </div>
+            </template>
+
+            <!-- Custom no data state -->
+            <template v-slot:no-data>
+              <div class="empty-row">
+                No employees found
+              </div>
+            </template>
+
+            <!-- Custom rank column with select dropdown -->
+            <template v-slot:body-cell-rank="props">
+              <q-td :props="props">
+                <q-select v-model="props.row.rank" :options="rankOptions" option-value="value" option-label="label"
+                  emit-value map-options dense outlined @update:model-value="updateEmployeeRank(props.row)"
+                  :disable="props.row.rank === 'Head' && isHeadOptionDisabled(props.row)" />
+              </q-td>
+            </template>
+
+            <!-- Custom actions column -->
+            <template v-slot:body-cell-actions="props">
+              <q-td :props="props">
+                <!-- Your action buttons here -->
+                <q-btn icon="delete" color="negative" flat dense @click="deleteEmployee(props.row.id)" />
+              </q-td>
+            </template>
+          </q-table>
+
+          <!-- Loading state when initially loading -->
           <div v-if="loading || employeeStore.loading" class="loading-container">
             <q-spinner color="primary" size="2em" />
             <span>Loading employees...</span>
           </div>
-
-          <template v-else>
-            <div class="table-header">
-              <div class="header-cell">Name</div>
-              <div class="header-cell">Position</div>
-              <div class="header-cell">Rank</div>
-              <div class="header-cell action-cell">Actions</div>
-            </div>
-
-            <div v-if="filteredEmployees.length === 0" class="empty-row">
-              <div class="table-cell" colspan="4">No employees found</div>
-            </div>
-
-            <div v-else v-for="employee in filteredEmployees" :key="employee.id" class="table-row">
-              <div class="table-cell">{{ employee.name }}</div>
-              <div class="table-cell">{{ employee.position }}</div>
-              <div class="table-cell">
-                <select v-model="employee.rank" @change="updateEmployeeRank(employee)" class="rank-select">
-                  <option value="">None</option>
-                  <option value="Head" :disabled="isHeadOptionDisabled(employee)">
-                    Head
-                  </option>
-                  <option value="Supervisor">Supervisor</option>
-                  <option value="Employee">Employee</option>
-                </select>
-              </div>
-              <div class="table-cell action-cell">
-                <!-- Action buttons here -->
-              </div>
-            </div>
-          </template>
         </div>
       </div>
     </div>
     <AddEmployeeModal v-model:showModal="showAddModal" @add="handleAddEmployees" />
   </div>
+  <!-- <template>
+    <q-dialog v-model="showDialog" persistent>
+      <q-card style="min-width: 70vw">
+        <q-card-section>
+          <div class="text-h6">Deleted Employees</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-table :rows="employeeStore.softDeletedEmployees" :columns="columns" row-key="id" flat bordered>
+            <template v-slot:body-cell-actions="props">
+              <q-td :props="props">
+                <q-btn icon="restore" color="primary" flat dense @click="restoreEmployee(props.row.id)"
+                  label="Restore" />
+              </q-td>
+            </template>
+          </q-table>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Close" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </template> -->
 </template>
 
 <script>
@@ -165,29 +189,67 @@ export default {
       userStore: useUserStore(),
       loading: false,
       officeExpanded: false,
-      divisions: [] // Add this to properly initialize the divisions array
+      divisions: [],
+      // Add this to properly initialize the divisions array
+      columns: [
+        {
+          name: 'name',
+          required: true,
+          label: 'Name',
+          align: 'left',
+          field: row => row.name,
+          sortable: true
+        },
+        {
+          name: 'position',
+          label: 'Position',
+          align: 'left',
+          field: row => row.position,
+          sortable: true
+        },
+        {
+          name: 'rank',
+          label: 'Rank',
+          align: 'left',
+          field: row => row.rank,
+          sortable: true
+        },
+        {
+          name: 'actions',
+          label: 'Actions',
+          align: 'center',
+          sortable: false
+        }
+      ],
+      rankOptions: [
+        { value: '', label: 'None' },
+        { value: 'Head', label: 'Head' },
+        { value: 'Supervisor', label: 'Supervisor' },
+        { value: 'Employee', label: 'Employee' }
+      ]
     }
   },
 
   computed: {
+
     filteredEmployees() {
       if (!this.selectedNode) return [];
-
-      const employees = this.employeeStore.employees;
-
-      switch (this.selectedNode.type) {
-        case 'office':
-          return employees.filter(emp => emp.office_id === this.userStore.user?.office_id);
-        case 'division':
-          return employees.filter(emp => emp.division === this.selectedNode.name);
-        case 'section':
-          return employees.filter(emp => emp.section === this.selectedNode.name);
-        case 'unit':
-          return employees.filter(emp => emp.unit === this.selectedNode.name);
-        default:
-          return employees;
-      }
+      return this.employeeStore.assignedEmployees.filter(emp => {
+        switch (this.selectedNode.type) {
+          case 'office':
+            return emp.office_id === this.userStore.user?.office_id;
+          case 'division':
+            return emp.division === this.selectedNode.name;
+          case 'section':
+            return emp.section === this.selectedNode.name;
+          case 'unit':
+            return emp.unit === this.selectedNode.name;
+          default:
+            return true;
+        }
+      });
     },
+
     selectedNodeTitle() {
       if (!this.selectedNode) return '';
       return `${this.selectedNode.name}`;
@@ -200,6 +262,13 @@ export default {
     await this.fetchOrganizationStructure();
   },
   methods: {
+
+    openAddModal() {
+      // Store the current employees before opening the modal
+      this.showAddModal = true;
+      this.employeeStore.fetchUnassignedEmployees();
+    },
+
     toggleOffice(event) {
       if (event) event.stopPropagation();
       this.officeExpanded = !this.officeExpanded;
@@ -207,20 +276,6 @@ export default {
         this.selectOffice();
       }
     },
-    // selectOffice() {
-    //   this.selectedNode = {
-    //     type: 'office',
-    //     id: this.userStore.user?.office_id,
-    //     name: this.officeName
-    //   };
-    //   this.employeeStore.fetchEmployeesByNode(this.selectedNode)
-    //     .catch(error => {
-    //       console.error("Error fetching employees:", error);
-    //       this.$q.notify({
-    //         type: 'negative',
-    //         message: 'Failed to load employees'
-    //       });
-    //     });
 
     selectOffice() {
       this.selectedNode = {
@@ -244,70 +299,139 @@ export default {
         emp.office_id === this.userStore.user?.office_id
       );
     },
-    // async fetchOrganizationStructure() {
-    //   this.loading = true;
-    //   try {
-    //     const response = await api.get('/office/structure');
-    //     const officeData = response.data.find(office =>
-    //       office.office === this.userStore.officeName
-    //     );
+    // async deleteEmployee(employeeId) {
+    //   this.$q.dialog({
+    //     title: 'Confirm Delete',
+    //     message: 'Are you sure you want to delete this employee?',
+    //     cancel: true,
+    //     persistent: true
+    //   }).onOk(async () => {
+    //     try {
+    //       const result = await this.employeeStore.softDeleteEmployee(employeeId);
 
-    //     if (officeData) {
-    //       this.divisions = officeData.divisions.map((div, divIndex) => {
-    //         const hasDirectUnits = div.units && div.units.length > 0;
-
-    //         const divisionObj = {
-    //           id: divIndex + 1,
-    //           name: div.division,
-    //           expanded: false,
-    //           sections: [],
-    //           units: []
-    //         };
-
-    //         if (div.sections && div.sections.length > 0) {
-    //           divisionObj.sections = div.sections.map((sec, secIndex) => ({
-    //             id: (divIndex + 1) * 100 + secIndex + 1,
-    //             name: sec.section,
-    //             expanded: false,
-    //             units: sec.units ? sec.units.map((unit, unitIndex) => ({
-    //               id: ((divIndex + 1) * 100 + secIndex + 1) * 100 + unitIndex + 1,
-    //               name: unit
-    //             })) : []
-    //           }));
-    //         }
-
-    //         if (hasDirectUnits) {
-    //           divisionObj.units = div.units.map((unit, unitIndex) => ({
-    //             id: (divIndex + 1) * 1000 + unitIndex + 1,
-    //             name: unit
-    //           }));
-    //         }
-
-    //         return divisionObj;
-    //       });
-
-    //       if (officeData.sections_without_division) {
-    //         this.divisions.push({
-    //           id: this.divisions.length + 1,
-    //           name: 'Other Sections',
-    //           expanded: false,
-    //           sections: officeData.sections_without_division.map((sec, secIndex) => ({
-    //             id: (this.divisions.length + 1) * 100 + secIndex + 1,
-    //             name: sec,
-    //             expanded: false,
-    //             units: []
-    //           })),
-    //           units: []
+    //       if (result?.success) {
+    //         this.$q.notify({
+    //           type: 'positive',
+    //           message: result.message || 'Employee moved to trash'
     //         });
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching organization structure:', error);
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
 
+    //         // Force update the component's view
+    //         this.$forceUpdate();
+
+    //         // If you're using a selected node, refresh its data
+    //         if (this.selectedNode) {
+    //           await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+    //         }
+
+    //         // Refresh counts in the component
+    //         if (this.employeeStore.currentOfficeId) {
+    //           const counts = await this.employeeStore.fetchEmployeeCounts(this.employeeStore.currentOfficeId);
+    //           this.updateLocalCounts(counts);
+    //         }
+    //       } else {
+    //         throw new Error(result?.message || 'Failed to delete employee');
+    //       }
+    //     } catch (error) {
+    //       this.$q.notify({
+    //         type: 'negative',
+    //         message: error.message || 'Failed to delete employee'
+    //       });
+    //     }
+    //   });
+    // },
+    async deleteEmployee(employeeId) {
+      this.$q.dialog({
+        title: 'Confirm Delete',
+        message: 'Are you sure you want to delete this employee?',
+        cancel: true,
+        persistent: true
+      }).onOk(async () => {
+        try {
+          const result = await this.employeeStore.softDeleteEmployee(employeeId);
+
+          if (result?.success) {
+            this.$q.notify({
+              type: 'positive',
+              message: result.message || 'Employee moved to trash'
+            });
+
+            // Update local counts immediately
+            if (result.deletedEmployee) {
+              this.updateLocalCountsAfterDelete(result.deletedEmployee);
+            }
+
+            // Refresh the current view
+            if (this.selectedNode) {
+              await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+            }
+
+            // Force update to ensure UI refreshes
+            this.$forceUpdate();
+          } else {
+            throw new Error(result?.message || 'Failed to delete employee');
+          }
+        } catch (error) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.message || 'Failed to delete employee'
+          });
+        }
+      });
+    },
+
+    // Add this new method to handle immediate count updates
+    updateLocalCountsAfterDelete(deletedEmployee) {
+      // Update office count
+      if (this.employeeStore.employeeCounts?.office > 0) {
+        this.employeeStore.employeeCounts.office--;
+      }
+
+      // Update division count if applicable
+      if (deletedEmployee.division && this.employeeStore.employeeCounts?.divisions[deletedEmployee.division]) {
+        this.employeeStore.employeeCounts.divisions[deletedEmployee.division]--;
+
+        // Also update the local divisions array
+        const division = this.divisions.find(d => d.name === deletedEmployee.division);
+        if (division) {
+          division.count = Math.max(0, division.count - 1);
+        }
+      }
+
+      // Update section count if applicable
+      if (deletedEmployee.section && this.employeeStore.employeeCounts?.sections[deletedEmployee.section]) {
+        this.employeeStore.employeeCounts.sections[deletedEmployee.section]--;
+
+        // Also update the local sections array
+        for (const division of this.divisions) {
+          const section = division.sections.find(s => s.name === deletedEmployee.section);
+          if (section) {
+            section.count = Math.max(0, section.count - 1);
+            break;
+          }
+        }
+      }
+
+      // Update unit count if applicable
+      if (deletedEmployee.unit && this.employeeStore.employeeCounts?.units[deletedEmployee.unit]) {
+        this.employeeStore.employeeCounts.units[deletedEmployee.unit]--;
+
+        // Also update the local units array
+        for (const division of this.divisions) {
+          for (const section of division.sections) {
+            const unit = section.units.find(u => u.name === deletedEmployee.unit);
+            if (unit) {
+              unit.count = Math.max(0, unit.count - 1);
+              break;
+            }
+          }
+          const unit = division.units?.find(u => u.name === deletedEmployee.unit);
+          if (unit) {
+            unit.count = Math.max(0, unit.count - 1);
+            break;
+          }
+        }
+      }
+    },
     async fetchOrganizationStructure() {
       this.loading = true;
       try {
@@ -408,57 +532,60 @@ export default {
       if (event) event.stopPropagation();
       section.expanded = !section.expanded;
     },
-    selectDivision(division) {
+
+    async selectDivision(division) {
       this.selectedNode = {
         type: 'division',
         id: division.id,
         name: division.name
       };
-      this.employeeStore.fetchEmployeesByNode(this.selectedNode)
-        .catch(error => {
-          console.error("Error fetching employees:", error);
-          this.$q.notify({
-            type: 'negative',
-            message: 'Failed to load employees'
-          });
-        });
+      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
+      this.updateLocalCounts(counts);
     },
-    selectSection(section) {
+
+    async selectSection(section) {
       this.selectedNode = {
         type: 'section',
         id: section.id,
         name: section.name
       };
-      this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
+      this.updateLocalCounts(counts);
     },
-    selectUnit(unit) {
+
+    async selectUnit(unit) {
       this.selectedNode = {
         type: 'unit',
         id: unit.id,
         name: unit.name
       };
-      this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
+      this.updateLocalCounts(counts);
     },
+
     getDivisionEmployees(division) {
       return this.employeeStore.employees.filter(emp =>
         emp.division === division.name &&
         emp.office_id === this.userStore.user?.office_id
       );
     },
+
     getSectionEmployees(section) {
       return this.employeeStore.employees.filter(emp =>
         emp.section === section.name &&
         emp.office_id === this.userStore.user?.office_id
       );
     },
+
     getUnitEmployees(unit) {
       return this.employeeStore.employees.filter(emp =>
         emp.unit === unit.name &&
         emp.office_id === this.userStore.user?.office_id
       );
     },
-
-
 
     async handleAddEmployees(selectedEmployees) {
       try {
@@ -474,6 +601,7 @@ export default {
           throw new Error('Please select an office, division, section, or unit before adding employees.');
         }
 
+        // Create the employeesToAdd array here (moved before using it)
         const employeesToAdd = selectedEmployees.map(emp => {
           const employeeData = {
             name: emp.name,
@@ -507,11 +635,16 @@ export default {
           return employeeData;
         });
 
+        // Now we can use employeesToAdd
         await this.employeeStore.addEmployees({ employees: employeesToAdd });
 
-        // Refresh the current view
+        // Refresh the current view and counts
         if (this.selectedNode) {
           await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+          const counts = await this.employeeStore.fetchEmployeeCounts(officeId);
+
+          // Update local counts
+          this.updateLocalCounts(counts);
         }
 
         this.$q.notify({
@@ -524,8 +657,36 @@ export default {
           type: 'negative',
           message: error.message || 'Failed to add employees'
         });
+      } finally {
+        this.showAddModal = false;
       }
     },
+
+    // Add this new method to update local counts
+    updateLocalCounts(counts) {
+      this.divisions.forEach(division => {
+        // Update division count
+        division.count = counts.divisions[division.name]?.count || 0;
+
+        // Update section counts
+        division.sections.forEach(section => {
+          section.count = counts.sections[section.name]?.count || 0;
+
+          // Update unit counts
+          section.units.forEach(unit => {
+            unit.count = counts.units[unit.name]?.count || 0;
+          });
+        });
+
+        // Update units directly under division
+        if (division.units) {
+          division.units.forEach(unit => {
+            unit.count = counts.units[unit.name]?.count || 0;
+          });
+        }
+      });
+    },
+
     getDivisionForNode(node) {
       if (node.type === 'division') return { name: node.name };
       if (node.type === 'section' || node.type === 'unit') {
@@ -545,6 +706,7 @@ export default {
       }
       return null;
     },
+
     getSectionForUnit(unitNode) {
       for (const division of this.divisions) {
         for (const section of division.sections) {
@@ -554,6 +716,7 @@ export default {
       }
       return null;
     },
+
     updateEmployeeRank(updatedEmployee) {
       if (updatedEmployee.rank === 'Head') {
         this.employeeStore.employees.forEach(emp => {
@@ -567,6 +730,7 @@ export default {
         });
       }
     },
+
     isHeadOptionDisabled(employee) {
       return this.employeeStore.employees.some(emp =>
         emp.id !== employee.id &&
@@ -574,6 +738,7 @@ export default {
         emp.rank === 'Head'
       );
     },
+
     isSameOrganizationalUnit(emp1, emp2) {
       if (this.selectedNode?.type === 'office') {
         return emp1.office_id === emp2.office_id;
@@ -586,24 +751,79 @@ export default {
       }
       return false;
     },
-    deleteEmployee(employeeId) {
-      this.employeeStore.deleteEmployee(employeeId).then(() => {
+    // Add this method to handle restoring employees
+    async restoreEmployee(employeeId) {
+      try {
+        await this.employeeStore.restoreEmployee(employeeId);
         this.$q.notify({
           type: 'positive',
-          message: 'Employee deleted successfully'
+          message: 'Employee restored successfully'
         });
-      }).catch(error => {
+      } catch (error) {
         this.$q.notify({
           type: 'negative',
-          message: error.message || 'Failed to delete employee'
+          message: error.message || 'Failed to restore employee'
         });
-      });
+      }
+    },
+
+    // Add this method to show soft-deleted employees
+    async showSoftDeletedEmployees() {
+      try {
+        await this.employeeStore.fetchSoftDeletedEmployees();
+        // You'll need to create a dialog or component to display these
+        this.showSoftDeletedDialog = true;
+      } catch (error) {
+        this.$q.notify({
+          type: 'negative',
+          message: error.message || 'Failed to load deleted employees'
+        });
+      }
     }
+
+
   }
+
+
 };
 </script>
 
 <style scoped>
+.employee-table {
+  height: calc(100% - 60px);
+  /* Adjust based on your layout */
+}
+
+.q-table {
+  height: 100%;
+}
+
+.empty-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: rgba(0, 0, 0, 0.54);
+  text-align: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.q-table__top {
+  padding: 8px 16px;
+}
+
+.q-table__bottom {
+  padding: 8px 16px;
+}
+
 /* Add office-specific styles */
 .tree-node.office {
   padding-left: 10px;
