@@ -3,6 +3,7 @@
     <q-card class="employee-selection-modal">
       <q-card-section class="modal-header">
         <div class="text-h6">Select Employees</div>
+
       </q-card-section>
 
       <q-card-section class="filter-section">
@@ -85,8 +86,10 @@ const columns = [
     align: 'left',
     sortable: true
   },
-
 ]
+
+// Use unassignedEmployees from the store
+const employees = computed(() => employeeStore.unassignedEmployees)
 
 // Load employees when modal is shown or when showAllOffices changes
 watch([() => props.showModal, showAllOffices], async ([showModalValue, showAll]) => {
@@ -94,12 +97,10 @@ watch([() => props.showModal, showAllOffices], async ([showModalValue, showAll])
     if (showAll) {
       await employeeStore.fetchAllEmployees()
     } else {
-      await employeeStore.fetchEmployeesByOffice()
+      await employeeStore.fetchUnassignedEmployees() // Changed to use the dedicated method
     }
   }
 }, { immediate: true })
-
-const employees = computed(() => employeeStore.employees)
 
 const filteredEmployees = computed(() => {
   let filtered = employees.value
@@ -107,7 +108,6 @@ const filteredEmployees = computed(() => {
   if (!showAllOffices.value && employeeStore.userOffice) {
     filtered = filtered.filter(emp => emp.office === employeeStore.userOffice)
   }
-
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(emp =>
@@ -116,17 +116,16 @@ const filteredEmployees = computed(() => {
       (emp.office && emp.office.toLowerCase().includes(query))
     )
   }
-
   return filtered
 })
-
 
 const hasSelection = computed(() => {
   return employees.value.some(emp => emp.selected)
 })
 
 function closeModal() {
-  employeeStore.employees.forEach(emp => emp.selected = false)
+  // Clear selections from unassigned employees only
+  employeeStore.unassignedEmployees.forEach(emp => emp.selected = false)
   searchQuery.value = ''
   showAllOffices.value = false
   emit('update:showModal', false)
@@ -139,10 +138,9 @@ function addEmployee() {
       id,
       name,
       position
-    }));
-
-  emit('add', selectedEmployees);
-  closeModal();
+    }))
+  emit('add', selectedEmployees)
+  closeModal()
 }
 </script>
 
