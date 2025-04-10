@@ -1,13 +1,10 @@
 <template>
-  <q-page>
+  <q-page padding>
     <!-- Welcome Section -->
-    <div class="office-dashboard">
-      <h1>Welcome to {{ userStore.officeName }}</h1>
-      <!-- <p>Your Office ID: {{ userStore.user?.office_id }}</p> -->
-
-
+    <div class="q-mb-md">
+      <h6 class="text-h6 q-mb-xs">Welcome to {{ userStore.officeName }}</h6>
     </div>
-    </q-page>
+  </q-page>
 </template>
 
 <script>
@@ -31,6 +28,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

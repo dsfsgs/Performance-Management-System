@@ -1,65 +1,69 @@
 <template>
-    <div>
+    <div class="performance-standard-container">
         <!-- Performance Indicator Section -->
-        <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-md">Performance Indicator</div>
-            <div class="row no-wrap">
-                <div class="col-auto">
+        <div class="q-mb-lg">
+            <div class="text-h7 q-mb-md">Performance Indicator</div>
+            <div class="row no-wrap performance-indicator-grid">
+                <!-- MFO Column -->
+                <div class="col-auto mfo-column">
                     <q-table :rows="rows" :columns="[columns[0]]" row-key="id" hide-bottom bordered flat
-                        style="min-width: 200px;">
+                        class="sticky-column">
                         <template v-slot:body-cell-mfo="props">
-                            <q-td :props="props">
+                            <q-td :props="props" class="dropdown-cell">
                                 <q-select v-model="props.row.mfo" :label="getDropdownLabel(props.row.id)"
-                                    :options="getMfoOptions(props.row.id)" dense borderless emit-value map-options
-                                    behavior="menu" />
+                                    :options="getMfoOptions(props.row.id)" dense outlined emit-value map-options
+                                    behavior="menu" class="dropdown-select" />
                             </q-td>
                         </template>
                     </q-table>
                 </div>
 
-                <div class="col" style="flex-grow: 2; min-width: 400px;">
+                <!-- Competency Column -->
+                <div class="col competency-column">
                     <q-table :rows="[mergedRow]" :columns="competencyColumns" row-key="id" hide-bottom bordered flat
-                        class="full-width" style="width: 100%;">
+                        class="full-width">
                         <template v-slot:body-cell-core="props">
-                            <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                <q-input v-model="mergedCoreCompetency" type="text" dense borderless
-                                    class="full-width full-height" input-style="height: 100%; width: 100%;" />
+                            <q-td :props="props" class="text-area-cell">
+                                <q-input v-model="mergedCoreCompetency" type="textarea" dense outlined autogrow
+                                    class="full-height-input" />
                             </q-td>
                         </template>
                         <template v-slot:body-cell-leadership="props">
-                            <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                <q-input v-model="mergedLeadershipCompetency" type="text" dense borderless
-                                    class="full-width full-height" input-style="height: 100%; width: 100%;" />
+                            <q-td :props="props" class="text-area-cell">
+                                <q-input v-model="mergedLeadershipCompetency" type="textarea" dense outlined autogrow
+                                    class="full-height-input" />
                             </q-td>
                         </template>
                         <template v-slot:body-cell-technical="props">
-                            <q-td :props="props" class="bordered-cell" style="height: 162px;">
-                                <q-input v-model="mergedTechnicalCompetency" type="text" dense borderless
-                                    class="full-width full-height" input-style="height: 100%; width: 100%;" />
+                            <q-td :props="props" class="text-area-cell">
+                                <q-input v-model="mergedTechnicalCompetency" type="textarea" dense outlined autogrow
+                                    class="full-height-input" />
                             </q-td>
                         </template>
                     </q-table>
                 </div>
 
-                <div class="col-auto">
+                <!-- Success Indicator Column -->
+                <div class="col-auto success-indicator-column">
                     <q-table :rows="[mergedRow]" :columns="[columns[2]]" row-key="id" hide-bottom bordered flat
-                        style="min-width: 200px;">
+                        class="sticky-column">
                         <template v-slot:body-cell-successIndicator="props">
-                            <q-td :props="props" style="height: 162px;">
-                                <q-input v-model="mergedSuccessIndicator" type="text" dense borderless
-                                    class="full-height" input-style="height: 100%;" />
+                            <q-td :props="props" class="text-area-cell">
+                                <q-input v-model="mergedSuccessIndicator" type="textarea" dense outlined autogrow
+                                    class="full-height-input" />
                             </q-td>
                         </template>
                     </q-table>
                 </div>
 
-                <div class="col-auto">
+                <!-- Required Output Column -->
+                <div class="col-auto required-output-column">
                     <q-table :rows="[mergedRow]" :columns="[columns[3]]" row-key="id" hide-bottom bordered flat
-                        style="min-width: 200px;">
+                        class="sticky-column">
                         <template v-slot:body-cell-requiredOutput="props">
-                            <q-td :props="props" style="height: 162px;">
-                                <q-input v-model="mergedRequiredOutput" type="text" dense borderless class="full-height"
-                                    input-style="height: 100%;" />
+                            <q-td :props="props" class="text-area-cell">
+                                <q-input v-model="mergedRequiredOutput" type="textarea" dense outlined autogrow
+                                    class="full-height-input" />
                             </q-td>
                         </template>
                     </q-table>
@@ -67,58 +71,55 @@
             </div>
         </div>
 
-        <q-separator />
-        <br>
+        <q-separator class="q-my-md" />
 
         <!-- Standard Outcome Section -->
-        <div>
-            <div class="text-subtitle2 q-mb-md">Standard Outcome</div>
+        <div class="standard-outcome-section">
+            <div class="text-h7 q-mb-md">Standard Outcome</div>
             <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom bordered
                 flat dense class="standard-outcome-table">
-                <!-- Modified header templates to match style of Performance Indicator dropdowns -->
+                <!-- Header with dropdown selects -->
                 <template v-slot:header-cell-quantity="props">
-                    <q-th :props="props" class="bordered-cell header-cell">
-                        <q-select v-model="quantityIndicatorType" :options="quantityIndicator" dense borderless
-                            emit-value map-options behavior="menu" class="header-select left-aligned" />
+                    <q-th :props="props" class="header-dropdown-cell">
+                        <q-select v-model="quantityIndicatorType" :options="quantityIndicator" dense outlined emit-value
+                            map-options behavior="menu" class="header-select" />
                     </q-th>
                 </template>
                 <template v-slot:header-cell-effectiveness="props">
-                    <q-th :props="props" class="bordered-cell header-cell">
+                    <q-th :props="props" class="header-dropdown-cell">
                         <q-select v-model="effectivenessType" :options="[
                             { label: 'Effectiveness (Conditional)', value: 'conditional' },
                             { label: 'Effectiveness (Numeric)', value: 'numeric' }
-                        ]" dense borderless emit-value map-options behavior="menu"
-                            class="header-select left-aligned" />
+                        ]" dense outlined emit-value map-options behavior="menu" class="header-select" />
                     </q-th>
                 </template>
                 <template v-slot:header-cell-timeliness="props">
-                    <q-th :props="props" class="bordered-cell header-cell">
+                    <q-th :props="props" class="header-dropdown-cell">
                         <q-select v-model="timelinessType" :options="[
                             { label: 'Timeliness (Conditional)', value: 'conditional' },
                             { label: 'Timeliness (Numeric)', value: 'numeric' }
-                        ]" dense borderless emit-value map-options behavior="menu"
-                            class="header-select left-aligned" />
+                        ]" dense outlined emit-value map-options behavior="menu" class="header-select" />
                     </q-th>
                 </template>
 
+                <!-- Body cells with conditional inputs -->
                 <template v-slot:body-cell-quantity="props">
-                    <q-td :props="props" class="bordered-cell">
-                        <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense
-                            borderless class="full-width" placeholder="Enter custom target"
-                            :rules="[validateStrictNumeric]" @keydown="blockInvalidChars"
+                    <q-td :props="props" class="input-cell">
+                        <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense outlined
+                            placeholder="Enter custom target" :rules="[validateStrictNumeric]"
+                            @keydown="blockInvalidChars"
                             @update:model-value="sanitizeNumericInput(props.row, 'quantity')" />
-
-                        <div v-else class="text-caption full-width q-pa-xs">
+                        <div v-else class="numeric-display">
                             {{ props.row.quantity || '-' }}
                         </div>
                     </q-td>
                 </template>
 
                 <template v-slot:body-cell-effectiveness="props">
-                    <q-td :props="props" class="bordered-cell">
+                    <q-td :props="props" class="input-cell">
                         <q-input v-if="effectivenessType === 'conditional'" v-model="props.row.effectiveness" dense
-                            borderless class="full-width" placeholder="Enter condition" />
-                        <q-input v-else v-model="props.row.effectiveness" dense borderless class="full-width"
+                            outlined placeholder="Enter condition" />
+                        <q-input v-else v-model="props.row.effectiveness" dense outlined
                             placeholder="Enter number or range" :rules="[validateStrictNumeric]"
                             @keydown="blockInvalidChars"
                             @update:model-value="sanitizeNumericInput(props.row, 'effectiveness')" />
@@ -126,42 +127,42 @@
                 </template>
 
                 <template v-slot:body-cell-timeliness="props">
-                    <q-td :props="props" class="bordered-cell">
-                        <q-input v-if="timelinessType === 'conditional'" v-model="props.row.timeliness" dense borderless
-                            class="full-width" placeholder="Enter condition" />
-                        <q-input v-else v-model="props.row.timeliness" dense borderless class="full-width"
+                    <q-td :props="props" class="input-cell">
+                        <q-input v-if="timelinessType === 'conditional'" v-model="props.row.timeliness" dense outlined
+                            placeholder="Enter condition" />
+                        <q-input v-else v-model="props.row.timeliness" dense outlined
                             placeholder="Enter number or range" :rules="[validateStrictNumeric]"
                             @keydown="blockInvalidChars"
                             @update:model-value="sanitizeNumericInput(props.row, 'timeliness')" />
                     </q-td>
                 </template>
             </q-table>
-
-            <q-dialog v-model="showTargetModal" persistent>
-                <q-card style="min-width: 300px;">
-                    <q-card-section>
-                        <div class="text-h6">Enter Target Output</div>
-                    </q-card-section>
-
-                    <q-card-section>
-                        <q-input v-model.number="targetValue" label="Target Output" type="number"
-                            @keypress="blockInvalidChars" min="1" />
-                    </q-card-section>
-
-                    <q-card-actions align="right">
-                        <q-btn flat label="Cancel" v-close-popup @click="cancelTargetInput" />
-                        <q-btn flat label="OK" color="primary" @click="computeQuantities" />
-                    </q-card-actions>
-                </q-card>
-            </q-dialog>
         </div>
+
+        <!-- Target Input Modal -->
+        <q-dialog v-model="showTargetModal" persistent>
+            <q-card style="min-width: 400px; border-radius: 8px;">
+                <q-card-section class="modal-header">
+                    <div class="text-h6">Enter Target Output</div>
+                </q-card-section>
+
+                <q-card-section class="modal-body">
+                    <q-input v-model.number="targetValue" label="Target Output" type="number" outlined dense
+                        :rules="[val => val > 0 || 'Must be greater than 0']" @keypress="blockInvalidChars" />
+                </q-card-section>
+
+                <q-card-actions align="right" class="modal-actions">
+                    <q-btn flat label="Cancel" color="grey-7" v-close-popup @click="cancelTargetInput" />
+                    <q-btn label="Calculate" color="primary" unelevated @click="computeQuantities" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
     </div>
 </template>
 
 <script>
 export default {
     props: {
-        // Props to receive data from parent component
         initialMergedCoreCompetency: {
             type: String,
             default: 'DSE-4'
@@ -214,7 +215,7 @@ export default {
             timelinessType: 'conditional',
             effectivenessType: 'conditional',
             standardOutcomeColumns: [
-                { name: 'rating', label: 'Ratings', field: 'rating', align: 'center' },
+                { name: 'rating', label: 'Ratings', field: 'rating', align: 'center', classes: 'rating-column' },
                 { name: 'quantity', label: 'Quantity', field: 'quantity', align: 'center' },
                 { name: 'timeliness', label: 'Timeliness', field: 'timeliness', align: 'center' },
                 { name: 'effectiveness', label: 'Effectiveness', field: 'effectiveness', align: 'center' }
@@ -232,21 +233,21 @@ export default {
                     label: 'Core',
                     align: 'left',
                     field: 'core',
-                    style: "width: 33%"
+                    classes: 'core-column'
                 },
                 {
                     name: 'leadership',
                     label: 'Leadership',
                     align: 'left',
                     field: 'leadership',
-                    style: "width: 33%"
+                    classes: 'leadership-column'
                 },
                 {
                     name: 'technical',
                     label: 'Technical',
                     align: 'left',
                     field: 'technical',
-                    style: "width: 34%"
+                    classes: 'technical-column'
                 }
             ],
             columns: [
@@ -257,28 +258,28 @@ export default {
                     align: 'left',
                     field: 'mfo',
                     sortable: true,
-                    style: "width: 20%"
+                    classes: 'mfo-column-header'
                 },
                 {
                     name: 'competency',
                     label: 'Required Competency & Proficiency Level',
                     align: 'left',
                     field: 'competency',
-                    style: "width: 40%"
+                    classes: 'competency-column-header'
                 },
                 {
                     name: 'successIndicator',
                     label: 'Success Indicator',
                     align: 'left',
                     field: 'successIndicator',
-                    style: "width: 20%"
+                    classes: 'success-indicator-column-header'
                 },
                 {
                     name: 'requiredOutput',
                     label: 'Required Output',
                     align: 'left',
                     field: 'requiredOutput',
-                    style: "width: 20%"
+                    classes: 'required-output-column-header'
                 }
             ],
             rows: [
@@ -364,7 +365,11 @@ export default {
         },
         computeQuantities() {
             if ((this.quantityIndicatorType === 'B') && (!this.targetValue || isNaN(this.targetValue))) {
-                this.$q.notify({ message: 'Please enter a valid number', color: 'negative' });
+                this.$q.notify({
+                    message: 'Please enter a valid number',
+                    color: 'negative',
+                    position: 'top'
+                });
                 return;
             }
 
@@ -381,6 +386,12 @@ export default {
                 this.standardOutcomeRows[2].quantity = `${base}-${Math.floor(base * 1.15) - 1}`;  // 100%
                 this.standardOutcomeRows[3].quantity = `${Math.ceil(base * 0.51)}-${Math.floor(base * 0.99)}`;    // 51%
                 this.standardOutcomeRows[4].quantity = `${Math.floor(base * 0.5)} and below`;      // 50%
+
+                this.$q.notify({
+                    message: 'Quantities calculated successfully',
+                    color: 'positive',
+                    position: 'top'
+                });
             }
             else if (this.quantityIndicatorType === 'C') {
                 // Type C: Cannot exceed 100% (auto percentages)
@@ -396,7 +407,6 @@ export default {
             this.quantityIndicatorType = 'numeric';
             this.showTargetModal = false;
         },
-        // Method to get current data to pass back to parent
         getFormData() {
             return {
                 mergedCoreCompetency: this.mergedCoreCompetency,
@@ -408,7 +418,6 @@ export default {
                 standardOutcomeRows: this.standardOutcomeRows
             };
         },
-        // Method to reset the component's data
         resetComponentData() {
             this.mergedCoreCompetency = this.initialMergedCoreCompetency;
             this.mergedLeadershipCompetency = this.initialMergedLeadershipCompetency;
@@ -428,17 +437,22 @@ export default {
                 row.successIndicator = '';
                 row.requiredOutput = '';
             });
+
+            this.$q.notify({
+                message: 'Form has been reset',
+                color: 'info',
+                position: 'top'
+            });
         }
     },
     watch: {
         quantityIndicatorType(val) {
             if (val === 'B') {
                 this.targetValue = null;
-                this.showTargetModal = true; // Show modal only for type B
+                this.showTargetModal = true;
             } else if (val === 'C') {
-                this.computeQuantities(); // Auto-compute for type C
+                this.computeQuantities();
             } else if (val === 'numeric') {
-                // Clear for custom target
                 this.standardOutcomeRows.forEach(row => {
                     row.quantity = '';
                 });
@@ -449,56 +463,140 @@ export default {
 </script>
 
 <style scoped>
+.performance-standard-container {
+    padding: 16px;
+}
+
+/* Performance Indicator Grid */
+.performance-indicator-grid {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: white;
+}
+
+/* Table Cells */
+.dropdown-cell {
+    padding: 8px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.text-area-cell {
+    padding: 8px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.input-cell {
+    padding: 8px;
+    border-right: 1px solid #e0e0e0;
+}
+
+/* Input Styles */
+.full-height-input {
+    height: 100%;
+}
+
+.full-height-input .q-field__control {
+    height: 100%;
+}
+
+.full-height-input .q-field__control-container {
+    height: 100%;
+}
+
+.full-height-input .q-field__native {
+    height: 100%;
+}
+
+/* Dropdown Selects */
+.dropdown-select {
+    min-width: 180px;
+}
+
+.header-select {
+    min-width: 200px;
+}
+
+/* Standard Outcome Table */
 .standard-outcome-table {
-    border-collapse: collapse;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .standard-outcome-table th,
 .standard-outcome-table td {
-    border: 1px solid #ddd !important;
+    border-right: 1px solid #e0e0e0 !important;
 }
 
-.bordered-cell {
-    padding: 4px 8px !important;
-    border: 1px solid #ddd !important;
+.standard-outcome-table th:last-child,
+.standard-outcome-table td:last-child {
+    border-right: none !important;
 }
 
-.bordered-cell .q-field__control {
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
+/* Modal Styles */
+.modal-header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.bordered-cell .q-field__control:before {
-    border: none !important;
+.modal-body {
+    padding: 20px;
 }
 
-/* New styles to fix dropdown alignment */
-.header-cell {
-    padding: 8px !important;
-    text-align: left !important;
+.modal-actions {
+    padding: 16px;
+    border-top: 1px solid #e0e0e0;
 }
 
-.header-select {
-    width: 100% !important;
+/* Numeric Display */
+.numeric-display {
+    padding: 8px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.left-aligned {
-    text-align: left !important;
-    justify-content: flex-start !important;
+/* Column Widths */
+.mfo-column {
+    min-width: 220px;
+    max-width: 220px;
 }
 
-.left-aligned .q-field__native {
-    text-align: left !important;
+.competency-column {
+    min-width: 300px;
 }
 
-/* Fix for the dropdown flexing */
-.q-table th {
-    white-space: normal !important;
-    display: table-cell !important;
+.success-indicator-column {
+    min-width: 220px;
+    max-width: 220px;
 }
 
-.q-select .q-field__control {
-    min-height: auto !important;
+.required-output-column {
+    min-width: 220px;
+    width: 220px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .performance-indicator-grid {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .mfo-column,
+    .competency-column,
+    .success-indicator-column,
+    .required-output-column {
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 </style>

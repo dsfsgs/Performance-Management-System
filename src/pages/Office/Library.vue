@@ -1,6 +1,8 @@
 <template>
-  <q-page class="q-pa-md full-width">
-    <div class="text-h6 q-mb-sm">MFO</div>
+  <q-page padding>
+    <div class="q-mb-md">
+      <h6 class="text-h6 q-mb-xs">MFO</h6>
+    </div>
 
     <!-- Loading indicator -->
     <div v-if="loading" class="flex justify-center q-pa-sm">
