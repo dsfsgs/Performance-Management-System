@@ -34,40 +34,81 @@
       </template>
     </q-table>
 
-    <!-- IPCR Details Modal -->
+    <!-- Enhanced IPCR Details Modal with OPCR Style -->
     <q-dialog v-model="showModal" persistent>
-      <q-card style="min-width: 400px">
+      <q-card style="min-width: 1000px; max-width: 1200px;">
         <q-card-section class="row items-center q-pb-none">
-          <div class="text-h6">IPCR Details</div>
+          <div class="text-h6">Employee Performance Details - {{ selectedRow?.name }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
-        <q-card-section>
-          <div v-if="selectedRow" class="q-gutter-y-md">
-            <div>
-              <strong>Name:</strong> {{ selectedRow.name }}
-            </div>
-            <div>
-              <strong>Position:</strong> {{ selectedRow.position }}
-            </div>
-            <div>
-              <strong>Strategic Function:</strong> {{ selectedRow.strategic }}
-            </div>
-            <div>
-              <strong>Core Function:</strong> {{ selectedRow.core }}
-            </div>
-            <div>
-              <strong>Support Function:</strong> {{ selectedRow.support }}
-            </div>
-            <div>
-              <strong>Adjectival Rating:</strong> {{ selectedRow.rating }}
-            </div>
-          </div>
-        </q-card-section>
+        <q-separator />
 
-        <q-card-actions align="right">
-          <q-btn label="Print IPCR" color="primary" icon="print" @click="printIPCR" />
+        <!-- Tabs -->
+        <q-tabs v-model="activeTab" align="left" class="bg-grey-3 text-grey-8" narrow-indicator>
+          <q-tab name="ps" label="Performance Standard" />
+          <q-tab name="ipcr" label="IPCR" />
+          <q-tab name="po" label="Performance Objectives" />
+        </q-tabs>
+
+        <q-separator />
+
+        <!-- Tab Panels -->
+        <q-tab-panels v-model="activeTab" animated>
+          <!-- Performance Standard Tab -->
+          <q-tab-panel name="ps" class="q-pa-md">
+            <div class="text-subtitle1 q-mb-md">Performance Standard</div>
+            <div class="text-body1">Performance Standard content goes here.</div>
+          </q-tab-panel>
+
+          <!-- IPCR Tab -->
+          <q-tab-panel name="ipcr" class="q-pa-md">
+            <div class="text-subtitle1 q-mb-md">IPCR Details</div>
+            <div v-if="selectedRow" class="q-gutter-y-md">
+              <div class="row q-col-gutter-md">
+                <div class="col-6">
+                  <div><strong>Name:</strong> {{ selectedRow.name }}</div>
+                  <div><strong>Position:</strong> {{ selectedRow.position }}</div>
+                </div>
+              </div>
+
+              <q-table flat bordered :rows="[
+                {
+                  function: 'Strategic Function',
+                  rating: selectedRow.strategic,
+                  description: 'Key strategic contributions to organizational goals'
+                },
+                {
+                  function: 'Core Function',
+                  rating: selectedRow.core,
+                  description: 'Primary responsibilities of the position'
+                },
+                {
+                  function: 'Support Function',
+                  rating: selectedRow.support,
+                  description: 'Supporting roles and responsibilities'
+                }
+              ]" :columns="[
+                { name: 'function', label: 'Function', field: 'function', align: 'left' },
+                { name: 'rating', label: 'Rating', field: 'rating', align: 'center' },
+                { name: 'description', label: 'Description', field: 'description', align: 'left' }
+              ]" row-key="function" class="q-mt-md" />
+            </div>
+          </q-tab-panel>
+
+          <!-- Performance Objectives Tab -->
+          <q-tab-panel name="po" class="q-pa-md">
+            <div class="text-subtitle1 q-mb-md">Performance Objectives</div>
+            <div class="text-body1">Performance Objectives content goes here.</div>
+          </q-tab-panel>
+        </q-tab-panels>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-px-md q-py-md">
+          <q-btn label="Print" color="primary" icon="print" @click="printCurrentTab" />
+          <q-btn label="Close" color="grey" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -81,55 +122,18 @@ export default {
       search: '',
       showModal: false,
       selectedRow: null,
+      activeTab: 'ipcr',
       pagination: {
         sortBy: 'name',
         rowsPerPage: 5
       },
       columns: [
-        {
-          name: 'name',
-          label: 'Name',
-          align: 'left',
-          field: 'name',
-          sortable: true,
-          classes: 'text-no-wrap'
-        },
-        {
-          name: 'position',
-          label: 'Position',
-          align: 'left',
-          field: 'position',
-          sortable: true,
-          classes: 'text-no-wrap'
-        },
-        {
-          name: 'strategic',
-          label: 'Strategic Function',
-          align: 'center',
-          field: 'strategic',
-          classes: 'text-no-wrap'
-        },
-        {
-          name: 'core',
-          label: 'Core Function',
-          align: 'center',
-          field: 'core',
-          classes: 'text-no-wrap'
-        },
-        {
-          name: 'support',
-          label: 'Support Function',
-          align: 'center',
-          field: 'support',
-          classes: 'text-no-wrap'
-        },
-        {
-          name: 'rating',
-          label: 'Adjectival Rating',
-          align: 'center',
-          field: 'rating',
-          classes: 'text-no-wrap'
-        }
+        { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true, classes: 'text-no-wrap' },
+        { name: 'position', label: 'Position', align: 'left', field: 'position', sortable: true, classes: 'text-no-wrap' },
+        { name: 'strategic', label: 'Strategic Function', align: 'center', field: 'strategic', classes: 'text-no-wrap' },
+        { name: 'core', label: 'Core Function', align: 'center', field: 'core', classes: 'text-no-wrap' },
+        { name: 'support', label: 'Support Function', align: 'center', field: 'support', classes: 'text-no-wrap' },
+        { name: 'rating', label: 'Adjectival Rating', align: 'center', field: 'rating', classes: 'text-no-wrap' }
       ],
       employees: [
         {
@@ -202,60 +206,87 @@ export default {
     onRowClick(evt, row) {
       this.selectedRow = row
       this.showModal = true
+      this.activeTab = 'ipcr'
     },
-    printIPCR() {
-      const printContent = `
-        <div style="padding: 20px; font-family: Arial;">
-          <h2 style="text-align: center; margin-bottom: 20px;">IPCR Document</h2>
-          <div style="margin-bottom: 10px;">
-            <strong>Name:</strong> ${this.selectedRow.name}
-          </div>
-          <div style="margin-bottom: 10px;">
-            <strong>Position:</strong> ${this.selectedRow.position}
-          </div>
-          <div style="margin-bottom: 10px;">
-            <strong>Strategic Function:</strong> ${this.selectedRow.strategic}
-          </div>
-          <div style="margin-bottom: 10px;">
-            <strong>Core Function:</strong> ${this.selectedRow.core}
-          </div>
-          <div style="margin-bottom: 10px;">
-            <strong>Support Function:</strong> ${this.selectedRow.support}
-          </div>
-          <div style="margin-bottom: 15px;">
-            <strong>Adjectival Rating:</strong> ${this.selectedRow.rating}
-          </div>
-          <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
-            Printed on ${new Date().toLocaleDateString()}
-          </div>
-        </div>
-      `;
+    printCurrentTab() {
+      let printContent = ''
+      const date = new Date().toLocaleDateString()
 
-      const printWindow = window.open('', '_blank');
-      printWindow.document.open();
+      switch (this.activeTab) {
+        case 'ps':
+          printContent = 'Performance Standard content goes here.'
+          break
+        case 'ipcr':
+          printContent = `
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Function</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Rating</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Strategic Function</td>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${this.selectedRow.strategic}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Key strategic contributions to organizational goals</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Core Function</td>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${this.selectedRow.core}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Primary responsibilities of the position</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Support Function</td>
+                  <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${this.selectedRow.support}</td>
+                  <td style="border: 1px solid #ddd; padding: 8px;">Supporting roles and responsibilities</td>
+                </tr>
+              </tbody>
+            </table>
+          `
+          break
+        case 'po':
+          printContent = 'Performance Objectives content goes here.'
+          break
+      }
+
+      const printWindow = window.open('', '_blank')
+      printWindow.document.open()
       printWindow.document.write(`
         <html>
           <head>
-            <title>IPCR Print</title>
+            <title>${this.getPrintTitle()} - Print</title>
             <style>
-              @media print {
-                body { visibility: hidden; }
-                #print-content { visibility: visible; position: absolute; left: 0; top: 0; }
-              }
+              body { font-family: Arial; padding: 20px; }
+              h2 { text-align: center; margin-bottom: 20px; }
+              .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
             </style>
           </head>
           <body>
-            <div id="print-content">${printContent}</div>
+            <h2>${this.getPrintTitle()}</h2>
+            <div>Employee: ${this.selectedRow.name}</div>
+            <div>Position: ${this.selectedRow.position}</div>
+            ${printContent}
+            <div class="footer">Printed on ${date}</div>
             <script>
               setTimeout(function() {
-                window.print();
-                window.close();
-              }, 100);
+                window.print()
+                window.close()
+              }, 100)
             <\\/script>
           </body>
         </html>
-      `);
-      printWindow.document.close();
+      `)
+      printWindow.document.close()
+    },
+    getPrintTitle() {
+      switch (this.activeTab) {
+        case 'ps': return 'Performance Standard'
+        case 'ipcr': return 'IPCR Details'
+        case 'po': return 'Performance Objectives'
+        default: return 'Employee Performance'
+      }
     }
   }
 }
@@ -317,6 +348,10 @@ export default {
 
   .search-input {
     width: 100%;
+  }
+
+  .q-dialog__inner--minimized>div {
+    min-width: 90vw !important;
   }
 }
 </style>
