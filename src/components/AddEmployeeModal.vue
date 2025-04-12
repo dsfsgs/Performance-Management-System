@@ -3,25 +3,25 @@
     <q-card class="employee-selection-modal">
       <q-card-section class="modal-header">
         <div class="text-h6">Select Employees</div>
-
       </q-card-section>
 
       <q-card-section class="filter-section">
         <div class="row q-gutter-md items-center">
-          <q-input v-model="searchQuery" placeholder="Search by name, position, or office..." dense outlined clearable
-            class="col-grow">
+          <q-input v-model="searchTerm" placeholder="Search by name, position, or office..." dense outlined clearable
+            @keyup.enter="handleSearch" @update:model-value="handleSearchDebounced" class="col-grow"
+            @clear="handleClearSearch">
             <template v-slot:prepend>
               <q-icon name="search" />
             </template>
           </q-input>
-
-          <q-toggle v-model="showAllOffices" label="Show all offices" color="primary" left-label />
+          <q-btn label="Search" color="primary" @click="handleSearch" class="search-button"
+            :loading="employeeStore.loading" />
         </div>
       </q-card-section>
 
       <q-card-section class="table-section">
         <q-table :rows="filteredEmployees" :columns="columns" row-key="name" flat bordered :pagination="pagination"
-          class="employee-table" :filter="searchQuery" :loading="employeeStore.loading">
+          class="employee-table" :loading="employeeStore.loading">
           <template v-slot:body-cell-selection="props">
             <q-td :props="props">
               <q-checkbox v-model="props.row.selected" dense />
@@ -32,6 +32,17 @@
             <q-td :props="props">
               {{ props.row.office }}
             </q-td>
+          </template>
+
+          <template v-slot:no-data>
+            <div class="full-width row flex-center text-grey q-gutter-sm">
+              <span v-if="isSearching && !employeeStore.loading">
+                No employees found matching your search
+              </span>
+              <span v-else>
+                No employees available
+              </span>
+            </div>
           </template>
         </q-table>
       </q-card-section>
@@ -46,15 +57,17 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch,} from 'vue'
 import { useEmployeeStore } from 'src/stores/office/employeeStore'
+import { debounce } from 'quasar'
 
 const props = defineProps({
   showModal: Boolean
 })
 const emit = defineEmits(['update:showModal', 'add'])
 
-const searchQuery = ref('')
+const searchTerm = ref('')
+const isSearching = ref(false)
 const showAllOffices = ref(false)
 const employeeStore = useEmployeeStore()
 
@@ -88,57 +101,86 @@ const columns = [
   },
 ]
 
-// Use unassignedEmployees from the store
 const employees = computed(() => employeeStore.unassignedEmployees)
 
-// Load employees when modal is shown or when showAllOffices changes
+// Create debounced search function
+const handleSearchDebounced = debounce(async () => {
+  await handleSearch()
+}, 500)
+
 watch([() => props.showModal, showAllOffices], async ([showModalValue, showAll]) => {
   if (showModalValue) {
     if (showAll) {
       await employeeStore.fetchAllEmployees()
     } else {
-      await employeeStore.fetchUnassignedEmployees() // Changed to use the dedicated method
+      await employeeStore.fetchUnassignedEmployees()
     }
+    isSearching.value = false
+    searchTerm.value = '' // Clear search term when modal opens
   }
 }, { immediate: true })
 
 const filteredEmployees = computed(() => {
+  if (isSearching.value) {
+    return employeeStore.searchedEmployees
+  }
+
   let filtered = employees.value
 
   if (!showAllOffices.value && employeeStore.userOffice) {
     filtered = filtered.filter(emp => emp.office === employeeStore.userOffice)
   }
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(emp =>
-      emp.name.toLowerCase().includes(query) ||
-      emp.position.toLowerCase().includes(query) ||
-      (emp.office && emp.office.toLowerCase().includes(query))
-    )
-  }
+
   return filtered
 })
 
 const hasSelection = computed(() => {
-  return employees.value.some(emp => emp.selected)
+  const employeesToCheck = isSearching.value
+    ? employeeStore.searchedEmployees
+    : employees.value
+  return employeesToCheck.some(emp => emp.selected)
 })
 
+async function handleClearSearch() {
+  searchTerm.value = ''
+  isSearching.value = false
+  await employeeStore.fetchUnassignedEmployees()
+}
+
+async function handleSearch() {
+  try {
+    if (searchTerm.value.trim()) {
+      isSearching.value = true
+      await employeeStore.searchEmployees(searchTerm.value)
+    } else {
+      await handleClearSearch()
+    }
+  } catch (error) {
+    console.error('Search failed:', error)
+    isSearching.value = false
+  }
+}
+
 function closeModal() {
-  // Clear selections from unassigned employees only
+  // Clear selections from all employee lists
   employeeStore.unassignedEmployees.forEach(emp => emp.selected = false)
-  searchQuery.value = ''
+  employeeStore.searchedEmployees.forEach(emp => emp.selected = false)
+
+  searchTerm.value = ''
+  isSearching.value = false
   showAllOffices.value = false
   emit('update:showModal', false)
 }
 
-function addEmployee() {
-  const selectedEmployees = employees.value
+async function addEmployee() {
+  const selectedEmployees = (isSearching.value ? employeeStore.searchedEmployees : employees.value)
     .filter(emp => emp.selected)
     .map(({ id, name, position }) => ({
       id,
       name,
       position
     }))
+
   emit('add', selectedEmployees)
   closeModal()
 }

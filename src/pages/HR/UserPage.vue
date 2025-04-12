@@ -177,6 +177,8 @@ export default {
     const loading = ref(false);
     const saving = ref(false);
     const offices = ref([]);
+    // Remove the mock employees data and just keep the ref:
+    const employees = ref([]);
     const filteredOffices = ref([]);
     // User Account State
     const userAccounts = ref([]);
@@ -290,11 +292,16 @@ export default {
       );
     };
 
-    // employee name and designation
-    const fetchEmployees = async () => {
+
+    // Update the fetchEmployees function to accept office name
+    const fetchEmployees = async (officeName = null) => {
       loading.value = true;
       try {
-        const response = await api.get("/employee");
+        let url = "/employee/designation";
+        if (officeName) {
+          url += `?office_name=${encodeURIComponent(officeName)}`;
+        }
+        const response = await api.get(url);
         employees.value = response.data;
         filteredEmployees.value = response.data;
       } catch (error) {
@@ -308,13 +315,6 @@ export default {
       }
     };
 
-    const employees = ref(
-      Array.from({ length: 30 }, (_, i) => ({
-        id: i + 1,
-        name4: `Employee ${i + 1}`,
-        Designation: `Position ${(i % 5) + 1}`,
-      }))
-    );
 
     const employeeColumns = [
       {
@@ -352,12 +352,24 @@ export default {
       );
     };
 
+    // const openEmployeeModal = () => {
+    //   showOfficeModal.value = false;
+    //   showEmployeeModal.value = true;
+    //   search.value = ""; // Reset search when opening modal
+    //   filteredEmployees.value = employees.value;
+    // };
+
+
+    // Update the openEmployeeModal function
     const openEmployeeModal = () => {
-      showOfficeModal.value = false;
-      showEmployeeModal.value = true;
-      search.value = ""; // Reset search when opening modal
-      filteredEmployees.value = employees.value;
+      if (selectedOffice.value) {
+        showOfficeModal.value = false;
+        showEmployeeModal.value = true;
+        search.value = ""; // Reset search when opening modal
+        fetchEmployees(selectedOffice.value.name); // Pass the selected office name
+      }
     };
+
 
     const openRoleModal = () => {
       showEmployeeModal.value = false;
@@ -399,37 +411,46 @@ export default {
         label: "DATE CREATED",
         align: "center",
         field: "datecreated",
+        sortable: true,
+        sort: (a, b) => {
+          // Convert dates to timestamps for proper sorting
+          const dateA = new Date(a).getTime();
+          const dateB = new Date(b).getTime();
+          return dateA - dateB;
+        }
       },
     ];
-    const fetchUserAccounts = async () => {
-      loading.value = true;
-      try {
-        const response = await api.get("/user_account");
 
-        if (Array.isArray(response.data)) {
-          rows.value = response.data;
-        } else {
-          console.error("Unexpected response format:", response.data);
-          Notify.create({
-            message: "Invalid data format received.",
-            color: "negative",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user accounts:", error);
-        Notify.create({
-          message: "Failed to fetch user accounts. Please try again.",
-          color: "negative",
-        });
-      } finally {
-        loading.value = false;
-      }
-    };
+    const fetchUserAccounts = async () => {
+  loading.value = true;
+  try {
+    const response = await api.get("/user_account");
+
+    if (Array.isArray(response.data)) {
+      // The sorting should already be done by the backend,
+      // but we'll reverse it here just to be sure
+      rows.value = response.data;
+    } else {
+      console.error("Unexpected response format:", response.data);
+      Notify.create({
+        message: "Invalid data format received.",
+        color: "negative",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching user accounts:", error);
+    Notify.create({
+      message: "Failed to fetch user accounts. Please try again.",
+      color: "negative",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
 
     onMounted(() => {
       fetchUserAccounts();
       fetchOffices();
-      fetchEmployees(); // Call the fetchOffices function on component mount
     });
 
     return {

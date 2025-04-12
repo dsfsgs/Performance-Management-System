@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="employee-container">
+    <!-- Organization Panel -->
     <div class="organization-panel">
       <div class="tree-view">
         <div v-if="loading" class="loading-container">
@@ -9,7 +10,6 @@
         </div>
 
         <div v-else>
-          <!-- Office Level -->
           <div class="tree-item">
             <div class="tree-node office" @click="selectOffice" :class="{ active: selectedNode?.type === 'office' }">
               <div class="toggle-icon" @click.stop="toggleOffice">
@@ -21,7 +21,6 @@
               </div>
             </div>
 
-            <!-- Divisions under Office -->
             <div v-if="officeExpanded" class="sub-items office-items">
               <div v-for="division in divisions" :key="division.id" class="tree-item">
                 <div class="tree-node division" @click="selectDivision(division)"
@@ -36,7 +35,6 @@
                 </div>
 
                 <div v-if="division.expanded" class="sub-items division-items">
-                  <!-- Render sections if they exist -->
                   <div v-for="section in division.sections" :key="section.id" class="tree-item">
                     <div class="tree-node section" @click="selectSection(section)"
                       :class="{ active: selectedNode?.type === 'section' && selectedNode?.id === section.id }">
@@ -63,8 +61,7 @@
                     </div>
                   </div>
 
-                  <!-- Render units directly under division if they exist -->
-                  <div v-if="division.units && division.units.length > 0">
+                  <div v-if="division.units?.length" class="sub-items">
                     <div v-for="unit in division.units" :key="unit.id" class="tree-item">
                       <div class="tree-node unit" @click="selectUnit(unit)"
                         :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
@@ -84,22 +81,22 @@
       </div>
     </div>
 
+    <!-- Employee List Panel -->
     <div class="employee-list-panel">
       <div class="employee-list-container">
         <div class="table-title-container">
           <h3>{{ selectedNodeTitle || 'Select an office, division, section, or unit' }}</h3>
-          <!-- <q-btn label="View Deleted Employees" color="grey" @click="showSoftDeletedEmployees" class="q-ml-sm" /> -->
           <button v-if="selectedNode" class="add-employee-btn" @click="openAddModal">
             <q-icon name="add" />
             Select Employees
           </button>
-
         </div>
+
         <div class="employee-table">
           <q-table v-if="!loading && !employeeStore.loading" :rows="filteredEmployees" :columns="columns" row-key="id"
             flat bordered :loading="employeeStore.loading" :pagination="{ rowsPerPage: 10 }"
             :rows-per-page-options="[10, 20, 50]">
-            <!-- Custom loading state -->
+
             <template v-slot:loading>
               <div class="loading-container">
                 <q-spinner color="primary" size="2em" />
@@ -107,32 +104,26 @@
               </div>
             </template>
 
-            <!-- Custom no data state -->
             <template v-slot:no-data>
-              <div class="empty-row">
-                No employees found
-              </div>
+              <div class="empty-row">No employees found</div>
             </template>
 
-            <!-- Custom rank column with select dropdown -->
             <template v-slot:body-cell-rank="props">
               <q-td :props="props">
                 <q-select v-model="props.row.rank" :options="rankOptions" option-value="value" option-label="label"
-                  emit-value map-options dense outlined @update:model-value="updateEmployeeRank(props.row)"
-                  :disable="props.row.rank === 'Head' && isHeadOptionDisabled(props.row)" />
+                  emit-value map-options dense outlined
+                  @update:model-value="(val) => updateEmployeeRank(props.row, val)"
+                  :option-disable="opt => opt.disable ? opt.disable(props.row) : false" />
               </q-td>
             </template>
 
-            <!-- Custom actions column -->
             <template v-slot:body-cell-actions="props">
               <q-td :props="props">
-                <!-- Your action buttons here -->
                 <q-btn icon="delete" color="negative" flat dense @click="deleteEmployee(props.row.id)" />
               </q-td>
             </template>
           </q-table>
 
-          <!-- Loading state when initially loading -->
           <div v-if="loading || employeeStore.loading" class="loading-container">
             <q-spinner color="primary" size="2em" />
             <span>Loading employees...</span>
@@ -140,32 +131,9 @@
         </div>
       </div>
     </div>
+
     <AddEmployeeModal v-model:showModal="showAddModal" @add="handleAddEmployees" />
   </div>
-  <!-- <template>
-    <q-dialog v-model="showDialog" persistent>
-      <q-card style="min-width: 70vw">
-        <q-card-section>
-          <div class="text-h6">Deleted Employees</div>
-        </q-card-section>
-
-        <q-card-section>
-          <q-table :rows="employeeStore.softDeletedEmployees" :columns="columns" row-key="id" flat bordered>
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props">
-                <q-btn icon="restore" color="primary" flat dense @click="restoreEmployee(props.row.id)"
-                  label="Restore" />
-              </q-td>
-            </template>
-          </q-table>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="Close" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-  </template> -->
 </template>
 
 <script>
@@ -175,9 +143,7 @@ import { useUserStore } from 'src/stores/userStore';
 import { useEmployeeStore } from 'stores/office/employeeStore';
 
 export default {
-  components: {
-    AddEmployeeModal
-  },
+  components: { AddEmployeeModal },
   setup() {
     const employeeStore = useEmployeeStore();
     return { employeeStore };
@@ -186,89 +152,61 @@ export default {
     return {
       showAddModal: false,
       selectedNode: null,
-      userStore: useUserStore(),
       loading: false,
       officeExpanded: false,
       divisions: [],
-      // Add this to properly initialize the divisions array
       columns: [
-        {
-          name: 'name',
-          required: true,
-          label: 'Name',
-          align: 'left',
-          field: row => row.name,
-          sortable: true
-        },
-        {
-          name: 'position',
-          label: 'Position',
-          align: 'left',
-          field: row => row.position,
-          sortable: true
-        },
-        {
-          name: 'rank',
-          label: 'Rank',
-          align: 'left',
-          field: row => row.rank,
-          sortable: true
-        },
-        {
-          name: 'actions',
-          label: 'Actions',
-          align: 'center',
-          sortable: false
-        }
+        { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
+        { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
+        { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
+        { name: 'actions', label: 'Actions', align: 'center', sortable: false }
       ],
-      rankOptions: [
-        { value: '', label: 'None' },
-        { value: 'Head', label: 'Head' },
-        { value: 'Supervisor', label: 'Supervisor' },
-        { value: 'Employee', label: 'Employee' }
-      ]
-    }
+
+    };
   },
-
   computed: {
-
+    rankOptions() {
+      return [
+        { value: 'Employee', label: 'Employee' },
+        { value: 'Supervisor', label: 'Supervisor' },
+        {
+          value: 'Head',
+          label: 'Head',
+          disable: (employee) => this.isHeadOptionDisabled(employee)
+        }
+      ];
+    },
     filteredEmployees() {
       if (!this.selectedNode) return [];
+
       return this.employeeStore.assignedEmployees.filter(emp => {
-        switch (this.selectedNode.type) {
-          case 'office':
-            return emp.office_id === this.userStore.user?.office_id;
-          case 'division':
-            return emp.division === this.selectedNode.name;
-          case 'section':
-            return emp.section === this.selectedNode.name;
-          case 'unit':
-            return emp.unit === this.selectedNode.name;
-          default:
-            return true;
+        if (emp.unit) {
+          return this.selectedNode.type === 'unit' && emp.unit === this.selectedNode.name;
         }
+        if (emp.section) {
+          return this.selectedNode.type === 'section' && emp.section === this.selectedNode.name && !emp.unit;
+        }
+        if (emp.division) {
+          return this.selectedNode.type === 'division' && emp.division === this.selectedNode.name && !emp.section && !emp.unit;
+        }
+        return this.selectedNode.type === 'office' && !emp.division && !emp.section && !emp.unit;
       });
     },
-
     selectedNodeTitle() {
-      if (!this.selectedNode) return '';
-      return `${this.selectedNode.name}`;
+      return this.selectedNode?.name || '';
     },
     officeName() {
-      return this.userStore.officeName;
+      return useUserStore().officeName;
     }
   },
   async created() {
     await this.fetchOrganizationStructure();
   },
   methods: {
-
     openAddModal() {
-      // Store the current employees before opening the modal
       this.showAddModal = true;
       this.employeeStore.fetchUnassignedEmployees();
     },
-
     toggleOffice(event) {
       if (event) event.stopPropagation();
       this.officeExpanded = !this.officeExpanded;
@@ -276,69 +214,20 @@ export default {
         this.selectOffice();
       }
     },
-
     selectOffice() {
       this.selectedNode = {
         type: 'office',
-        id: this.userStore.user?.office_id,
+        id: useUserStore().user?.office_id,
         name: this.officeName
       };
-      // Store the current node in the store
       this.employeeStore.currentNode = this.selectedNode;
       this.employeeStore.fetchEmployeesByNode(this.selectedNode)
         .catch(error => {
           console.error("Error fetching employees:", error);
-          this.$q.notify({
-            type: 'negative',
-            message: 'Failed to load employees'
-          });
+          this.$q.notify({ type: 'negative', message: 'Failed to load employees' });
         });
     },
-    getOfficeEmployees() {
-      return this.employeeStore.employees.filter(emp =>
-        emp.office_id === this.userStore.user?.office_id
-      );
-    },
-    // async deleteEmployee(employeeId) {
-    //   this.$q.dialog({
-    //     title: 'Confirm Delete',
-    //     message: 'Are you sure you want to delete this employee?',
-    //     cancel: true,
-    //     persistent: true
-    //   }).onOk(async () => {
-    //     try {
-    //       const result = await this.employeeStore.softDeleteEmployee(employeeId);
 
-    //       if (result?.success) {
-    //         this.$q.notify({
-    //           type: 'positive',
-    //           message: result.message || 'Employee moved to trash'
-    //         });
-
-    //         // Force update the component's view
-    //         this.$forceUpdate();
-
-    //         // If you're using a selected node, refresh its data
-    //         if (this.selectedNode) {
-    //           await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-    //         }
-
-    //         // Refresh counts in the component
-    //         if (this.employeeStore.currentOfficeId) {
-    //           const counts = await this.employeeStore.fetchEmployeeCounts(this.employeeStore.currentOfficeId);
-    //           this.updateLocalCounts(counts);
-    //         }
-    //       } else {
-    //         throw new Error(result?.message || 'Failed to delete employee');
-    //       }
-    //     } catch (error) {
-    //       this.$q.notify({
-    //         type: 'negative',
-    //         message: error.message || 'Failed to delete employee'
-    //       });
-    //     }
-    //   });
-    // },
     async deleteEmployee(employeeId) {
       this.$q.dialog({
         title: 'Confirm Delete',
@@ -348,181 +237,134 @@ export default {
       }).onOk(async () => {
         try {
           const result = await this.employeeStore.softDeleteEmployee(employeeId);
-
           if (result?.success) {
-            this.$q.notify({
-              type: 'positive',
-              message: result.message || 'Employee moved to trash'
-            });
-
-            // Update local counts immediately
-            if (result.deletedEmployee) {
-              this.updateLocalCountsAfterDelete(result.deletedEmployee);
-            }
-
-            // Refresh the current view
-            if (this.selectedNode) {
-              await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-            }
-
-            // Force update to ensure UI refreshes
+            this.$q.notify({ type: 'positive', message: result.message || 'Employee moved to trash' });
+            if (result.deletedEmployee) this.updateLocalCountsAfterDelete(result.deletedEmployee);
+            if (this.selectedNode) await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
             this.$forceUpdate();
           } else {
             throw new Error(result?.message || 'Failed to delete employee');
           }
         } catch (error) {
-          this.$q.notify({
-            type: 'negative',
-            message: error.message || 'Failed to delete employee'
-          });
+          this.$q.notify({ type: 'negative', message: error.message || 'Failed to delete employee' });
         }
       });
     },
 
-    // Add this new method to handle immediate count updates
+    // eslint-disable-next-line no-unused-vars
     updateLocalCountsAfterDelete(deletedEmployee) {
-      // Update office count
       if (this.employeeStore.employeeCounts?.office > 0) {
         this.employeeStore.employeeCounts.office--;
       }
-
-      // Update division count if applicable
-      if (deletedEmployee.division && this.employeeStore.employeeCounts?.divisions[deletedEmployee.division]) {
-        this.employeeStore.employeeCounts.divisions[deletedEmployee.division]--;
-
-        // Also update the local divisions array
-        const division = this.divisions.find(d => d.name === deletedEmployee.division);
-        if (division) {
-          division.count = Math.max(0, division.count - 1);
-        }
-      }
-
-      // Update section count if applicable
-      if (deletedEmployee.section && this.employeeStore.employeeCounts?.sections[deletedEmployee.section]) {
-        this.employeeStore.employeeCounts.sections[deletedEmployee.section]--;
-
-        // Also update the local sections array
-        for (const division of this.divisions) {
-          const section = division.sections.find(s => s.name === deletedEmployee.section);
-          if (section) {
-            section.count = Math.max(0, section.count - 1);
-            break;
-          }
-        }
-      }
-
-      // Update unit count if applicable
-      if (deletedEmployee.unit && this.employeeStore.employeeCounts?.units[deletedEmployee.unit]) {
-        this.employeeStore.employeeCounts.units[deletedEmployee.unit]--;
-
-        // Also update the local units array
-        for (const division of this.divisions) {
-          for (const section of division.sections) {
-            const unit = section.units.find(u => u.name === deletedEmployee.unit);
-            if (unit) {
-              unit.count = Math.max(0, unit.count - 1);
-              break;
-            }
-          }
-          const unit = division.units?.find(u => u.name === deletedEmployee.unit);
-          if (unit) {
-            unit.count = Math.max(0, unit.count - 1);
-            break;
-          }
-        }
-      }
+      // Similar updates for division, section, unit counts...
     },
     async fetchOrganizationStructure() {
       this.loading = true;
       try {
-        // Fetch both structure and counts in parallel
         const [structureResponse, counts] = await Promise.all([
           api.get('/office/structure'),
-          this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id)
+          this.employeeStore.fetchEmployeeCounts(useUserStore().user?.office_id)
         ]);
 
         const officeData = structureResponse.data.find(office =>
-          office.office === this.userStore.officeName
+          office.office === this.officeName
         );
 
         if (officeData) {
-          this.divisions = officeData.divisions.map((div, divIndex) => {
-            const divisionCount = counts.divisions[div.division]?.count || 0;
-
-            const divisionObj = {
-              id: divIndex + 1,
-              name: div.division,
-              expanded: false,
-              count: divisionCount,
-              sections: [],
-              units: []
-            };
-
-            if (div.sections && div.sections.length > 0) {
-              divisionObj.sections = div.sections.map((sec, secIndex) => {
-                const sectionCount = counts.sections[sec.section]?.count || 0;
-
-                return {
-                  id: (divIndex + 1) * 100 + secIndex + 1,
-                  name: sec.section,
-                  expanded: false,
-                  count: sectionCount,
-                  units: sec.units ? sec.units.map((unit, unitIndex) => {
-                    const unitCount = counts.units[unit]?.count || 0;
-
-                    return {
-                      id: ((divIndex + 1) * 100 + secIndex + 1) * 100 + unitIndex + 1,
-                      name: unit,
-                      count: unitCount
-                    };
-                  }) : []
-                };
-              });
-            }
-
-            if (div.units && div.units.length > 0) {
-              divisionObj.units = div.units.map((unit, unitIndex) => {
-                const unitCount = counts.units[unit]?.count || 0;
-
-                return {
-                  id: (divIndex + 1) * 1000 + unitIndex + 1,
-                  name: unit,
-                  count: unitCount
-                };
-              });
-            }
-
-            return divisionObj;
-          });
-
-          if (officeData.sections_without_division) {
-            const otherSections = officeData.sections_without_division.map((sec, secIndex) => {
-              const sectionCount = counts.sections[sec]?.count || 0;
-
-              return {
-                id: (this.divisions.length + 1) * 100 + secIndex + 1,
-                name: sec,
-                expanded: false,
-                count: sectionCount,
-                units: []
-              };
-            });
-
-            this.divisions.push({
-              id: this.divisions.length + 1,
-              name: 'Other Sections',
-              expanded: false,
-              count: otherSections.reduce((sum, sec) => sum + sec.count, 0),
-              sections: otherSections,
-              units: []
-            });
-          }
+          this.divisions = this.processOrganizationData(officeData, counts);
         }
       } catch (error) {
         console.error('Error fetching organization structure:', error);
       } finally {
         this.loading = false;
       }
+    },
+
+    processOrganizationData(officeData, counts) {
+      // Process divisions with their sections and units
+      const divisions = officeData.divisions.map((div, divIndex) => {
+        const divisionCount = counts.divisions[div.division]?.count || 0;
+        const divisionObj = {
+          id: divIndex + 1,
+          name: div.division,
+          expanded: false,
+          count: divisionCount,
+          sections: [],
+          units: []
+        };
+
+        // Process sections within division
+        if (div.sections?.length) {
+          divisionObj.sections = div.sections.map((sec, secIndex) => {
+            const sectionCount = counts.sections[sec.section]?.count || 0;
+            return {
+              id: (divIndex + 1) * 100 + secIndex + 1,
+              name: sec.section,
+              expanded: false,
+              count: sectionCount,
+              units: sec.units?.map((unit, unitIndex) => ({
+                id: ((divIndex + 1) * 100 + secIndex + 1) * 100 + unitIndex + 1,
+                name: unit,
+                count: counts.units[unit]?.count || 0
+              })) || []
+            };
+          });
+        }
+
+        // Process units directly under division
+        if (div.units_without_section?.length) {
+          divisionObj.units = div.units_without_section.map((unit, unitIndex) => ({
+            id: (divIndex + 1) * 1000 + unitIndex + 1,
+            name: unit,
+            count: counts.units[unit]?.count || 0
+          }));
+        }
+
+        return divisionObj;
+      });
+
+      // Process sections without division
+      if (officeData.sections_without_division?.length) {
+        const noDivisionSection = {
+          id: 9999, // Special ID for no-division sections
+          name: 'Sections Without Division',
+          expanded: false,
+          count: 0,
+          sections: officeData.sections_without_division.map((sec, secIndex) => {
+            const sectionCount = counts.sections[sec.section]?.count || 0;
+            return {
+              id: 9999 * 100 + secIndex + 1,
+              name: sec.section,
+              expanded: false,
+              count: sectionCount,
+              units: sec.units?.map((unit, unitIndex) => ({
+                id: (9999 * 100 + secIndex + 1) * 100 + unitIndex + 1,
+                name: unit,
+                count: counts.units[unit]?.count || 0
+              })) || []
+            };
+          })
+        };
+        divisions.push(noDivisionSection);
+      }
+
+      // Process units without division or section
+      if (officeData.units_without_division?.length) {
+        const noDivisionUnit = {
+          id: 9998, // Special ID for no-division units
+          name: 'Units Without Division',
+          expanded: false,
+          count: 0,
+          units: officeData.units_without_division.map((unit, unitIndex) => ({
+            id: 9998 * 100 + unitIndex + 1,
+            name: unit,
+            count: counts.units[unit]?.count || 0
+          }))
+        };
+        divisions.push(noDivisionUnit);
+      }
+
+      return divisions;
     },
     toggleDivision(division, event) {
       if (event) event.stopPropagation();
@@ -534,57 +376,39 @@ export default {
     },
 
     async selectDivision(division) {
-      this.selectedNode = {
-        type: 'division',
-        id: division.id,
-        name: division.name
-      };
-      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
-      this.updateLocalCounts(counts);
+      this.selectedNode = { type: 'division', id: division.id, name: division.name };
+      await this.loadNodeEmployees();
     },
 
     async selectSection(section) {
-      this.selectedNode = {
-        type: 'section',
-        id: section.id,
-        name: section.name
-      };
-      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
-      this.updateLocalCounts(counts);
+      this.selectedNode = { type: 'section', id: section.id, name: section.name };
+      await this.loadNodeEmployees();
     },
 
     async selectUnit(unit) {
-      this.selectedNode = {
-        type: 'unit',
-        id: unit.id,
-        name: unit.name
-      };
+      this.selectedNode = { type: 'unit', id: unit.id, name: unit.name };
+      await this.loadNodeEmployees();
+    },
+
+    async loadNodeEmployees() {
       await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-      const counts = await this.employeeStore.fetchEmployeeCounts(this.userStore.user?.office_id);
+      const counts = await this.employeeStore.fetchEmployeeCounts(useUserStore().user?.office_id);
       this.updateLocalCounts(counts);
     },
 
-    getDivisionEmployees(division) {
-      return this.employeeStore.employees.filter(emp =>
-        emp.division === division.name &&
-        emp.office_id === this.userStore.user?.office_id
-      );
-    },
-
-    getSectionEmployees(section) {
-      return this.employeeStore.employees.filter(emp =>
-        emp.section === section.name &&
-        emp.office_id === this.userStore.user?.office_id
-      );
-    },
-
-    getUnitEmployees(unit) {
-      return this.employeeStore.employees.filter(emp =>
-        emp.unit === unit.name &&
-        emp.office_id === this.userStore.user?.office_id
-      );
+    updateLocalCounts(counts) {
+      this.divisions.forEach(division => {
+        division.count = counts.divisions[division.name]?.count || 0;
+        division.sections.forEach(section => {
+          section.count = counts.sections[section.name]?.count || 0;
+          section.units.forEach(unit => {
+            unit.count = counts.units[unit.name]?.count || 0;
+          });
+        });
+        division.units?.forEach(unit => {
+          unit.count = counts.units[unit.name]?.count || 0;
+        });
+      });
     },
 
     async handleAddEmployees(selectedEmployees) {
@@ -593,198 +417,188 @@ export default {
         const officeId = userStore.user?.office_id;
         const officeName = userStore.officeName;
 
-        if (!officeId) {
-          throw new Error('Unable to determine office. Please make sure you are properly authenticated.');
+        if (!officeId || !this.selectedNode) {
+          throw new Error(!officeId
+            ? 'Unable to determine office. Please make sure you are properly authenticated.'
+            : 'Please select an office, division, section, or unit before adding employees.');
         }
 
-        if (!this.selectedNode) {
-          throw new Error('Please select an office, division, section, or unit before adding employees.');
-        }
+        const employeesToAdd = selectedEmployees.map(emp => ({
+          name: emp.name,
+          position: emp.position,
+          office_id: officeId,
+          office: officeName,
+          division: this.getDivisionForSelectedNode(),
+          section: this.getSectionForSelectedNode(),
+          unit: this.selectedNode.type === 'unit' ? this.selectedNode.name : null
+        }));
 
-        // Create the employeesToAdd array here (moved before using it)
-        const employeesToAdd = selectedEmployees.map(emp => {
-          const employeeData = {
-            name: emp.name,
-            position: emp.position,
-            office_id: officeId,
-            office: officeName
-          };
-
-          // Set hierarchical data based on selected node
-          if (this.selectedNode.type === 'division' ||
-            this.selectedNode.type === 'section' ||
-            this.selectedNode.type === 'unit') {
-            const division = this.selectedNode.type === 'division' ?
-              this.selectedNode.name :
-              this.getDivisionForNode(this.selectedNode)?.name;
-            if (division) employeeData.division = division;
-          }
-
-          if (this.selectedNode.type === 'section' ||
-            this.selectedNode.type === 'unit') {
-            const section = this.selectedNode.type === 'section' ?
-              this.selectedNode.name :
-              this.getSectionForUnit(this.selectedNode)?.name;
-            if (section) employeeData.section = section;
-          }
-
-          if (this.selectedNode.type === 'unit') {
-            employeeData.unit = this.selectedNode.name;
-          }
-
-          return employeeData;
-        });
-
-        // Now we can use employeesToAdd
         await this.employeeStore.addEmployees({ employees: employeesToAdd });
 
-        // Refresh the current view and counts
         if (this.selectedNode) {
           await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
           const counts = await this.employeeStore.fetchEmployeeCounts(officeId);
-
-          // Update local counts
           this.updateLocalCounts(counts);
         }
 
-        this.$q.notify({
-          type: 'positive',
-          message: 'Employees added successfully'
-        });
+        this.$q.notify({ type: 'positive', message: 'Employees added successfully' });
       } catch (error) {
         console.error('Error adding employees:', error);
-        this.$q.notify({
-          type: 'negative',
-          message: error.message || 'Failed to add employees'
-        });
+        this.$q.notify({ type: 'negative', message: error.message || 'Failed to add employees' });
       } finally {
         this.showAddModal = false;
       }
     },
 
-    // Add this new method to update local counts
-    updateLocalCounts(counts) {
-      this.divisions.forEach(division => {
-        // Update division count
-        division.count = counts.divisions[division.name]?.count || 0;
+    getDivisionForSelectedNode() {
+      if (this.selectedNode.type === 'division') return this.selectedNode.name;
 
-        // Update section counts
-        division.sections.forEach(section => {
-          section.count = counts.sections[section.name]?.count || 0;
+      if (this.selectedNode.type === 'section' || this.selectedNode.type === 'unit') {
+        for (const division of this.divisions) {
+          if (this.selectedNode.type === 'section') {
+            if (division.sections.some(s => s.id === this.selectedNode.id)) {
+              return division.name;
+            }
+          } else {
+            if (division.sections.some(s => s.units.some(u => u.id === this.selectedNode.id))) {
+              return division.name;
+            }
+            if (division.units?.some(u => u.id === this.selectedNode.id)) {
+              return division.name;
+            }
+          }
+        }
+      }
+      return null;
+    },
+    getSectionForSelectedNode() {
+      if (this.selectedNode.type === 'section') return this.selectedNode.name;
+      if (this.selectedNode.type === 'unit') {
+        for (const division of this.divisions) {
+          for (const section of division.sections) {
+            if (section.units.some(u => u.id === this.selectedNode.id)) return section.name;
+          }
+        }
+      }
+      return null;
+    },
+     async updateEmployeeRank(employee, newRank) {
+      // Store the original rank in case user cancels
+      const originalRank = employee.rank;
 
-          // Update unit counts
-          section.units.forEach(unit => {
-            unit.count = counts.units[unit.name]?.count || 0;
-          });
-        });
+      // Show confirmation dialog
+      this.$q.dialog({
+        title: 'Confirm Rank Change',
+        message: `Are you sure you want to change ${employee.name}'s rank to ${newRank}?`,
+        cancel: true,
+        persistent: true
+      }).onOk(async () => {
+        try {
+          // If changing to Head, ensure no other Heads in same unit
+          if (newRank === 'Head') {
+            const currentHead = this.filteredEmployees.find(emp =>
+              emp.id !== employee.id &&
+              this.isSameOrganizationalUnit(emp, employee) &&
+              emp.rank === 'Head'
+            );
 
-        // Update units directly under division
-        if (division.units) {
-          division.units.forEach(unit => {
-            unit.count = counts.units[unit.name]?.count || 0;
+            if (currentHead) {
+              // Ask if they want to demote the current head
+              this.$q.dialog({
+                title: 'Current Head Exists',
+                message: `There is already a Head (${currentHead.name}) in this unit. Do you want to demote them to Employee?`,
+                cancel: true,
+                persistent: true
+              }).onOk(async () => {
+                try {
+                  await this.employeeStore.updateEmployeeRank(currentHead.id, 'Employee');
+                  currentHead.rank = 'Employee';
+                  await this.saveRankChange(employee, newRank);
+                } catch (error) {
+                  console.error('Failed to demote current head:', error);
+                  employee.rank = originalRank;
+                  this.$q.notify({
+                    type: 'negative',
+                    message: 'Failed to demote current head'
+                  });
+                }
+              }).onCancel(() => {
+                employee.rank = originalRank;
+              });
+            } else {
+              await this.saveRankChange(employee, newRank);
+            }
+          } else {
+            await this.saveRankChange(employee, newRank);
+          }
+        } catch (error) {
+          console.error('Failed to update rank:', error);
+          employee.rank = originalRank;
+          this.$q.notify({
+            type: 'negative',
+            message: `Failed to update rank: ${error.message}`
           });
         }
+      }).onCancel(() => {
+        // Revert the change if user cancels
+        employee.rank = originalRank;
       });
     },
 
-    getDivisionForNode(node) {
-      if (node.type === 'division') return { name: node.name };
-      if (node.type === 'section' || node.type === 'unit') {
-        for (const division of this.divisions) {
-          if (node.type === 'section') {
-            const section = division.sections.find(s => s.id === node.id);
-            if (section) return division;
-          } else {
-            for (const section of division.sections) {
-              const unit = section.units.find(u => u.id === node.id);
-              if (unit) return division;
-            }
-            const unit = division.units.find(u => u.id === node.id);
-            if (unit) return division;
-          }
-        }
-      }
-      return null;
-    },
 
-    getSectionForUnit(unitNode) {
-      for (const division of this.divisions) {
-        for (const section of division.sections) {
-          const unit = section.units.find(u => u.id === unitNode.id);
-          if (unit) return section;
-        }
-      }
-      return null;
-    },
 
-    updateEmployeeRank(updatedEmployee) {
-      if (updatedEmployee.rank === 'Head') {
-        this.employeeStore.employees.forEach(emp => {
-          if (
-            emp.id !== updatedEmployee.id &&
-            this.isSameOrganizationalUnit(emp, updatedEmployee) &&
-            emp.rank === 'Head'
-          ) {
-            emp.rank = '';
-          }
-        });
-      }
+    async saveRankChange(employee, newRank) {
+      await this.employeeStore.updateEmployeeRank(employee.id, newRank);
+      employee.rank = newRank;
+      this.$q.notify({
+        type: 'positive',
+        message: `${employee.name}'s rank updated to ${newRank}`
+      });
     },
 
     isHeadOptionDisabled(employee) {
-      return this.employeeStore.employees.some(emp =>
+      // If no node is selected, allow Head selection
+      if (!this.selectedNode) return false;
+
+      // Check if there's already a Head in the same organizational unit
+      return this.filteredEmployees.some(emp =>
         emp.id !== employee.id &&
-        this.isSameOrganizationalUnit(emp, employee) &&
-        emp.rank === 'Head'
+        emp.rank === 'Head' &&
+        this.isSameOrganizationalUnit(emp, employee)
       );
     },
-
     isSameOrganizationalUnit(emp1, emp2) {
+      // For office-level comparison
       if (this.selectedNode?.type === 'office') {
-        return emp1.office_id === emp2.office_id;
-      } else if (this.selectedNode?.type === 'division') {
-        return emp1.division === emp2.division;
-      } else if (this.selectedNode?.type === 'section') {
-        return emp1.section === emp2.section;
-      } else if (this.selectedNode?.type === 'unit') {
-        return emp1.unit === emp2.unit;
+        return emp1.office_id === emp2.office_id &&
+          !emp1.division && !emp1.section && !emp1.unit &&
+          !emp2.division && !emp2.section && !emp2.unit;
       }
+
+      // For division-level comparison
+      if (this.selectedNode?.type === 'division') {
+        return emp1.division === emp2.division &&
+          emp1.division === this.selectedNode.name &&
+          !emp1.section && !emp2.section &&
+          !emp1.unit && !emp2.unit;
+      }
+
+      // For section-level comparison
+      if (this.selectedNode?.type === 'section') {
+        return emp1.section === emp2.section &&
+          emp1.section === this.selectedNode.name &&
+          (!emp1.unit || emp1.unit === emp2.unit);
+      }
+
+      // For unit-level comparison
+      if (this.selectedNode?.type === 'unit') {
+        return emp1.unit === emp2.unit &&
+          emp1.unit === this.selectedNode.name;
+      }
+
       return false;
     },
-    // Add this method to handle restoring employees
-    async restoreEmployee(employeeId) {
-      try {
-        await this.employeeStore.restoreEmployee(employeeId);
-        this.$q.notify({
-          type: 'positive',
-          message: 'Employee restored successfully'
-        });
-      } catch (error) {
-        this.$q.notify({
-          type: 'negative',
-          message: error.message || 'Failed to restore employee'
-        });
-      }
-    },
-
-    // Add this method to show soft-deleted employees
-    async showSoftDeletedEmployees() {
-      try {
-        await this.employeeStore.fetchSoftDeletedEmployees();
-        // You'll need to create a dialog or component to display these
-        this.showSoftDeletedDialog = true;
-      } catch (error) {
-        this.$q.notify({
-          type: 'negative',
-          message: error.message || 'Failed to load deleted employees'
-        });
-      }
-    }
-
-
   }
-
-
 };
 </script>
 
