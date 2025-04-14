@@ -182,6 +182,36 @@ export default {
     },
     handleGenerateOPCR() {
       this.$emit('generate-opcr');
+    },
+    getLatestTargetPeriod() {
+      if (this.targetPeriodOptions.length === 0) return null;
+
+      // Convert periods to Date objects for comparison
+      const periodsWithDates = this.targetPeriodOptions.map(option => {
+        // Handle format like "July – December 2024"
+        const [, endMonth, year] = option.label.match(/(\w+) – \w+ (\d{4})/) || [];
+        const monthIndex = new Date(`${endMonth} 1, ${year}`).getMonth();
+        return {
+          option,
+          date: new Date(year, monthIndex)
+        };
+      });
+
+      // Sort descending by date
+      periodsWithDates.sort((a, b) => b.date - a.date);
+
+      return periodsWithDates[0].option.value;
+    }
+  },
+  watch: {
+    // Set default target period when rows change
+    rows: {
+      immediate: true,
+      handler() {
+        if (this.showTargetPeriodFilter && this.targetPeriodFilter === null) {
+          this.targetPeriodFilter = this.getLatestTargetPeriod();
+        }
+      }
     }
   }
 }

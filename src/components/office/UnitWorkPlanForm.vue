@@ -9,37 +9,34 @@
 
       <q-card-section>
         <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-md-6 col-sm-12">
+          <div class="col-md-4 col-sm-12">
             <q-select filled v-model="selectedDivision" :options="divisionOptions" label="Division" stack-label
-              @update:model-value="fetchEmployees" :rules="[val => !!val || 'Field is required']" />
-          </div>
-          <div class="col-md-6 col-sm-12">
-            <q-select filled v-model="selectedEmployee" :options="employeeOptions" label="Employee" stack-label
-              option-label="name" option-value="id" emit-value map-options @update:model-value="fillEmployeeDetails"
-              :rules="[val => !!val || 'Field is required']" />
-          </div>
-        </div>
-
-        <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-md-4 col-sm-12">
-            <q-input filled v-model="rank" label="Rank" stack-label readonly
-              :rules="[val => !!val || 'Field is required']" />
-          </div>
-          <div class="col-md-4 col-sm-12">
-            <q-input filled v-model="position" label="Position" stack-label readonly
-              :rules="[val => !!val || 'Field is required']" />
+              @update:model-value="fetchEmployees" class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
           </div>
           <div class="col-md-4 col-sm-12">
             <q-select filled v-model="targetPeriod" :options="periodOptions" label="Target Period" stack-label
-              :rules="[val => !!val || 'Field is required']" />
+              class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
           </div>
-        </div>
-
-        <div class="row q-col-gutter-md q-mb-md">
-          <div class="col-md-6 col-sm-12">
-            <q-select filled v-model="targetYear" :options="yearOptions" label="Year" stack-label
+          <div class="col-md-4 col-sm-12">
+            <q-select filled v-model="targetYear" :options="yearOptions" label="Year" stack-label class="q-mb-sm"
               :rules="[val => !!val || 'Field is required']" use-input input-debounce="0" @filter="filterYears"
               behavior="menu" />
+          </div>
+        </div>
+        <q-separator class="q-my-md" />
+        <div class="row q-col-gutter-md">
+          <div class="col-md-4 col-sm-12">
+            <q-select filled v-model="selectedEmployee" :options="employeeOptions" label="Employee Name" stack-label
+              option-label="name" option-value="id" emit-value map-options @update:model-value="fillEmployeeDetails"
+              class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
+          </div>
+          <div class="col-md-4 col-sm-12">
+            <q-input filled v-model="rank" label="Rank" stack-label class="q-mb-sm" readonly
+              :rules="[val => !!val || 'Field is required']" />
+          </div>
+          <div class="col-md-4 col-sm-12">
+            <q-input filled v-model="position" label="Position" stack-label class="q-mb-sm" readonly
+              :rules="[val => !!val || 'Field is required']" />
           </div>
         </div>
       </q-card-section>
