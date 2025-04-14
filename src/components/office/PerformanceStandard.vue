@@ -10,9 +10,21 @@
                         class="sticky-column">
                         <template v-slot:body-cell-mfo="props">
                             <q-td :props="props" class="dropdown-cell">
-                                <q-select v-model="props.row.mfo" :label="getDropdownLabel(props.row.id)"
-                                    :options="getMfoOptions(props.row.id)" dense outlined emit-value map-options
-                                    behavior="menu" class="dropdown-select" />
+                                <!-- Category Select -->
+                                <q-select v-if="props.row.id === 1" v-model="props.row.category" label="Select Category"
+                                    :options="categoryOptions" dense outlined emit-value map-options behavior="menu"
+                                    class="dropdown-select" @update:model-value="clearDependentFields(props.row.id)" />
+
+                                <!-- MFO Select -->
+                                <q-select v-else-if="props.row.id === 2" v-model="props.row.mfo" label="Select MFO"
+                                    :options="filteredMfoOptions" dense outlined emit-value map-options behavior="menu"
+                                    class="dropdown-select" :disable="!rows[0].category"
+                                    @update:model-value="clearDependentFields(props.row.id)" />
+
+                                <!-- Output Select -->
+                                <q-select v-else-if="props.row.id === 3" v-model="props.row.output"
+                                    label="Select Output" :options="filteredOutputOptions" dense outlined emit-value
+                                    map-options behavior="menu" class="dropdown-select" :disable="!rows[1].mfo" />
                             </q-td>
                         </template>
                     </q-table>
@@ -71,6 +83,7 @@
             </div>
         </div>
 
+        <!-- Rest of your template remains the same -->
         <q-separator class="q-my-md" />
 
         <!-- Standard Outcome Section -->
@@ -78,31 +91,23 @@
             <div class="text-h7 q-mb-md">Standard Outcome</div>
             <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom bordered
                 flat dense class="standard-outcome-table">
-                <!-- Header with dropdown selects -->
+                <!-- Header with dropdown only for quantity -->
                 <template v-slot:header-cell-quantity="props">
                     <q-th :props="props" class="header-dropdown-cell">
                         <q-select v-model="quantityIndicatorType" :options="quantityIndicator" dense outlined emit-value
                             map-options behavior="menu" class="header-select" />
                     </q-th>
                 </template>
-                <template v-slot:header-cell-effectiveness="props">
-                    <q-th :props="props" class="header-dropdown-cell">
-                        <q-select v-model="effectivenessType" :options="[
-                            { label: 'Effectiveness (Conditional)', value: 'conditional' },
-                            { label: 'Effectiveness (Numeric)', value: 'numeric' }
-                        ]" dense outlined emit-value map-options behavior="menu" class="header-select" />
-                    </q-th>
-                </template>
+
+                <!-- Simple headers for timeliness and effectiveness -->
                 <template v-slot:header-cell-timeliness="props">
-                    <q-th :props="props" class="header-dropdown-cell">
-                        <q-select v-model="timelinessType" :options="[
-                            { label: 'Timeliness (Conditional)', value: 'conditional' },
-                            { label: 'Timeliness (Numeric)', value: 'numeric' }
-                        ]" dense outlined emit-value map-options behavior="menu" class="header-select" />
-                    </q-th>
+                    <q-th :props="props">Timeliness</q-th>
+                </template>
+                <template v-slot:header-cell-effectiveness="props">
+                    <q-th :props="props">Effectiveness</q-th>
                 </template>
 
-                <!-- Body cells with conditional inputs -->
+                <!-- Body cells with inputs -->
                 <template v-slot:body-cell-quantity="props">
                     <q-td :props="props" class="input-cell">
                         <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense outlined
@@ -117,23 +122,15 @@
 
                 <template v-slot:body-cell-effectiveness="props">
                     <q-td :props="props" class="input-cell">
-                        <q-input v-if="effectivenessType === 'conditional'" v-model="props.row.effectiveness" dense
-                            outlined placeholder="Enter condition" />
-                        <q-input v-else v-model="props.row.effectiveness" dense outlined
-                            placeholder="Enter number or range" :rules="[validateStrictNumeric]"
-                            @keydown="blockInvalidChars"
-                            @update:model-value="sanitizeNumericInput(props.row, 'effectiveness')" />
+                        <q-input v-model="props.row.effectiveness" dense outlined
+                            placeholder="Enter effectiveness criteria" />
                     </q-td>
                 </template>
 
                 <template v-slot:body-cell-timeliness="props">
                     <q-td :props="props" class="input-cell">
-                        <q-input v-if="timelinessType === 'conditional'" v-model="props.row.timeliness" dense outlined
-                            placeholder="Enter condition" />
-                        <q-input v-else v-model="props.row.timeliness" dense outlined
-                            placeholder="Enter number or range" :rules="[validateStrictNumeric]"
-                            @keydown="blockInvalidChars"
-                            @update:model-value="sanitizeNumericInput(props.row, 'timeliness')" />
+                        <q-input v-model="props.row.timeliness" dense outlined
+                            placeholder="Enter timeliness criteria" />
                     </q-td>
                 </template>
             </q-table>
@@ -186,34 +183,65 @@ export default {
             showTargetModal: false,
             targetValue: null,
             mergedRow: { id: 0 },
+
+            // MFO Data Structure
             categoryOptions: [
                 { label: 'A. Strategic Function', value: 'A' },
                 { label: 'B. Core Function', value: 'B' },
                 { label: 'C. Support Function', value: 'C' }
             ],
-            dropdownLabels: {
-                1: 'Select Category',
-                2: 'Select MFO',
-                3: 'Select Output'
+
+            // Sample MFO data structure (in a real app, this might come from an API)
+            mfoData: {
+                // Strategic Function MFOS
+                'A': [
+                    {
+                        value: 'MFO1',
+                        label: 'MFO 1 - Strategic Planning',
+                        outputs: [
+                            { value: 'O1', label: 'Strategic Plan Document' },
+                            { value: 'O2', label: 'Annual Implementation Plan' }
+                        ]
+                    },
+                    {
+                        value: 'MFO2',
+                        label: 'MFO 2 - Policy Development',
+                        outputs: [
+                            { value: 'O1', label: 'Policy Documents' },
+                            { value: 'O2', label: 'Policy Guidelines' }
+                        ]
+                    }
+                ],
+                // Core Function MFOS
+                'B': [
+                    {
+                        value: 'MFO1',
+                        label: 'MFO 1 - Service Delivery',
+                        outputs: [
+                            { value: 'O1', label: 'Completed Services' },
+                            { value: 'O2', label: 'Service Reports' }
+                        ]
+                    }
+                ],
+                // Support Function MFOS
+                'C': [
+                    {
+                        value: 'MFO1',
+                        label: 'MFO 1 - Administrative Support',
+                        outputs: [
+                            { value: 'O1', label: 'Processed Documents' },
+                            { value: 'O2', label: 'Administrative Reports' }
+                        ]
+                    }
+                ]
             },
-            mfoOptions: [
-                { label: 'MFO 1', value: 'M1' },
-                { label: 'MFO 2', value: 'M2' },
-                { label: 'MFO 3', value: 'M3' }
-            ],
-            outputOptions: [
-                { label: 'Output 1', value: 'O1' },
-                { label: 'Output 2', value: 'O2' },
-                { label: 'Output 3', value: 'O3' }
-            ],
+
             quantityIndicatorType: 'numeric',
             quantityIndicator: [
                 { label: 'Quantity (A. Custom target)', value: 'numeric' },
                 { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
                 { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
             ],
-            timelinessType: 'conditional',
-            effectivenessType: 'conditional',
             standardOutcomeColumns: [
                 { name: 'rating', label: 'Ratings', field: 'rating', align: 'center', classes: 'rating-column' },
                 { name: 'quantity', label: 'Quantity', field: 'quantity', align: 'center' },
@@ -285,7 +313,9 @@ export default {
             rows: [
                 {
                     id: 1,
+                    category: '',
                     mfo: '',
+                    output: '',
                     core: '',
                     leadership: '',
                     technical: '',
@@ -294,7 +324,9 @@ export default {
                 },
                 {
                     id: 2,
+                    category: '',
                     mfo: '',
+                    output: '',
                     core: '',
                     leadership: '',
                     technical: '',
@@ -303,7 +335,9 @@ export default {
                 },
                 {
                     id: 3,
+                    category: '',
                     mfo: '',
+                    output: '',
                     core: '',
                     leadership: '',
                     technical: '',
@@ -313,15 +347,36 @@ export default {
             ]
         }
     },
-    methods: {
-        getDropdownLabel(rowId) {
-            return this.dropdownLabels[rowId] || ''
+    computed: {
+        filteredMfoOptions() {
+            const category = this.rows[0].category;
+            if (!category) return [];
+
+            return this.mfoData[category]?.map(mfo => ({
+                value: mfo.value,
+                label: mfo.label
+            })) || [];
         },
-        getMfoOptions(rowId) {
-            if (rowId === 1) return this.categoryOptions
-            if (rowId === 2) return this.mfoOptions
-            if (rowId === 3) return this.outputOptions
-            return []
+        filteredOutputOptions() {
+            const category = this.rows[0].category;
+            const mfo = this.rows[1].mfo;
+            if (!category || !mfo) return [];
+
+            const selectedMfo = this.mfoData[category]?.find(m => m.value === mfo);
+            return selectedMfo?.outputs || [];
+        }
+    },
+    methods: {
+        clearDependentFields(rowId) {
+            // When category changes, clear MFO and Output
+            if (rowId === 1) {
+                this.rows[1].mfo = '';
+                this.rows[2].output = '';
+            }
+            // When MFO changes, clear Output
+            else if (rowId === 2) {
+                this.rows[2].output = '';
+            }
         },
         blockInvalidChars(e) {
             const allowedKeys = [
@@ -409,6 +464,11 @@ export default {
         },
         getFormData() {
             return {
+                mfoData: {
+                    category: this.rows[0].category,
+                    mfo: this.rows[1].mfo,
+                    output: this.rows[2].output
+                },
                 mergedCoreCompetency: this.mergedCoreCompetency,
                 mergedLeadershipCompetency: this.mergedLeadershipCompetency,
                 mergedTechnicalCompetency: this.mergedTechnicalCompetency,
@@ -430,7 +490,9 @@ export default {
                 row.effectiveness = '';
             });
             this.rows.forEach(row => {
+                row.category = '';
                 row.mfo = '';
+                row.output = '';
                 row.core = '';
                 row.leadership = '';
                 row.technical = '';
@@ -463,6 +525,7 @@ export default {
 </script>
 
 <style scoped>
+/* Your existing styles remain the same */
 .performance-standard-container {
     padding: 16px;
 }

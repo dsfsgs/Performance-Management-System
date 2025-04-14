@@ -8,9 +8,9 @@
     </div>
 
     <!-- Unit Work Plan Form -->
-    <q-page v-if="showUWP">
-      <UnitWorkPlanForm />
-    </q-page>
+    <div v-if="showUWP">
+      <UnitWorkPlanForm @form-saved="onFormSaved" />
+    </div>
 
     <!-- Combined Filter and Table Component -->
     <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
@@ -19,7 +19,8 @@
 
     <!-- Division Detail -->
     <div v-if="selectedDivision" class="division-employee-container">
-      <DivisionEmployee :division="selectedDivision" @back="selectedDivision = null" />
+      <DivisionEmployee :division="selectedDivision" :employeeData="selectedEmployeeData"
+        @back="selectedDivision = null" />
     </div>
   </q-page>
 </template>
@@ -39,6 +40,8 @@ export default {
     return {
       showUWP: false,
       selectedDivision: null,
+      selectedEmployeeData: null,
+      latestEmployeeAdded: null,
       rows: [
         {
           id: 1,
@@ -88,11 +91,60 @@ export default {
   methods: {
     onDivisionClick(row) {
       this.selectedDivision = row.division;
+      // If we have a latest employee added for this division, select it
+      if (this.latestEmployeeAdded && this.latestEmployeeAdded.division === row.division) {
+        this.selectedEmployeeData = this.latestEmployeeAdded;
+      } else {
+        this.selectedEmployeeData = null;
+      }
+    },
+    onFormSaved(formData) {
+      // Close the UWP form
+      this.showUWP = false;
+
+      // Create a new row for the table
+      const newRow = {
+        id: this.rows.length + 1,
+        division: formData.division,
+        targetPeriod: formData.targetPeriod,
+        dateCreated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        status: "Pending"
+      };
+
+      // Add to rows
+      this.rows.unshift(newRow);
+
+      // Store the employee data for potential display in DivisionEmployee
+      this.latestEmployeeAdded = {
+        division: formData.division,
+        employeeName: formData.employeeName,
+        position: formData.position,
+        rank: formData.rank,
+        performanceStandards: formData.performanceStandards
+      };
+
+      // Set the division and employee data to view in DivisionEmployee component
+      this.selectedDivision = formData.division;
+      this.selectedEmployeeData = this.latestEmployeeAdded;
+
+      // Show notification
+      this.$q.notify({
+        message: 'Work plan saved successfully',
+        color: 'positive',
+        icon: 'check_circle',
+        position: 'top-right'
+      });
     },
     generateUnitWorkPlan() {
       // Implement the logic for generating unit work plan
       console.log('Generating Unit Work Plan');
-      // You could show a notification, download a file, etc.
+
+      this.$q.notify({
+        message: 'Unit Work Plan generated successfully',
+        color: 'positive',
+        icon: 'check_circle',
+        position: 'top-right'
+      });
     }
   }
 };

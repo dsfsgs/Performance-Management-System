@@ -94,6 +94,10 @@ export default {
     showTargetPeriodFilter: {
       type: Boolean,
       default: true
+    },
+    hideDivisionColumn: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp'],
@@ -103,8 +107,8 @@ export default {
       officeFilter: null,
       showGenerateModal: false,
       allColumns: [
-        { name: "division", label: "Division", field: "division", align: "left" },
         { name: "office", label: "Office", field: "office", align: "left", showIf: 'showOfficeColumn' },
+        { name: "division", label: "Division", field: "division", align: "left" },
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
         { name: "status", label: "Status", field: "status", align: "left" }

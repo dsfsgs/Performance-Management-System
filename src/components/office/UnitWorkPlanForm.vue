@@ -73,7 +73,7 @@
             <q-separator />
 
             <q-card-actions align="right" class="q-pa-md">
-                <q-btn label="Reset" color="grey-7" flat @click="resetForm" class="q-mr-sm" />
+                <q-btn label="Cancel" color="grey-7" flat @click="$emit('cancel')" class="q-mr-sm" />
                 <q-btn icon="save" label="Save Work Plan" color="primary" unelevated @click="saveForm" />
             </q-card-actions>
         </q-card>
@@ -87,6 +87,7 @@ export default {
     components: {
         PerformanceStandards
     },
+    emits: ['form-saved', 'cancel'],
     data() {
         // Create an array of years
         const currentYear = new Date().getFullYear();
@@ -144,7 +145,27 @@ export default {
                 );
             });
         },
+        validateForm() {
+            let isValid = true
+            const requiredFields = [
+                this.division,
+                this.targetPeriod,
+                this.targetYear,
+                this.employeeName,
+                this.rank,
+                this.position
+            ]
+
+            if (requiredFields.some(field => !field)) {
+                this.$q.notify('Please fill all required fields')
+                isValid = false
+            }
+
+            // Validate performance standards if needed
+            return isValid
+        },
         saveForm() {
+            if (!this.validateForm()) return
             // Get data from all performance standards components
             const performanceData = [];
 
@@ -167,12 +188,9 @@ export default {
             };
 
             console.log('Saved Data:', savedData);
-            this.$q.notify({
-                message: 'Work plan saved successfully',
-                color: 'positive',
-                icon: 'check_circle',
-                position: 'top-right'
-            });
+
+            // Emit the saved data to the parent component
+            this.$emit('form-saved', savedData);
         },
         resetForm() {
             this.$q.dialog({

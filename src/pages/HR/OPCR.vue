@@ -5,7 +5,7 @@
     </div>
 
     <MainTable :rows="rows" @create="showUWP = true" :hideCreateButton="true" :showOfficeFilter="true"
-      :hideUnitWorkPlanButton="true" :showOfficeColumn="true" />
+      :hideUnitWorkPlanButton="true" :showOfficeColumn="true" hideDivisionColumn="true" />
   </q-page>
 </template>
 
