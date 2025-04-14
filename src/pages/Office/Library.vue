@@ -41,6 +41,7 @@
         </thead>
         <tbody>
           <tr>
+
             <td class="category-cell">
               <ul class="mfo-list">
                 <li v-for="(mfo, index) in strategicMfos" :key="mfo.id" class="mfo-item">
@@ -75,6 +76,7 @@
                 <span class="text-grey-6">No strategic functions available</span>
               </div>
             </td>
+
             <td class="category-cell">
               <ul class="mfo-list">
                 <li v-for="(mfo, index) in coreMfos" :key="mfo.id" class="mfo-item">
@@ -109,23 +111,25 @@
                 <span class="text-grey-6">No core functions available</span>
               </div>
             </td>
+
             <td class="category-cell">
               <ul class="mfo-list">
-                <li v-for="(mfo, index) in supportMfos" :key="mfo.id" class="mfo-item">
+                <li v-for="(output, index) in supportOutputs" :key="output.id" class="mfo-item">
                   <div class="mfo-content">
                     <div class="mfo-title">
-                      <span class="output-text">{{ `SUPPORT OUTPUT ${index + 1}. ${mfo.name}` }}</span>
+                      <span class="output-text">{{ `SUPPORT OUTPUT ${index + 1}. ${output.name}` }}</span>
                     </div>
                     <div class="mfo-actions">
-                      <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editSupport(mfo)" />
-                      <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
+                      <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editSupport(output)" />
+                      <q-btn icon="delete" size="xs" flat round dense color="negative"
+                        @click="confirmDeleteOutput(output)" />
                     </div>
                   </div>
                 </li>
               </ul>
-              <div v-if="supportMfos.length === 0" class="empty-state">
+              <div v-if="supportOutputs.length === 0" class="empty-state">
                 <q-icon name="info" size="sm" color="grey-5" class="q-mr-xs" />
-                <span class="text-grey-6">No support functions available</span>
+                <span class="text-grey-6">No support outputs available</span>
               </div>
             </td>
           </tr>
@@ -238,14 +242,17 @@ export default {
       // If no categories from API, use standard ones
       return standardCategories;
     },
-
     isSupportCategory() {
-      return this.form.category && (
-        this.form.category.name?.includes("SUPPORT") ||
-        this.form.category.name?.includes("C.")
+      return this.form.category &&
+        (this.form.category.name.includes("SUPPORT") ||
+          this.form.category.name.includes("C."));
+    },
+    supportCategory() {
+      return this.categoryOptions.find(cat =>
+        cat.name.includes("SUPPORT") ||
+        cat.name.includes("C.")
       );
     },
-
     strategicMfos() {
       return this.mfos.filter(mfo =>
         mfo.category && (
@@ -264,43 +271,47 @@ export default {
       );
     },
 
-    supportMfos() {
-      return this.mfos.filter(mfo =>
-        mfo.category && (
-          mfo.category.name?.includes("SUPPORT") ||
-          mfo.category.name?.includes("C.")
-        )
+    supportOutputs() {
+      if (!this.supportCategory) return [];
+
+      return this.outputs.filter(output =>
+        output.f_category_id === this.supportCategory.id &&
+        (!output.mfo_id || output.mfo_id === null)
       );
-    }
+    },
   },
   created() {
     this.fetchData();
   },
   methods: {
+
+
     async fetchData() {
       this.loading = true;
       try {
-        // Load user data and MFOs
         const userStore = useUserStore();
         await userStore.loadUserData();
         this.mfos = userStore.mfos;
 
-        // Fetch categories explicitly
-        try {
-          const categoriesResponse = await api.get('/fetch_f_category');
-          this.categories = categoriesResponse.data;
-        } catch (error) {
-          console.error('Error fetching categories:', error);
-          // Use userStore categories as fallback
-          this.categories = userStore.categories;
-        }
+        // Fetch categories
+        const categoriesResponse = await api.get('/fetch_f_category');
+        this.categories = categoriesResponse.data;
 
-        // Fetch outputs and include MFO information
-        const outputsResponse = await api.get('/outputs');
-        this.outputs = outputsResponse.data.map(output => ({
-          ...output,
-          mfo: this.mfos.find(m => m.id === output.mfo_id)
-        }));
+        // Fetch ALL outputs (not just support outputs)
+        const outputsResponse = await api.get('/allOutputs', {
+          params: {
+            office_id: this.user.office_id
+          }
+        });
+
+        this.outputs = outputsResponse.data.map(output => {
+          // For all outputs, attach category and mfo if available
+          return {
+            ...output,
+            category: this.categories.find(c => c.id === output.f_category_id),
+            mfo: this.mfos.find(m => m.id === output.mfo_id)
+          };
+        });
       } catch (error) {
         console.error('Error fetching data:', error);
         this.$q.notify({
@@ -319,9 +330,9 @@ export default {
 
     getInputLabel(index) {
       if (this.form.isOutput) {
-        return `Output ${index + 1}`;
+        return this.isSupportCategory ? `Support Output ${index + 1}` : `Output ${index + 1}`;
       }
-      return this.isSupportCategory ? `Support Output ${index + 1}` : `MFO ${index + 1}`;
+      return `MFO ${index + 1}`;
     },
 
     getRequiredMessage(index) {
@@ -349,12 +360,15 @@ export default {
         parentMfo: null
       };
     },
-
     openAddModal(categoryType) {
       this.resetForm();
+
+      // Determine if this is for support function
+      const isSupport = categoryType === 'support';
+
       this.modal = {
         show: true,
-        title: `Add ${this.getCategoryName(categoryType)}`,
+        title: isSupport ? 'Add Support Output' : `Add ${this.getCategoryName(categoryType)}`,
         mode: "add",
         loading: false,
         context: { categoryType }
@@ -373,7 +387,8 @@ export default {
       }
 
       this.form.category = categoryForType;
-      this.form.isOutput = false;
+      this.form.isOutput = isSupport; // Set to true for support functions
+      this.form.parentMfo = null; // Support outputs don't have parent MFO
     },
 
     openAddOutputModal(mfo, categoryType) {
@@ -460,43 +475,50 @@ export default {
 
     async saveEntry() {
       try {
-        this.modal.loading = true;
+      this.modal.loading = true;
 
-        // Validate all items
-        const hasEmptyItems = this.form.items.some(item => !item.name.trim());
-        if (hasEmptyItems) {
-          throw new Error("Please fill in all fields");
-        }
+      // Validate all items
+      const hasEmptyItems = this.form.items.some(item => !item.name.trim());
+      if (hasEmptyItems) {
+        throw new Error("Please fill in all fields");
+      }
 
-        if (this.form.isOutput) {
-          await this.saveOutputs();
+      if (this.form.isOutput) {
+        await this.saveOutputs();
+      } else {
+        // Only show MFO success message for non-support categories
+        if (!this.isSupportCategory) {
+        await this.saveMfos();
         } else {
-          await this.saveMfos();
+        // For support outputs, we'll handle them in saveOutputs
+        await this.saveOutputs();
+        return; // Return early to avoid duplicate notification
         }
+      }
 
-        this.$q.notify({
-          type: 'positive',
-          message: this.modal.mode === 'add'
-            ? (this.form.isOutput
-              ? `${this.form.items.length} outputs added successfully`
-              : `${this.form.items.length} ${this.isSupportCategory ? 'support outputs' : 'MFOs'} added successfully`)
-            : (this.form.isOutput
-              ? 'Output updated successfully'
-              : `${this.isSupportCategory ? 'Support output' : 'MFO'} updated successfully`),
-          position: 'top'
-        });
+      this.$q.notify({
+        type: 'positive',
+        message: this.modal.mode === 'add'
+        ? (this.form.isOutput
+          ? `${this.isSupportCategory ? 'Support outputs' : 'Outputs'} added successfully`
+          : `Added successfully`)
+        : (this.form.isOutput
+          ? 'Output updated successfully'
+          : 'MFO updated successfully'),
+        position: 'top'
+      });
 
-        await this.fetchData();
-        this.closeModal();
+      await this.fetchData();
+      this.closeModal();
       } catch (error) {
-        console.error('Save error:', error);
-        this.$q.notify({
-          type: 'negative',
-          message: error.response?.data?.message || error.message || 'Failed to save entries',
-          position: 'top'
-        });
+      console.error('Save error:', error);
+      this.$q.notify({
+        type: 'negative',
+        message: error.response?.data?.message || error.message || 'Failed to save entries',
+        position: 'top'
+      });
       } finally {
-        this.modal.loading = false;
+      this.modal.loading = false;
       }
     },
 
@@ -521,43 +543,52 @@ export default {
 
     async saveOutputs() {
       try {
+        this.modal.loading = true;
+
         if (this.modal.mode === 'add') {
           const promises = this.form.items.map(item => {
-            return api.post('/add_output', {
-              mfo_id: this.form.parentMfo.id,
-              name: item.name
-            });
+            const payload = {
+              name: item.name,
+              f_category_id: this.form.category.id,
+              office_id: this.user.office_id
+            };
+
+            // Only add mfo_id for non-support outputs
+            if (!this.isSupportCategory && this.form.parentMfo) {
+              payload.mfo_id = this.form.parentMfo.id;
+            }
+
+            return api.post('/add_output', payload);
           });
 
-          const responses = await Promise.all(promises);
-          const newOutputs = responses.map(res => res.data);
-
-          // Add the new outputs to our local state with MFO reference
-          this.outputs = [
-            ...this.outputs,
-            ...newOutputs.map(output => ({
-              ...output,
-              mfo: this.form.parentMfo
-            }))
-          ];
+          await Promise.all(promises);
         } else {
-          // Edit mode - update single output
-          const response = await api.post(`/outputs/${this.modal.context.output.id}`, {
-            mfo_id: this.form.parentMfo.id,
-            name: this.form.items[0].name
-          });
+          const payload = {
+            name: this.form.items[0].name,
+            f_category_id: this.form.category.id,
+            office_id: this.user.office_id
+          };
 
-          // Update the output in our local state
-          const updatedOutput = response.data;
-          this.outputs = this.outputs.map(output =>
-            output.id === updatedOutput.id
-              ? { ...updatedOutput, mfo: this.form.parentMfo }
-              : output
-          );
+          // Only add mfo_id for non-support outputs
+          if (!this.isSupportCategory && this.form.parentMfo) {
+            payload.mfo_id = this.form.parentMfo.id;
+          }
+
+          await api.post(`/outputs/${this.modal.context.output.id}`, payload);
         }
+
+        // Notification is now handled in saveEntry to avoid duplicates
+        await this.fetchData();
+        this.closeModal();
       } catch (error) {
         console.error('Error saving outputs:', error);
-        throw error;
+        this.$q.notify({
+          type: 'negative',
+          message: error.response?.data?.message || 'Failed to save outputs',
+          position: 'top'
+        });
+      } finally {
+        this.modal.loading = false;
       }
     },
 
