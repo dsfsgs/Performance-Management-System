@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from 'src/boot/axios'
 import { useUserStore } from 'src/stores/userStore'
+// import { useCompetencyStore } from 'src/stores/office/competencyStore'
 
 export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
   state: () => ({
@@ -21,7 +22,8 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
         leadershipCompetency: 'TSC-4',
         technicalCompetency: 'RM-3'
       }
-    ]
+    ],
+        employeePositionMap: {} // To store position IDs for employees
   }),
 
   actions: {
@@ -39,7 +41,8 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
       }
     },
 
-    async fetchEmployees() {
+
+     async fetchEmployees() {
       const userStore = useUserStore()
       if (!userStore.officeId || !this.selectedDivision) return
 
@@ -55,6 +58,7 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
           id: emp.id,
           name: emp.name,
           position: emp.position,
+          positionId: emp.position_id, // Make sure your API returns position_id
           rank: emp.rank
         }))
 
@@ -64,16 +68,57 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
         throw error
       }
     },
+    async fetchEmployeeCompetencies(employeeId) {
+  try {
+    const response = await api.get(`/employee/${employeeId}/competencies`);
+    return response.data.data; // Returns the formatted competencies
+  } catch (error) {
+    console.error('Error fetching competencies:', error);
+    throw error;
+  }
+},
 
-    fillEmployeeDetails() {
-      if (!this.selectedEmployee) return
+async fillEmployeeDetails(employeeId, empIndex) {
+  const employee = this.employeeOptions.find(e => e.id === employeeId);
+  if (employee) {
+    this.employeeWorkPlans[empIndex].rank = employee.rank || '';
+    this.employeeWorkPlans[empIndex].position = employee.position || '';
+    this.employeeWorkPlans[empIndex].employeeName = employee.name || '';
 
-      const employee = this.employeeOptions.find(e => e.id === this.selectedEmployee)
-      if (employee) {
-        this.rank = employee.rank
-        this.position = employee.position
+    try {
+      // Fetch competencies for this employee
+      const competencies = await this.fetchEmployeeCompetencies(employeeId);
+
+      // Store competencies for later use
+      this.employeeWorkPlans[empIndex].competencies = competencies;
+
+      // Update the first performance standard with the first of each competency
+      if (this.employeeWorkPlans[empIndex].performanceStandards.length > 0) {
+        const firstStandard = this.employeeWorkPlans[empIndex].performanceStandards[0];
+
+        // Get first core competency if exists
+        if (competencies.core && Object.keys(competencies.core).length > 0) {
+          const firstCore = Object.entries(competencies.core)[0];
+          firstStandard.coreCompetency = `${firstCore[0]}-${firstCore[1].value}`;
+        }
+
+        // Get first technical competency if exists
+        if (competencies.technical && Object.keys(competencies.technical).length > 0) {
+          const firstTech = Object.entries(competencies.technical)[0];
+          firstStandard.technicalCompetency = `${firstTech[0]}-${firstTech[1].value}`;
+        }
+
+        // Get first leadership competency if exists
+        if (competencies.leadership && Object.keys(competencies.leadership).length > 0) {
+          const firstLeader = Object.entries(competencies.leadership)[0];
+          firstStandard.leadershipCompetency = `${firstLeader[0]}-${firstLeader[1].value}`;
+        }
       }
-    },
+    } catch (error) {
+      console.error('Error loading competencies:', error);
+    }
+  }
+},
 
     filterYears(val, update) {
       if (val === '') {
@@ -124,18 +169,16 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
 
       this.performanceStandards = [
         {
-          coreCompetency: 'DSE-4',
-          leadershipCompetency: 'TSC-4',
-          technicalCompetency: 'RM-3'
+
         }
+
+
       ]
     },
 
     addPerformanceStandard() {
       this.performanceStandards.push({
-        coreCompetency: 'DSE-4',
-        leadershipCompetency: 'TSC-4',
-        technicalCompetency: 'RM-3'
+
       })
     },
 
