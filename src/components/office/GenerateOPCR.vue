@@ -532,13 +532,14 @@ export default {
 }
 
 .competency-table {
-  table {
+  :deep(table) {
     border-collapse: collapse;
     width: 100%;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     border: 1px solid #e0e0e0;
+  }
 
     th,
     td {
@@ -547,9 +548,18 @@ export default {
       vertical-align: middle;
       color: #333;
     }
+  ::v-deep th,
+  ::v-deep td {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    vertical-align: middle;
+  }
 
     thead {
       background-color: #263238;
+  ::v-deep thead {
+    background-color: #f5f5f5;
+  }
 
       th {
         font-weight: 500;
@@ -557,87 +567,17 @@ export default {
         font-size: 0.9rem;
       }
     }
-
-    tbody {
-      background-color: white;
-
-      tr {
-        transition: background-color 0.2s ease;
-      }
-
-      tr:hover {
-        background-color: #f8f9fa;
-      }
-    }
-  }
-}
-
-.modern-input {
-  :deep(.q-field__control) {
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    border-color: #d0d0d0;
+  ::v-deep thead th {
+    font-weight: 500;
+    color: #424242;
   }
 
-  :deep(.q-field__control:hover) {
-    border-color: #90a4ae;
+  ::v-deep tbody {
+    background-color: white;
   }
 
-  :deep(.q-field--focused .q-field__control) {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
-  }
-
-  :deep(.q-field--error .q-field__control) {
-    border-color: #f44336;
-    box-shadow: 0 0 0 1px rgba(244, 67, 54, 0.2);
-  }
-
-  :deep(.q-field__native) {
-    font-size: 0.95rem;
-  }
-}
-
-.action-btn {
-  border-radius: 8px !important;
-  min-width: 120px;
-  padding: 8px 20px;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
-}
-
-.shake-animation {
-  animation: shake 0.6s cubic-bezier(.36, .07, .19, .97) both;
-  transform: translate3d(0, 0, 0);
-}
-
-@keyframes shake {
-
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-3px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(3px, 0, 0);
+  ::v-deep tbody tr:hover {
+    background-color: #fafafa;
   }
 }
 
