@@ -365,36 +365,36 @@ export default {
 }
 
 .competency-table {
-  table {
+  :deep(table) {
     border-collapse: collapse;
     width: 100%;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
 
-    th,
-    td {
-      border: 1px solid #e0e0e0;
-      padding: 10px;
-      vertical-align: middle;
-    }
+  ::v-deep th,
+  ::v-deep td {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+    vertical-align: middle;
+  }
 
-    thead {
-      background-color: #f5f5f5;
+  ::v-deep thead {
+    background-color: #f5f5f5;
+  }
 
-      th {
-        font-weight: 500;
-        color: #424242;
-      }
-    }
+  ::v-deep thead th {
+    font-weight: 500;
+    color: #424242;
+  }
 
-    tbody {
-      background-color: white;
+  ::v-deep tbody {
+    background-color: white;
+  }
 
-      tr:hover {
-        background-color: #fafafa;
-      }
-    }
+  ::v-deep tbody tr:hover {
+    background-color: #fafafa;
   }
 }
 

@@ -1,167 +1,172 @@
+      <!-- performance standard -->
 <template>
-    <div class="performance-standard-container">
-        <!-- Performance Indicator Section -->
-        <div class="q-mb-lg">
-            <div class="text-h7 q-mb-md">Performance Indicator</div>
+  <div class="performance-standard-container">
+    <!-- Performance Indicator Section -->
+    <div class="q-mb-lg">
+      <div class="text-h7 q-mb-md">Performance Indicator</div>
 
-            <q-card flat bordered class="main-card">
-                <q-card-section>
-                    <div class="row q-col-gutter-md">
-                        <!-- First Column: MFO Details -->
-                        <div class="col-md-3 col-sm-12">
-                            <div class="text-subtitle2 q-mb-sm text-center">MFO Details</div>
-                            <q-select filled v-model="rows[0].category" label="Select Category"
-                                :options="categoryOptions" dense outlined map-options
-                                @update:model-value="clearDependentFields(1)" class="q-mb-sm" />
-                            <q-select filled v-model="rows[1].mfo" label="Select MFO" :options="filteredMfoOptions"
-                                dense outlined map-options :disable="!rows[0].category"
-                                @update:model-value="clearDependentFields(2)" class="q-mb-sm" />
-                            <q-select filled v-model="rows[2].output" label="Select Output"
-                                :options="filteredOutputOptions" dense outlined map-options :disable="!rows[1].mfo" />
-                        </div>
+      <q-card flat bordered class="main-card">
+        <q-card-section>
+          <div class="row q-col-gutter-md">
+            <!-- First Column: MFO Details -->
+            <div class="col-md-3 col-sm-12">
+              <div class="text-subtitle2 q-mb-sm text-center">MFO Details</div>
+              <q-select filled v-model="rows[0].category" label="Select Category" :options="categoryOptions" dense
+                outlined map-options @update:model-value="clearDependentFields(1)" class="q-mb-sm" />
 
-                        <!-- Second Column: Competencies -->
-                        <div class="col-md-5 col-sm-12">
-                            <div class="text-subtitle2 q-mb-sm text-center">Competencies</div>
-                            <div class="row q-col-gutter-xs">
-                                <!-- Core -->
-                                <div class="col-md-4 col-sm-12">
-                                    <q-card flat bordered class="competency-card full-height">
-                                        <q-card-section class="q-pa-sm">
-                                            <div class="text-subtitle2 text-center">Core</div>
-                                            <div class="competency-list">
-                                                <div v-for="(comp, index) in coreCompetencies" :key="'core-' + index">
-                                                    {{ comp }}
-                                                </div>
-                                            </div>
-                                        </q-card-section>
-                                    </q-card>
-                                </div>
+              <!-- <q-select filled v-model="rows[1].mfo" label="Select MFO" :options="filteredMfoOptions" dense outlined
+                map-options :disable="!rows[0].category || skipMfo" @update:model-value="clearDependentFields(2)"
+                class="q-mb-sm" /> -->
 
-                                <!-- Technical -->
-                                <div class="col-md-4 col-sm-12">
-                                    <q-card flat bordered class="competency-card full-height">
-                                        <q-card-section class="q-pa-sm">
-                                            <div class="text-subtitle2 text-center">Technical</div>
-                                            <div class="competency-list">
-                                                <div v-for="(comp, index) in technicalCompetencies"
-                                                    :key="'technical-' + index">
-                                                    {{ comp }}
-                                                </div>
-                                            </div>
-                                        </q-card-section>
-                                    </q-card>
-                                </div>
+              <q-select v-if="!skipMfo" filled v-model="rows[1].mfo" label="Select MFO" :options="filteredMfoOptions"
+                dense outlined map-options :disable="!rows[0].category" @update:model-value="clearDependentFields(2)"
+                class="q-mb-sm" />
 
-                                <!-- Leadership -->
-                                <div class="col-md-4 col-sm-12">
-                                    <q-card flat bordered class="competency-card full-height">
-                                        <q-card-section class="q-pa-sm">
-                                            <div class="text-subtitle2 text-center">Leadership</div>
-                                            <div class="competency-list">
-                                                <div v-for="(comp, index) in leadershipCompetencies"
-                                                    :key="'leadership-' + index">
-                                                    {{ comp }}
-                                                </div>
-                                            </div>
-                                        </q-card-section>
-                                    </q-card>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Third Column: Success Indicator -->
-                        <div class="col-md-2 col-sm-12">
-                            <div class="text-subtitle2 q-mb-sm text-center">Success Indicator</div>
-                            <q-input filled v-model="mergedSuccessIndicator" type="textarea" dense autogrow
-                                class="auto-expand-textarea" />
-                        </div>
-
-                        <!-- Fourth Column: Required Output -->
-                        <div class="col-md-2 col-sm-12">
-                            <div class="text-subtitle2 q-mb-sm text-center">Required Output</div>
-                            <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow
-                                class="auto-expand-textarea" />
-                        </div>
-                    </div>
-                </q-card-section>
-            </q-card>
-
-            <!-- Rest of your template remains the same -->
-            <q-separator class="q-my-md" />
-
-            <!-- Standard Outcome Section -->
-            <div class="standard-outcome-section">
-                <div class="text-h7 q-mb-md">Standard Outcome</div>
-                <div class="q-pa-md" style="max-width: 100%;">
-                    <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom
-                        bordered flat dense class="standard-outcome-table">
-                        <!-- Header with dropdown only for quantity -->
-                        <template v-slot:header-cell-quantity="props">
-                            <q-th :props="props" class="header-dropdown-cell">
-                                <q-select v-model="quantityIndicatorType" :options="quantityIndicator" dense outlined
-                                    emit-value map-options behavior="menu" class="header-select" />
-                            </q-th>
-                        </template>
-
-                        <!-- Simple headers for timeliness and effectiveness -->
-                        <template v-slot:header-cell-timeliness="props">
-                            <q-th :props="props">Timeliness</q-th>
-                        </template>
-                        <template v-slot:header-cell-effectiveness="props">
-                            <q-th :props="props">Effectiveness</q-th>
-                        </template>
-
-                        <!-- Body cells with inputs -->
-                        <template v-slot:body-cell-quantity="props">
-                            <q-td :props="props" class="input-cell">
-                                <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense
-                                    outlined placeholder="Enter custom target" :rules="[validateStrictNumeric]"
-                                    @keydown="blockInvalidChars"
-                                    @update:model-value="sanitizeNumericInput(props.row, 'quantity')" />
-                                <div v-else class="numeric-display">
-                                    {{ props.row.quantity || '-' }}
-                                </div>
-                            </q-td>
-                        </template>
-
-                        <template v-slot:body-cell-effectiveness="props">
-                            <q-td :props="props" class="input-cell">
-                                <q-input v-model="props.row.effectiveness" dense outlined
-                                    placeholder="Enter effectiveness criteria" />
-                            </q-td>
-                        </template>
-
-                        <template v-slot:body-cell-timeliness="props">
-                            <q-td :props="props" class="input-cell">
-                                <q-input v-model="props.row.timeliness" dense outlined
-                                    placeholder="Enter timeliness criteria" />
-                            </q-td>
-                        </template>
-                    </q-table>
-                </div>
+              <q-select filled v-model="rows[2].output" label="Select Output" :options="filteredOutputOptions" dense
+                outlined map-options :disable="(!rows[1].mfo && !skipMfo) || !rows[0].category" />
             </div>
-        </div>
+            <!-- -->
+            <!-- Competencies Section -->
+            <div class="row q-col-gutter-xs q-mb-md">
+              <!-- Core -->
+              <div class="col-md-4 col-sm-12">
+                <q-card flat bordered class="competency-card">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-subtitle2 text-center">Core</div>
+                    <div class="competency-list">
+                      <template v-if="mergedCoreCompetency && Object.keys(mergedCoreCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedCoreCompetency" :key="'core-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+<div v-else class="text-grey-6">No core competencies</div>
+</div>
+</q-card-section>
+</q-card>
+</div>
 
-        <!-- Target Input Modal -->
-        <q-dialog v-model="showTargetModal" persistent>
-            <q-card style="min-width: 400px; border-radius: 8px;">
-                <q-card-section class="modal-header">
-                    <div class="text-h6">Enter Target Output</div>
-                </q-card-section>
+<!-- Technical -->
+<div class="col-md-4 col-sm-12">
+  <q-card flat bordered class="competency-card">
+    <q-card-section class="q-pa-sm">
+      <div class="text-subtitle2 text-center">Technical</div>
+      <div class="competency-list">
+        <template v-if="mergedTechnicalCompetency && Object.keys(mergedTechnicalCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedTechnicalCompetency" :key="'tech-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+        <div v-else class="text-grey-6">No technical competencies</div>
+      </div>
+    </q-card-section>
+  </q-card>
+</div>
 
-                <q-card-section class="modal-body">
-                    <q-input v-model.number="targetValue" label="Target Output" type="number" outlined dense
-                        :rules="[val => val > 0 || 'Must be greater than 0']" @keypress="blockInvalidChars" />
-                </q-card-section>
+<!-- Leadership -->
+<div class="col-md-4 col-sm-12">
+  <q-card flat bordered class="competency-card">
+    <q-card-section class="q-pa-sm">
+      <div class="text-subtitle2 text-center">Leadership</div>
+      <div class="competency-list">
+        <template v-if="mergedLeadershipCompetency && Object.keys(mergedLeadershipCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedLeadershipCompetency" :key="'leader-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+        <div v-else class="text-grey-6">No leadership competencies</div>
+      </div>
+    </q-card-section>
+  </q-card>
+</div>
+</div>
 
-                <q-card-actions align="right" class="modal-actions">
-                    <q-btn flat label="Cancel" color="grey-7" v-close-popup @click="cancelTargetInput" />
-                    <q-btn label="Calculate" color="primary" unelevated @click="computeQuantities" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-    </div>
+<!-- Third Column: Success Indicator -->
+<div class="col-md-2 col-sm-12">
+  <div class="text-subtitle2 q-mb-sm text-center">Success Indicator</div>
+  <q-input filled v-model="mergedSuccessIndicator" type="textarea" dense autogrow class="auto-expand-textarea" />
+</div>
+
+<!-- Fourth Column: Required Output -->
+<div class="col-md-2 col-sm-12">
+  <div class="text-subtitle2 q-mb-sm text-center">Required Output</div>
+  <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow class="auto-expand-textarea" />
+</div>
+</div>
+</q-card-section>
+</q-card>
+
+<!-- Rest of your template remains the same -->
+<q-separator class="q-my-md" />
+
+<!-- Standard Outcome Section -->
+<div class="standard-outcome-section">
+  <div class="text-h7 q-mb-md">Standard Outcome</div>
+  <div class="q-pa-md" style="max-width: 100%;">
+    <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom bordered flat
+      dense class="standard-outcome-table">
+      <!-- Header with dropdown only for quantity -->
+      <template v-slot:header-cell-quantity="props">
+              <q-th :props="props" class="header-dropdown-cell">
+                <q-select v-model="quantityIndicatorType" :options="quantityIndicator" dense outlined emit-value
+                  map-options behavior="menu" class="header-select" />
+              </q-th>
+            </template>
+
+      <!-- Simple headers for timeliness and effectiveness -->
+      <template v-slot:header-cell-timeliness="props">
+              <q-th :props="props">Timeliness</q-th>
+            </template>
+      <template v-slot:header-cell-effectiveness="props">
+              <q-th :props="props">Effectiveness</q-th>
+            </template>
+
+      <!-- Body cells with inputs -->
+      <template v-slot:body-cell-quantity="props">
+              <q-td :props="props" class="input-cell">
+                <q-input v-if="quantityIndicatorType === 'numeric'" v-model="props.row.quantity" dense outlined
+                  placeholder="Enter custom target" :rules="[validateStrictNumeric]" @keydown="blockInvalidChars"
+                  @update:model-value="sanitizeNumericInput(props.row, 'quantity')" />
+                <div v-else class="numeric-display">
+                  {{ props.row.quantity || '-' }}
+                </div>
+              </q-td>
+            </template>
+
+      <template v-slot:body-cell-effectiveness="props">
+              <q-td :props="props" class="input-cell">
+                <q-input v-model="props.row.effectiveness" dense outlined placeholder="Enter effectiveness criteria" />
+              </q-td>
+            </template>
+
+      <template v-slot:body-cell-timeliness="props">
+              <q-td :props="props" class="input-cell">
+                <q-input v-model="props.row.timeliness" dense outlined placeholder="Enter timeliness criteria" />
+              </q-td>
+            </template>
+    </q-table>
+  </div>
+</div>
+</div>
+
+<!-- Target Input Modal -->
+<q-dialog v-model="showTargetModal" persistent>
+  <q-card style="min-width: 400px; border-radius: 8px;">
+    <q-card-section class="modal-header">
+      <div class="text-h6">Enter Target Output</div>
+    </q-card-section>
+
+    <q-card-section class="modal-body">
+      <q-input v-model.number="targetValue" label="Target Output" type="number" outlined dense
+        :rules="[val => val > 0 || 'Must be greater than 0']" @keypress="blockInvalidChars" />
+    </q-card-section>
+
+    <q-card-actions align="right" class="modal-actions">
+      <q-btn flat label="Cancel" color="grey-7" v-close-popup @click="cancelTargetInput" />
+      <q-btn label="Calculate" color="primary" unelevated @click="computeQuantities" />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+</div>
 </template>
 
 <script>
@@ -169,27 +174,105 @@ import { useMfoStore } from 'src/stores/office/mfoStore'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
-export default {
-    props: {
-        initialCoreCompetencies: {
-            type: Array,
-            default: () => ['SP - 4', 'DM - 4', 'PM - 4']
-        },
-        initialTechnicalCompetencies: {
-            type: Array,
-            default: () => ['SPP - 4', 'M&E - 4', 'RM - 4']
-        },
-        initialLeadershipCompetencies: {
-            type: Array,
-            default: () => ['LDP - 4', 'CDP - 4', 'TPM - 4']
-        }
-    },
 
-    setup() {
+export default {
+    // props: {
+    //     initialCoreCompetencies: {
+    //         type: Array,
+    //         default: () => ['SP - 4', 'DM - 4', 'PM - 4']
+    //     },
+    //     initialTechnicalCompetencies: {
+    //         type: Array,
+    //         default: () => ['SPP - 4', 'M&E - 4', 'RM - 4']
+    //     },
+    //     initialLeadershipCompetencies: {
+    //         type: Array,
+    //         default: () => ['LDP - 4', 'CDP - 4', 'TPM - 4']
+    //     }
+    // },
+  props: {
+    employeeCompetencies: {
+      type: Object,
+      default: () => ({
+        core: {},
+        technical: {},
+        leadership: {}
+      })
+    }
+  },
+
+    setup(props) {
+
         const mfoStore = useMfoStore()
         const { categories, mfos, outputs, supportOutputs, skipMfo } = storeToRefs(mfoStore)
+      const codeMappings = {
+        core: {
+          'Delivering Service Excellence': 'DSE',
+          'Exemplifying Integrity': 'EI',
+          'Interpersonal Skills': 'IS'
+        },
+        technical: {
+          'Planning and Organizing': 'P&O',
+          'Monitoring and Evaluation': 'M&E',
+          'Records Management': 'RM',
+          'Partnering and Networking': 'P&N',
+          'Process Management': 'PM',
+          'Attention to Detail': 'AD'
+        },
+        leadership: {
+          'Thinking Strategically and Creatively': 'TSC',
+          'Problem Solving and Decision Making': 'PSDM',
+          'Building Collaborative & Inclusive Working Relationships': 'BCIWR',
+          'Managing Performance & Coaching for Results': 'MPCR'
+        }
+      }
+      // Process competencies for display
+      const mergedCoreCompetency = computed(() => {
+        if (!props.employeeCompetencies.core) return {}
+        return Object.entries(props.employeeCompetencies.core).reduce((acc, [name, data]) => {
+          acc[name] = {
+            ...data,
+            code: codeMappings.core[name] || name.substring(0, 3).toUpperCase()
+          }
+          return acc
+        }, {})
+      })
 
+      const mergedTechnicalCompetency = computed(() => {
+        if (!props.employeeCompetencies.technical) return {}
+        return Object.entries(props.employeeCompetencies.technical).reduce((acc, [name, data]) => {
+          acc[name] = {
+            ...data,
+            code: codeMappings.technical[name] || name.substring(0, 3).toUpperCase()
+          }
+          return acc
+        }, {})
+      })
+
+      const mergedLeadershipCompetency = computed(() => {
+        if (!props.employeeCompetencies.leadership) return {}
+        return Object.entries(props.employeeCompetencies.leadership).reduce((acc, [name, data]) => {
+          acc[name] = {
+            ...data,
+            code: codeMappings.leadership[name] || name.substring(0, 3).toUpperCase()
+          }
+          return acc
+        }, {})
+      })
+
+      // Legend mapping
+      // eslint-disable-next-line no-unused-vars
+      const legend = {
+        0: 'Not Applicable',
+        1: 'Basic',
+        2: 'Intermediate',
+        3: 'Advanced',
+        4: 'Superior'
+      }
         return {
+          mergedCoreCompetency,
+          mergedTechnicalCompetency,
+          mergedLeadershipCompetency,
             mfoStore,
             categories,
             mfos,
@@ -198,6 +281,8 @@ export default {
             skipMfo,
             loading: computed(() => mfoStore.loading)
         }
+
+
     },
 
     data() {
@@ -250,15 +335,7 @@ export default {
             showTargetModal: false,
             targetValue: null,
 
-            // Initialize competency arrays
-            coreCompetencies: [],
-            technicalCompetencies: [],
-            leadershipCompetencies: [],
 
-            // Keep these for backwards compatibility
-            mergedCoreCompetency: '',
-            mergedLeadershipCompetency: '',
-            mergedTechnicalCompetency: '',
 
             mergedSuccessIndicator: '',
             mergedRequiredOutput: ''
@@ -266,13 +343,15 @@ export default {
     },
 
     computed: {
-        categoryOptions() {
-            return this.categories?.map(cat => ({
-                label: cat.name,
-                value: cat.id
-            })) || []
-        },
 
+
+
+      categoryOptions() {
+        return this.categories?.map(cat => ({
+          label: cat.name,
+          value: Number(cat.id) // Ensure this is a number
+        })) || []
+      },
         filteredMfoOptions() {
             if (!this.rows[0].category) return []
             return this.mfos?.map(mfo => ({
@@ -281,49 +360,59 @@ export default {
             })) || []
         },
 
-        filteredOutputOptions() {
-            if (!this.rows[1].mfo) return []
+      filteredOutputOptions() {
+        if (!this.rows[0].category) return []
 
-            if (this.skipMfo) {
-                // For support functions
-                return this.supportOutputs?.map(output => ({
-                    label: output.name,
-                    value: output.id
-                })) || []
-            } else {
-                // For other categories
-                const selectedMfo = this.mfos?.find(m => m.id === this.rows[1].mfo)
-                return selectedMfo?.outputs?.map(output => ({
-                    label: output.name,
-                    value: output.id
-                })) || []
-            }
+        // For support functions - use the support outputs directly
+        if (this.skipMfo) {
+          return this.supportOutputs?.map(output => ({
+            label: output.name,
+            value: output.id
+          })) || []
         }
+
+        // For other categories (like Strategic Functions)
+        // Use outputs from the selected MFO
+        if (!this.rows[1].mfo) return []
+
+        // Get the outputs that were already fetched for this MFO
+        const selectedMfo = this.mfos?.find(m =>
+          m.id === (this.rows[1].mfo?.value || this.rows[1].mfo)
+        )
+
+        return selectedMfo?.outputs?.map(output => ({
+          label: output.name,
+          value: output.id
+        })) || []
+      }
+
     },
-
     methods: {
-        clearDependentFields(level) {
-            // Clear dependent fields when parent selection changes
-            if (level <= 1) {
-                this.rows[1].mfo = null
-                this.rows[2].output = null
 
-                // If category changed, fetch related MFOs
-                if (this.rows[0].category) {
-                    this.mfoStore.fetchMfosByCategory(this.rows[0].category)
-                }
-            }
 
-            if (level <= 2) {
-                this.rows[2].output = null
+      clearDependentFields(level) {
+        // Clear dependent fields when parent selection changes
+        if (level <= 1) {
+          this.rows[1].mfo = null
+          this.rows[2].output = null
 
-                // If MFO changed, fetch related outputs
-                if (this.rows[1].mfo) {
-                    this.mfoStore.fetchOutputsByMfo(this.rows[1].mfo)
-                }
-            }
-        },
+          // If category changed, fetch related MFOs
+          if (this.rows[0].category) {
+            const categoryId = this.rows[0].category.value || this.rows[0].category
+            this.mfoStore.fetchMfosByCategory(Number(categoryId))
+          }
+        }
 
+        if (level <= 2) {
+          this.rows[2].output = null
+
+          // Only fetch outputs if we're not skipping MFO (i.e., not a support function)
+          if (!this.skipMfo && this.rows[1].mfo) {
+            const mfoId = this.rows[1].mfo.value || this.rows[1].mfo
+            this.mfoStore.fetchOutputsByMfo(Number(mfoId))
+          }
+        }
+      },
         blockInvalidChars(e) {
             const allowedKeys = [
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -414,9 +503,7 @@ export default {
 
         getFormData() {
             return {
-                coreCompetencies: this.coreCompetencies,
-                technicalCompetencies: this.technicalCompetencies,
-                leadershipCompetencies: this.leadershipCompetencies,
+
                 mergedSuccessIndicator: this.mergedSuccessIndicator,
                 mergedRequiredOutput: this.mergedRequiredOutput,
                 rows: this.rows,
@@ -425,9 +512,7 @@ export default {
         },
 
         resetComponentData() {
-            this.coreCompetencies = [...this.initialCoreCompetencies];
-            this.technicalCompetencies = [...this.initialTechnicalCompetencies];
-            this.leadershipCompetencies = [...this.initialLeadershipCompetencies];
+
 
             this.mergedSuccessIndicator = '';
             this.mergedRequiredOutput = '';
@@ -453,6 +538,7 @@ export default {
     },
 
     watch: {
+
         quantityIndicatorType(val) {
             if (val === 'B') {
                 this.targetValue = null;
@@ -469,9 +555,6 @@ export default {
 
     async created() {
         // Initialize competency arrays from props
-        this.coreCompetencies = [...this.initialCoreCompetencies];
-        this.technicalCompetencies = [...this.initialTechnicalCompetencies];
-        this.leadershipCompetencies = [...this.initialLeadershipCompetencies];
 
         await this.mfoStore.fetchCategories();
     }
