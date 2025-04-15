@@ -5,7 +5,7 @@
     <div class="organization-panel">
       <div class="tree-view">
         <div v-if="loading" class="loading-container">
-          <q-spinner color="primary" size="2em" />
+          <q-spinner-gears color="cyan" />
           <span>Loading organization structure...</span>
         </div>
 
@@ -99,7 +99,7 @@
 
             <template v-slot:loading>
               <div class="loading-container">
-                <q-spinner color="primary" size="2em" />
+                <q-spinner-gears color="cyan" />
                 <span>Loading employees...</span>
               </div>
             </template>
@@ -125,7 +125,7 @@
           </q-table>
 
           <div v-if="loading || employeeStore.loading" class="loading-container">
-            <q-spinner color="primary" size="2em" />
+            <q-spinner-gears color="cyan" />
             <span>Loading employees...</span>
           </div>
         </div>
@@ -482,7 +482,7 @@ export default {
       }
       return null;
     },
-     async updateEmployeeRank(employee, newRank) {
+    async updateEmployeeRank(employee, newRank) {
       // Store the original rank in case user cancels
       const originalRank = employee.rank;
 
