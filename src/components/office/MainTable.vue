@@ -55,7 +55,7 @@
     </q-table>
 
     <!-- Generate OPCR Modal -->
-    <GenerateOPCR v-model="showGenerateModal" @save="handleGenerateOPCR" />
+    <GenerateOPCR v-model="showGenerateModal" @save="handleGenerateOPCR" ref="generateOPCRRef" />
   </div>
 </template>
 
@@ -100,10 +100,10 @@ export default {
       default: false
     }
   },
-  emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp'],
+  emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
   data() {
     return {
-      targetPeriodFilter: null,
+      targetPeriodFilter: null, // Changed to null to start empty
       officeFilter: null,
       showGenerateModal: false,
       allColumns: [
@@ -112,7 +112,8 @@ export default {
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
         { name: "status", label: "Status", field: "status", align: "left" }
-      ]
+      ],
+      generateOPCRRef: null
     }
   },
   computed: {
@@ -163,6 +164,7 @@ export default {
       switch (status.toLowerCase()) {
         case 'approved': return 'green';
         case 'pending': return 'orange';
+        case 'draft': return 'blue';
         default: return 'grey-2';
       }
     },
@@ -170,6 +172,7 @@ export default {
       switch (status.toLowerCase()) {
         case 'approved': return 'white';
         case 'pending': return 'white';
+        case 'draft': return 'white';
         default: return 'grey-10';
       }
     },
@@ -177,41 +180,14 @@ export default {
       switch (status.toLowerCase()) {
         case 'approved': return 'check_circle';
         case 'pending': return 'schedule';
+        case 'draft': return 'drafts';
         default: return 'info';
       }
     },
-    handleGenerateOPCR() {
-      this.$emit('generate-opcr');
-    },
-    getLatestTargetPeriod() {
-      if (this.targetPeriodOptions.length === 0) return null;
-
-      // Convert periods to Date objects for comparison
-      const periodsWithDates = this.targetPeriodOptions.map(option => {
-        // Handle format like "July – December 2024"
-        const [, endMonth, year] = option.label.match(/(\w+) – \w+ (\d{4})/) || [];
-        const monthIndex = new Date(`${endMonth} 1, ${year}`).getMonth();
-        return {
-          option,
-          date: new Date(year, monthIndex)
-        };
-      });
-
-      // Sort descending by date
-      periodsWithDates.sort((a, b) => b.date - a.date);
-
-      return periodsWithDates[0].option.value;
-    }
-  },
-  watch: {
-    // Set default target period when rows change
-    rows: {
-      immediate: true,
-      handler() {
-        if (this.showTargetPeriodFilter && this.targetPeriodFilter === null) {
-          this.targetPeriodFilter = this.getLatestTargetPeriod();
-        }
-      }
+    handleGenerateOPCR(formData) {
+      // Update status to "Pending" for all divisions in the selected target period
+      this.$emit('update-status', this.targetPeriodFilter, 'Pending');
+      this.$emit('generate-opcr', formData);
     }
   }
 }

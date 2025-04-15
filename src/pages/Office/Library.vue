@@ -7,8 +7,7 @@
 
     <!-- Loading indicator -->
     <div v-if="loading" class="flex justify-center q-pa-lg">
-      <q-spinner color="primary" size="3em" />
-      <span class="q-ml-sm text-subtitle1">Loading MFO data...</span>
+      <q-spinner-hourglass color="green" size="3em" />
     </div>
 
     <!-- Table inside a responsive card -->
@@ -41,7 +40,6 @@
         </thead>
         <tbody>
           <tr>
-
             <td class="category-cell">
               <ul class="mfo-list">
                 <li v-for="(mfo, index) in strategicMfos" :key="mfo.id" class="mfo-item">
@@ -157,17 +155,21 @@
           <template v-if="modal.mode === 'edit'">
             <q-input v-model="form.items[0].name"
               :label="form.isOutput ? 'Output Name' : (isSupportCategory ? 'Support Output Name' : 'MFO Name')"
-              class="q-mt-sm" outlined dense
+              class="q-mt-sm modern-input" :class="{ 'shake-animation': errors.name }" outlined dense
               :rules="[val => !!val || (form.isOutput ? 'Output name is required' : (isSupportCategory ? 'Support output name is required' : 'MFO name is required'))]"
-              ref="inputField" />
+              :error="errors.name" error-message="This field is required" ref="nameInput"
+              @blur="validateField('name')" />
           </template>
 
           <!-- Dynamic inputs for add mode -->
           <template v-else>
             <div v-for="(item, index) in form.items" :key="index" class="q-mb-md">
               <div class="row items-center">
-                <q-input v-model="item.name" :label="getInputLabel(index)" class="col-grow q-mr-sm" outlined dense
-                  :rules="[val => !!val || getRequiredMessage(index)]" />
+                <q-input v-model="item.name" :label="getInputLabel(index)" class="col-grow q-mr-sm modern-input"
+                  :class="{ 'shake-animation': errors[`item_${index}`] }" outlined dense
+                  :rules="[val => !!val || getRequiredMessage(index)]" :error="errors[`item_${index}`]"
+                  error-message="This field is required" :ref="`itemInput_${index}`"
+                  @blur="validateField(`item_${index}`)" />
                 <q-btn v-if="index > 0 || form.items.length > 1" icon="remove" flat round dense color="negative"
                   @click="removeItem(index)" class="q-ml-sm" />
               </div>
@@ -202,6 +204,11 @@ export default {
       mfos: [],
       outputs: [],
       categories: [],
+      errors: {
+        name: false,
+        // Dynamic item errors will be added as needed
+      },
+      firstInvalidFieldFocused: false,
       modal: {
         show: false,
         title: "Add MFO / Output",
@@ -284,7 +291,68 @@ export default {
     this.fetchData();
   },
   methods: {
+    validateField(fieldName) {
+      let isValid = false;
 
+      if (fieldName === 'name') {
+        isValid = !!this.form.items[0]?.name?.trim();
+      } else if (fieldName.startsWith('item_')) {
+        const index = parseInt(fieldName.split('_')[1]);
+        isValid = !!this.form.items[index]?.name?.trim();
+      }
+
+      this.errors[fieldName] = !isValid;
+      return isValid;
+    },
+
+    validateForm() {
+      let isValid = true;
+      this.firstInvalidFieldFocused = false;
+
+      // Validate all items
+      this.form.items.forEach((item, index) => {
+        const fieldName = this.modal.mode === 'edit' && index === 0 ? 'name' : `item_${index}`;
+        if (!this.validateField(fieldName)) {
+          isValid = false;
+
+          // Focus the first invalid field
+          if (!this.firstInvalidFieldFocused) {
+            const refName = this.modal.mode === 'edit' && index === 0 ? 'nameInput' : `itemInput_${index}`;
+            if (this.$refs[refName]) {
+              this.$nextTick(() => {
+                this.$refs[refName].focus();
+              });
+              this.firstInvalidFieldFocused = true;
+            }
+          }
+        }
+      });
+
+      return isValid;
+    },
+
+    shakeAllInvalidFields() {
+      this.$nextTick(() => {
+        Object.keys(this.errors).forEach(field => {
+          if (this.errors[field]) {
+            let refName;
+            if (field === 'name') {
+              refName = 'nameInput';
+            } else if (field.startsWith('item_')) {
+              const index = parseInt(field.split('_')[1]);
+              refName = `itemInput_${index}`;
+            }
+
+            if (this.$refs[refName]) {
+              const element = this.$refs[refName].$el;
+              element.classList.remove('shake-animation');
+              void element.offsetWidth; // Trigger reflow
+              element.classList.add('shake-animation');
+            }
+          }
+        });
+      });
+    },
 
     async fetchData() {
       this.loading = true;
@@ -359,6 +427,10 @@ export default {
         isOutput: false,
         parentMfo: null
       };
+      this.errors = {
+        name: false
+      };
+      this.firstInvalidFieldFocused = false;
     },
     openAddModal(categoryType) {
       this.resetForm();
@@ -475,50 +547,54 @@ export default {
 
     async saveEntry() {
       try {
-      this.modal.loading = true;
+        this.modal.loading = true;
+        this.firstInvalidFieldFocused = false;
 
-      // Validate all items
-      const hasEmptyItems = this.form.items.some(item => !item.name.trim());
-      if (hasEmptyItems) {
-        throw new Error("Please fill in all fields");
-      }
-
-      if (this.form.isOutput) {
-        await this.saveOutputs();
-      } else {
-        // Only show MFO success message for non-support categories
-        if (!this.isSupportCategory) {
-        await this.saveMfos();
-        } else {
-        // For support outputs, we'll handle them in saveOutputs
-        await this.saveOutputs();
-        return; // Return early to avoid duplicate notification
+        if (!this.validateForm()) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Please fill all required fields',
+            position: 'top',
+            icon: 'warning'
+          });
+          this.shakeAllInvalidFields();
+          return;
         }
-      }
 
-      this.$q.notify({
-        type: 'positive',
-        message: this.modal.mode === 'add'
-        ? (this.form.isOutput
-          ? `${this.isSupportCategory ? 'Support outputs' : 'Outputs'} added successfully`
-          : `Added successfully`)
-        : (this.form.isOutput
-          ? 'Output updated successfully'
-          : 'MFO updated successfully'),
-        position: 'top'
-      });
+        if (this.form.isOutput) {
+          await this.saveOutputs();
+        } else {
+          if (!this.isSupportCategory) {
+            await this.saveMfos();
+          } else {
+            await this.saveOutputs();
+            return;
+          }
+        }
 
-      await this.fetchData();
-      this.closeModal();
+        this.$q.notify({
+          type: 'positive',
+          message: this.modal.mode === 'add'
+            ? (this.form.isOutput
+              ? `${this.isSupportCategory ? 'Support outputs' : 'Outputs'} added successfully`
+              : `Added successfully`)
+            : (this.form.isOutput
+              ? 'Output updated successfully'
+              : 'MFO updated successfully'),
+          position: 'top'
+        });
+
+        await this.fetchData();
+        this.closeModal();
       } catch (error) {
-      console.error('Save error:', error);
-      this.$q.notify({
-        type: 'negative',
-        message: error.response?.data?.message || error.message || 'Failed to save entries',
-        position: 'top'
-      });
+        console.error('Save error:', error);
+        this.$q.notify({
+          type: 'negative',
+          message: error.response?.data?.message || error.message || 'Failed to save entries',
+          position: 'top'
+        });
       } finally {
-      this.modal.loading = false;
+        this.modal.loading = false;
       }
     },
 
@@ -553,7 +629,6 @@ export default {
               office_id: this.user.office_id
             };
 
-            // Only add mfo_id for non-support outputs
             if (!this.isSupportCategory && this.form.parentMfo) {
               payload.mfo_id = this.form.parentMfo.id;
             }
@@ -569,7 +644,6 @@ export default {
             office_id: this.user.office_id
           };
 
-          // Only add mfo_id for non-support outputs
           if (!this.isSupportCategory && this.form.parentMfo) {
             payload.mfo_id = this.form.parentMfo.id;
           }
@@ -577,7 +651,6 @@ export default {
           await api.post(`/outputs/${this.modal.context.output.id}`, payload);
         }
 
-        // Notification is now handled in saveEntry to avoid duplicates
         await this.fetchData();
         this.closeModal();
       } catch (error) {
@@ -779,6 +852,73 @@ export default {
 .modal-card {
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* Input styling with validation */
+.modern-input {
+  :deep(.q-field__control) {
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  :deep(.q-field__control:hover) {
+    border-color: #a0c0e8;
+  }
+
+  :deep(.q-field--focused .q-field__control) {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+  }
+
+  :deep(.q-field--error .q-field__control) {
+    border-color: #f44336;
+    box-shadow: 0 0 0 1px rgba(244, 67, 54, 0.2);
+  }
+
+  :deep(.q-field__native) {
+    font-size: 0.95rem;
+  }
+}
+
+.shake-animation {
+  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+
+:deep(.q-field--outlined .q-field__control) {
+  height: 40px;
+  min-height: 40px;
+  border-radius: 6px;
+}
+
+:deep(.q-field--error .q-field__bottom) {
+  padding-top: 4px;
+  color: #f44336;
+  font-size: 0.75rem;
 }
 
 /* Responsive adjustments */
