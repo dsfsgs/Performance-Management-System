@@ -3,7 +3,7 @@ import { api } from 'src/boot/axios'
 
 export const useMfoStore = defineStore('mfo', {
   state: () => ({
- categories: [],
+    categories: [],
     mfos: [],
     outputs: [],
     loading: false,
@@ -13,7 +13,7 @@ export const useMfoStore = defineStore('mfo', {
   }),
 
   actions: {
-       async fetchCategories() {
+    async fetchCategories() {
       this.loading = true
       this.error = null
       try {
@@ -27,48 +27,51 @@ export const useMfoStore = defineStore('mfo', {
         this.loading = false
       }
     },
+async fetchMfosByCategory(categoryId) {
+  this.loading = true
+  this.error = null
+  try {
+    // Ensure categoryId is a number
+    const numericCategoryId = Number(categoryId)
+    if (isNaN(numericCategoryId)) {
+      throw new Error('Invalid category ID')
+    }
 
-     async fetchMfosByCategory(categoryId) {
+    const response = await api.get('/mfo', {
+      params: { category_id: numericCategoryId }
+    })
+
+    this.mfos = response.data.mfos || []
+    this.supportOutputs = response.data.support_outputs || []
+    this.skipMfo = response.data.skip_mfo || false
+
+    if (this.skipMfo && this.supportOutputs.length === 1) {
+      this.rows[2].output = this.supportOutputs[0].value
+    }
+  } catch (error) {
+    console.error('Error fetching MFOs:', error)
+    this.error = error
+    throw error
+  } finally {
+    this.loading = false
+  }
+},
+    async fetchSupportOutputs(categoryId) {
       this.loading = true
       this.error = null
       try {
-        const category = this.categories.find(c => c.id === categoryId)
-        // Only skip MFO for C. Support Function
-        this.skipMfo = category?.name.includes("C. SUPPORT FUNCTION")
-
-        if (this.skipMfo) {
-          this.mfos = []
-          await this.fetchSupportOutputs(categoryId)
-        } else {
-          const response = await api.get('/mfo', {
-            params: { category_id: categoryId }
-          })
-          this.mfos = response.data.mfos || []
-        }
+        const response = await api.get('/getSupportOutputs', {
+          params: { category_id: categoryId }
+        })
+        this.supportOutputs = response.data
       } catch (error) {
-        console.error('Error fetching MFOs:', error)
+        console.error('Error fetching support outputs:', error)
         this.error = error
         throw error
       } finally {
         this.loading = false
       }
     },
-      async fetchSupportOutputs(categoryId) {
-        this.loading = true
-        this.error = null
-        try {
-          const response = await api.get('/getSupportOutputs', {
-            params: { category_id: categoryId }
-          })
-          this.supportOutputs = response.data
-        } catch (error) {
-          console.error('Error fetching support outputs:', error)
-          this.error = error
-          throw error
-        } finally {
-          this.loading = false
-        }
-      },
 
     async fetchOutputsByMfo(mfoId) {
       this.loading = true

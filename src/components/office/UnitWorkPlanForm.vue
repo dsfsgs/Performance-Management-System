@@ -1,3 +1,4 @@
+      <!-- unitworkplanform -->
 <template>
   <q-page class="q-pa-md">
     <q-card class="my-card" flat bordered>
@@ -26,6 +27,7 @@
         </div>
       </q-card-section>
 
+
       <q-separator />
 
       <!-- Employee work plans (tabbed interface) -->
@@ -43,7 +45,10 @@
             <div class="col-md-4 col-sm-12">
               <q-select filled v-model="workPlan.employeeId" :options="getFilteredEmployeeOptions(empIndex)"
                 label="Employee Name" stack-label option-label="name" option-value="id" emit-value map-options
-                @update:model-value="(val) => fillEmployeeDetails(val, empIndex)" class="q-mb-sm"
+                @update:model-value="(val) => {
+                  clearEmployeeData(empIndex);
+                  fillEmployeeDetails(val, empIndex);
+                }" class="q-mb-sm"
                 :rules="[val => !!val || 'Field is required']" />
             </div>
             <div class="col-md-4 col-sm-12">
@@ -68,6 +73,7 @@
               </div>
 
               <performance-standards :ref="`perfStd_${empIndex}_${stdIndex}`"
+                :employee-competencies="employeeWorkPlans[empIndex].competencies"
                 :initialMergedCoreCompetency="standard.coreCompetency"
                 :initialMergedLeadershipCompetency="standard.leadershipCompetency"
                 :initialMergedTechnicalCompetency="standard.technicalCompetency" />
@@ -131,9 +137,7 @@ export default {
         position: '',
         performanceStandards: [
           {
-            coreCompetency: null,
-            leadershipCompetency: null,
-            technicalCompetency: null
+
           }
         ]
       }
@@ -201,6 +205,14 @@ export default {
   },
 
   methods: {
+    clearEmployeeData(empIndex) {
+      this.employeeWorkPlans[empIndex].performanceStandards = [{}];
+      this.employeeWorkPlans[empIndex].competencies = {
+        core: {},
+        technical: {},
+        leadership: {}
+      };
+    },
     // Get filtered employee options (excluding already selected employees)
     getFilteredEmployeeOptions(currentIndex) {
       // Get all employee IDs that are currently selected (except the current one)
@@ -233,9 +245,7 @@ export default {
         position: '',
         performanceStandards: [
           {
-            coreCompetency: null,
-            leadershipCompetency: null,
-            technicalCompetency: null
+
           }
         ]
       });
@@ -285,13 +295,38 @@ export default {
       this.employeeWorkPlans[employeeIndex].performanceStandards.splice(standardIndex, 1);
     },
 
-    // Fill employee details when selected
-    fillEmployeeDetails(employeeId, empIndex) {
-      const employee = this.employeeOptions.find(emp => emp.id === employeeId);
+    // async fillEmployeeDetails(employeeId, empIndex) {
+    //   const employee = this.employeeOptions.find(e => e.id === employeeId);
+    //   if (employee) {
+    //   this.employeeWorkPlans[empIndex].rank = employee.rank || '';
+    //   this.employeeWorkPlans[empIndex].position = employee.position || '';
+    //   this.employeeWorkPlans[empIndex].employeeName = employee.name || '';
+    //   }
+    // },
+    async fillEmployeeDetails(employeeId, empIndex) {
+      const store = useUnitWorkPlanStore(); // Get store instance
+      const employee = this.employeeOptions.find(e => e.id === employeeId);
+
       if (employee) {
         this.employeeWorkPlans[empIndex].rank = employee.rank || '';
         this.employeeWorkPlans[empIndex].position = employee.position || '';
         this.employeeWorkPlans[empIndex].employeeName = employee.name || '';
+
+        try {
+          const competencies = await store.fetchEmployeeCompetencies(employeeId);
+          this.employeeWorkPlans[empIndex].competencies = competencies || {
+            core: {},
+            technical: {},
+            leadership: {}
+          };
+        } catch (error) {
+          console.error('Error loading competencies:', error);
+          this.employeeWorkPlans[empIndex].competencies = {
+            core: {},
+            technical: {},
+            leadership: {}
+          };
+        }
       }
     },
 

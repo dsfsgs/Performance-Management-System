@@ -352,14 +352,7 @@ export default {
       );
     };
 
-    // const openEmployeeModal = () => {
-    //   showOfficeModal.value = false;
-    //   showEmployeeModal.value = true;
-    //   search.value = ""; // Reset search when opening modal
-    //   filteredEmployees.value = employees.value;
-    // };
-
-
+  
     // Update the openEmployeeModal function
     const openEmployeeModal = () => {
       if (selectedOffice.value) {
