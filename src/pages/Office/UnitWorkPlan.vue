@@ -153,6 +153,5 @@ export default {
 <style scoped>
 .division-employee-container {
   position: relative;
-  padding-top: 16px;
 }
 </style>

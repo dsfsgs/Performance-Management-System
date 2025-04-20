@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- Header with navigation -->
-    <div class="row items-center justify-between q-mb-sm">
+    <div class="row items-center justify-between">
       <div class="text-h7">{{ division }}</div>
       <q-btn flat icon="arrow_back" label="Back" color="grey-8" class="q-ml-auto" @click="$emit('back')" />
     </div>
@@ -17,7 +16,7 @@
       </div>
 
       <div class="row q-gutter-sm">
-        <q-btn :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Other Employee" @click="$emit('create')"
+        <q-btn :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="$emit('create')"
           text-color="white" icon-color="white" unelevated no-caps />
       </div>
     </div>
