@@ -9,7 +9,7 @@
 
     <!-- Unit Work Plan Form -->
     <div v-if="showUWP">
-      <UnitWorkPlanForm @form-saved="onFormSaved" />
+      <UnitWorkPlanForm @form-saved="onFormSaved" :prefilledData="prefilledFormData" />
     </div>
 
     <!-- Combined Filter and Table Component -->
@@ -18,9 +18,9 @@
       :showTargetPeriodFilter="true" @generate-uwp="generateUnitWorkPlan" />
 
     <!-- Division Detail -->
-    <div v-if="selectedDivision" class="division-employee-container">
-      <DivisionEmployee :division="selectedDivision" :employeeData="selectedEmployeeData"
-        @back="selectedDivision = null" />
+    <div v-if="selectedDivision && !showUWP" class="division-employee-container">
+      <DivisionEmployee :division="selectedDivision" :targetPeriod="selectedRow ? selectedRow.targetPeriod : ''"
+        :employeeData="selectedEmployeeData" @back="handleBack" @add-employee="openUnitWorkPlanForm" />
     </div>
   </q-page>
 </template>
@@ -40,8 +40,10 @@ export default {
     return {
       showUWP: false,
       selectedDivision: null,
+      selectedRow: null,
       selectedEmployeeData: null,
       latestEmployeeAdded: null,
+      prefilledFormData: null,
       rows: [
         {
           id: 1,
@@ -91,6 +93,7 @@ export default {
   methods: {
     onDivisionClick(row) {
       this.selectedDivision = row.division;
+      this.selectedRow = row; // Store the complete row data
       // If we have a latest employee added for this division, select it
       if (this.latestEmployeeAdded && this.latestEmployeeAdded.division === row.division) {
         this.selectedEmployeeData = this.latestEmployeeAdded;
@@ -98,21 +101,45 @@ export default {
         this.selectedEmployeeData = null;
       }
     },
+    openUnitWorkPlanForm(data) {
+      // Setup prefilled data for the UnitWorkPlanForm
+      this.prefilledFormData = {
+        division: data.division,
+        targetPeriod: data.targetPeriod
+      };
+
+      // Show the UWP form
+      this.showUWP = true;
+    },
+    handleBack() {
+      this.selectedDivision = null;
+      this.selectedRow = null;
+    },
     onFormSaved(formData) {
       // Close the UWP form
       this.showUWP = false;
 
-      // Create a new row for the table
-      const newRow = {
-        id: this.rows.length + 1,
-        division: formData.division,
-        targetPeriod: formData.targetPeriod,
-        dateCreated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-        status: "Pending"
-      };
+      // Create a new row for the table if this is a new division/period combination
+      const existingRowIndex = this.rows.findIndex(
+        row => row.division === formData.division && row.targetPeriod === formData.targetPeriod
+      );
 
-      // Add to rows
-      this.rows.unshift(newRow);
+      if (existingRowIndex === -1) {
+        const newRow = {
+          id: this.rows.length + 1,
+          division: formData.division,
+          targetPeriod: formData.targetPeriod,
+          dateCreated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          status: "Pending"
+        };
+
+        // Add to rows
+        this.rows.unshift(newRow);
+        this.selectedRow = newRow;
+      } else {
+        // Use existing row
+        this.selectedRow = this.rows[existingRowIndex];
+      }
 
       // Store the employee data for potential display in DivisionEmployee
       this.latestEmployeeAdded = {
@@ -136,15 +163,7 @@ export default {
       });
     },
     generateUnitWorkPlan() {
-      // Implement the logic for generating unit work plan
-      console.log('Generating Unit Work Plan');
-
-      this.$q.notify({
-        message: 'Unit Work Plan generated successfully',
-        color: 'positive',
-        icon: 'check_circle',
-        position: 'top-right'
-      });
+      // Implementation remains the same
     }
   }
 };

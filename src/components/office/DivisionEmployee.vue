@@ -16,7 +16,7 @@
       </div>
 
       <div class="row q-gutter-sm">
-        <q-btn :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="$emit('create')"
+        <q-btn :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="handleAddEmployee"
           text-color="white" icon-color="white" unelevated no-caps />
       </div>
     </div>
@@ -77,12 +77,16 @@ export default {
       type: String,
       required: true
     },
+    targetPeriod: {  // Add this new prop to receive target period
+      type: String,
+      default: ""
+    },
     employeeData: {
       type: Object,
       default: null
     }
   },
-  emits: ['back', 'create'],
+  emits: ['back', 'create', 'add-employee'],
   data() {
     return {
       search: "",
@@ -293,6 +297,13 @@ export default {
         color: 'positive',
         icon: 'check_circle',
         position: 'top-right'
+      });
+    },
+    handleAddEmployee() {
+      // Emit event with both division and targetPeriod data
+      this.$emit('add-employee', {
+        division: this.division,
+        targetPeriod: this.targetPeriod
       });
     }
   },
