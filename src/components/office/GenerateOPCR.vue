@@ -541,42 +541,45 @@ export default {
     border: 1px solid #e0e0e0;
   }
 
-    th,
-    td {
-      border: 1px solid #e0e0e0;
-      padding: 12px;
-      vertical-align: middle;
-      color: #333;
-    }
-  ::v-deep th,
-  ::v-deep td {
+  th,
+  td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    vertical-align: middle;
+    color: #333;
+  }
+
+  :deep(th),
+  :deep(td) {
     border: 1px solid #e0e0e0;
     padding: 10px;
     vertical-align: middle;
   }
 
-    thead {
-      background-color: #263238;
-  ::v-deep thead {
+  thead {
+    background-color: #263238;
+  }
+
+  :deep(thead) {
     background-color: #f5f5f5;
   }
 
-      th {
-        font-weight: 500;
-        color: #ffffff;
-        font-size: 0.9rem;
-      }
-    }
-  ::v-deep thead th {
+  th {
+    font-weight: 500;
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+
+  :deep(thead th) {
     font-weight: 500;
     color: #424242;
   }
 
-  ::v-deep tbody {
+  :deep(tbody) {
     background-color: white;
   }
 
-  ::v-deep tbody tr:hover {
+  :deep(tbody tr:hover) {
     background-color: #fafafa;
   }
 }

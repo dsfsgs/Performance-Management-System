@@ -10,7 +10,7 @@
 
 <script>
 import { defineComponent } from 'vue'
-import AppSidebar from '../components/global/Sidebar.vue'
+import AppSidebar from '../components/global/SideBar.vue'
 
 export default defineComponent({
   name: 'MainLayout',

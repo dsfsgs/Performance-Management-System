@@ -29,7 +29,11 @@
           </q-tooltip>
         </q-btn>
         <q-btn v-if="!hideUnitWorkPlanButton" elevated rounded color="primary" label="Generate Unit Work Plan"
-          icon="print" @click="$emit('generate-uwp')" />
+          icon="print" @click="showUnitWorkPlanModal = true" :disable="!targetPeriodFilter">
+          <q-tooltip v-if="!targetPeriodFilter">
+            Please select a target period first
+          </q-tooltip>
+        </q-btn>
       </div>
     </div>
 
@@ -56,15 +60,22 @@
 
     <!-- Generate OPCR Modal -->
     <GenerateOPCR v-model="showGenerateModal" @save="handleGenerateOPCR" ref="generateOPCRRef" />
+
+    <!-- Unit Work Plan Report Modal -->
+    <q-dialog v-model="showUnitWorkPlanModal" full-width>
+      <UnitWorkPlanReport :targetPeriod="targetPeriodFilter" @close="showUnitWorkPlanModal = false" />
+    </q-dialog>
   </div>
 </template>
 
 <script>
 import GenerateOPCR from './GenerateOPCR.vue';
+import UnitWorkPlanReport from './UnitWorkPlanReport.vue';
 
 export default {
   components: {
-    GenerateOPCR
+    GenerateOPCR,
+    UnitWorkPlanReport
   },
   props: {
     rows: {
@@ -106,6 +117,7 @@ export default {
       targetPeriodFilter: null, // Changed to null to start empty
       officeFilter: null,
       showGenerateModal: false,
+      showUnitWorkPlanModal: false, // Added for UnitWorkPlanReport modal
       allColumns: [
         { name: "office", label: "Office", field: "office", align: "left", showIf: 'showOfficeColumn' },
         { name: "division", label: "Division", field: "division", align: "left" },

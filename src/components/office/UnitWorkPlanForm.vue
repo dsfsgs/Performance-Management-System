@@ -1,4 +1,3 @@
-      <!-- unitworkplanform -->
 <template>
   <q-page class="q-pa-md">
     <q-card class="my-card" flat bordered>
@@ -9,24 +8,24 @@
       <q-separator />
 
       <!-- Common fields section -->
-      <q-card-section>
-        <div class="row q-col-gutter-md q-mb-md">
+      <q-card-section class="common-fields-section">
+        <div class="row q-col-gutter-md">
           <div class="col-md-4 col-sm-12">
             <q-select filled v-model="selectedDivision" :options="divisionOptions" label="Division" stack-label
-              @update:model-value="fetchEmployees" class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
+              @update:model-value="fetchEmployees" class="no-bottom-margin"
+              :rules="[val => !!val || 'Field is required']" />
           </div>
           <div class="col-md-4 col-sm-12">
             <q-select filled v-model="targetPeriod" :options="periodOptions" label="Target Period" stack-label
-              class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
+              class="no-bottom-margin" :rules="[val => !!val || 'Field is required']" />
           </div>
           <div class="col-md-4 col-sm-12">
-            <q-select filled v-model="targetYear" :options="yearOptions" label="Year" stack-label class="q-mb-sm"
-              :rules="[val => !!val || 'Field is required']" use-input input-debounce="0" @filter="filterYears"
-              behavior="menu" />
+            <q-select filled v-model="targetYear" :options="yearOptions" label="Year" stack-label
+              class="no-bottom-margin" :rules="[val => !!val || 'Field is required']" use-input input-debounce="0"
+              @filter="filterYears" behavior="menu" />
           </div>
         </div>
       </q-card-section>
-
 
       <q-separator />
 
@@ -41,15 +40,14 @@
       <q-tab-panels v-model="activeTab" animated>
         <q-tab-panel v-for="(workPlan, empIndex) in employeeWorkPlans" :key="empIndex" :name="'emp-' + empIndex">
           <!-- Employee selection -->
-          <div class="row q-col-gutter-md q-mb-md">
+          <div class="row q-col-gutter-md">
             <div class="col-md-4 col-sm-12">
               <q-select filled v-model="workPlan.employeeId" :options="getFilteredEmployeeOptions(empIndex)"
                 label="Employee Name" stack-label option-label="name" option-value="id" emit-value map-options
                 @update:model-value="(val) => {
                   clearEmployeeData(empIndex);
                   fillEmployeeDetails(val, empIndex);
-                }" class="q-mb-sm"
-                :rules="[val => !!val || 'Field is required']" />
+                }" class="q-mb-sm" :rules="[val => !!val || 'Field is required']" />
             </div>
             <div class="col-md-4 col-sm-12">
               <q-input filled v-model="workPlan.rank" label="Rank" stack-label class="q-mb-sm" readonly
@@ -99,10 +97,16 @@
       <q-separator />
 
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn label="Reset" color="grey-7" flat @click="confirmReset" class="q-mr-sm" />
-        <q-btn icon="person_add" label="Add Other Employee" color="secondary" outline @click="addEmployee"
-          class="q-mr-sm" :disabled="!canAddMoreEmployees" />
-        <q-btn icon="save" label="Save Work Plan" color="primary" unelevated @click="saveForm" />
+        <div class="row full-width justify-between items-center">
+          <div>
+            <q-btn icon="person_add" label="Add Other Employee" color="secondary" outline @click="addEmployee"
+              :disabled="!canAddMoreEmployees" class="q-mr-sm" />
+          </div>
+          <div>
+            <q-btn label="Reset" color="grey-7" flat @click="confirmReset" class="q-mr-sm" />
+            <q-btn icon="save" label="Save Work Plan" color="primary" unelevated @click="saveForm" />
+          </div>
+        </div>
       </q-card-actions>
     </q-card>
   </q-page>
@@ -135,11 +139,7 @@ export default {
         employeeName: '',
         rank: '',
         position: '',
-        performanceStandards: [
-          {
-
-          }
-        ]
+        performanceStandards: [{}]
       }
     ]);
 
@@ -213,6 +213,7 @@ export default {
         leadership: {}
       };
     },
+
     // Get filtered employee options (excluding already selected employees)
     getFilteredEmployeeOptions(currentIndex) {
       // Get all employee IDs that are currently selected (except the current one)
@@ -243,11 +244,7 @@ export default {
         employeeName: '',
         rank: '',
         position: '',
-        performanceStandards: [
-          {
-
-          }
-        ]
+        performanceStandards: [{}]
       });
 
       // Switch to the new employee tab
@@ -295,14 +292,6 @@ export default {
       this.employeeWorkPlans[employeeIndex].performanceStandards.splice(standardIndex, 1);
     },
 
-    // async fillEmployeeDetails(employeeId, empIndex) {
-    //   const employee = this.employeeOptions.find(e => e.id === employeeId);
-    //   if (employee) {
-    //   this.employeeWorkPlans[empIndex].rank = employee.rank || '';
-    //   this.employeeWorkPlans[empIndex].position = employee.position || '';
-    //   this.employeeWorkPlans[empIndex].employeeName = employee.name || '';
-    //   }
-    // },
     async fillEmployeeDetails(employeeId, empIndex) {
       const store = useUnitWorkPlanStore(); // Get store instance
       const employee = this.employeeOptions.find(e => e.id === employeeId);
@@ -479,5 +468,24 @@ export default {
 
 .q-tab-panels {
   background-color: white;
+}
+
+/* Fix the spacing under division */
+.common-fields-section {
+  padding-bottom: 8px;
+}
+
+.no-bottom-margin {
+  margin-bottom: 0 !important;
+}
+
+/* Override Quasar's default bottom padding for fields in this section */
+.common-fields-section .q-field__bottom {
+  padding-top: 2px;
+  min-height: 16px;
+}
+
+.q-card-actions .row {
+  width: 100%;
 }
 </style>
