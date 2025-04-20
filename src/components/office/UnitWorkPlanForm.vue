@@ -123,7 +123,12 @@ export default {
   components: {
     PerformanceStandards
   },
-
+  props: {
+    prefilledData: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   setup() {
     // eslint-disable-next-line no-unused-vars
     const userStore = useUserStore();
@@ -432,8 +437,44 @@ export default {
         this.fetchDivisions();
       }
     }
+  },
+  watch: {
+    prefilledData: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal && Object.keys(newVal).length > 0) {
+          // Set the division and target period if they exist in the prefilled data
+          if (newVal.division) {
+            // Find the matching division option
+            const divOption = this.divisionOptions.find(
+              option => option.label === newVal.division || option.value === newVal.division
+            );
+
+            if (divOption) {
+              this.selectedDivision = divOption;
+              // If we set a division, make sure to fetch employees for that division
+              this.$nextTick(() => {
+                this.fetchEmployees();
+              });
+            }
+          }
+
+          if (newVal.targetPeriod) {
+            // Find the matching target period option
+            const periodOption = this.periodOptions.find(
+              option => option.label === newVal.targetPeriod || option.value === newVal.targetPeriod
+            );
+
+            if (periodOption) {
+              this.targetPeriod = periodOption;
+            }
+          }
+        }
+      }
+    }
   }
 };
+
 </script>
 
 <style scoped>
