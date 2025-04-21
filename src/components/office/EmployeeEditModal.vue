@@ -32,16 +32,12 @@
       <q-separator />
 
       <q-card-section>
-        <div class="row items-center justify-between q-mb-md">
-          <div class="section-title">Performance Standards</div>
-          <q-btn color="primary" icon="add" label="Add Standard" @click="addPerformanceStandard" unelevated />
-        </div>
 
         <div v-for="(standard, index) in editedStandards" :key="index" class="q-mb-lg">
           <q-card bordered class="standard-card">
             <q-card-section class="standard-header">
               <div class="row items-center">
-                <div class="text-subtitle1">Performance Standard {{ index + 1 }}</div>
+                <div class="section-title">Performance Standard {{ index + 1 }}</div>
                 <q-space />
                 <q-btn flat round color="negative" icon="delete" @click="removePerformanceStandard(index)" />
               </div>
@@ -57,6 +53,9 @@
                 v-model:standard-outcome-rows="standard.standardOutcomeRows" />
             </q-card-section>
           </q-card>
+        </div>
+        <div class="text-center">
+          <q-btn icon="add" label="Add Performance Standard" color="primary" outline @click="addPerformanceStandard" />
         </div>
       </q-card-section>
 

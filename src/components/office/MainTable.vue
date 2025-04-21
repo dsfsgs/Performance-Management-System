@@ -114,10 +114,10 @@ export default {
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
   data() {
     return {
-      targetPeriodFilter: null, // Changed to null to start empty
+      targetPeriodFilter: null,
       officeFilter: null,
       showGenerateModal: false,
-      showUnitWorkPlanModal: false, // Added for UnitWorkPlanReport modal
+      showUnitWorkPlanModal: false,
       allColumns: [
         { name: "office", label: "Office", field: "office", align: "left", showIf: 'showOfficeColumn' },
         { name: "division", label: "Division", field: "division", align: "left" },
@@ -197,9 +197,38 @@ export default {
       }
     },
     handleGenerateOPCR(formData) {
-      // Update status to "Pending" for all divisions in the selected target period
       this.$emit('update-status', this.targetPeriodFilter, 'Pending');
       this.$emit('generate-opcr', formData);
+    },
+    getLatestTargetPeriod() {
+      if (this.rows.length === 0) return null;
+
+      // Extract all target periods and parse them to Date objects
+      const periodsWithDates = this.rows.map(row => {
+        const period = row.targetPeriod;
+        // Assuming format is "Month Year" (e.g., "January 2023")
+        const [month, year] = period.split(' ');
+        const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+        return {
+          period,
+          date: new Date(year, monthIndex)
+        };
+      });
+
+      // Sort by date descending
+      periodsWithDates.sort((a, b) => b.date - a.date);
+
+      return periodsWithDates[0].period;
+    }
+  },
+  watch: {
+    rows: {
+      immediate: true,
+      handler(newRows) {
+        if (newRows && newRows.length > 0 && !this.targetPeriodFilter) {
+          this.targetPeriodFilter = this.getLatestTargetPeriod();
+        }
+      }
     }
   }
 }
