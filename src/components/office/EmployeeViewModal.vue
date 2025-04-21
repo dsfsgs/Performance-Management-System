@@ -342,6 +342,7 @@ export default {
   text-align: center;
   border-right: 1px solid #e8e8e8;
   font-size: 13px;
+  color: #444;
 }
 
 .header-cell:last-child,

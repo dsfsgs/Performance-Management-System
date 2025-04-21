@@ -29,7 +29,6 @@
 
       <q-separator />
 
-      <!-- Employee work plans (tabbed interface) -->
       <q-tabs v-model="activeTab" class="text-primary" align="left" narrow-indicator>
         <q-tab v-for="(workPlan, index) in employeeWorkPlans" :key="index" :name="'emp-' + index"
           :label="`Employee ${index + 1}${workPlan.employeeName ? ': ' + workPlan.employeeName : ''}`" />
@@ -82,7 +81,7 @@
 
           <!-- Add performance standard button -->
           <div class="text-center q-pt-md">
-            <q-btn icon="add" label="Add Another Performance Standard" color="primary" outline
+            <q-btn icon="add" label="Add Performance Standard" color="primary" outline
               @click="addPerformanceStandard(empIndex)" />
           </div>
 
@@ -99,12 +98,12 @@
       <q-card-actions align="right" class="q-pa-md">
         <div class="row full-width justify-between items-center">
           <div>
-            <q-btn icon="person_add" label="Add Other Employee" color="secondary" outline @click="addEmployee"
+            <q-btn icon="person_add" label="Add Employee" color="secondary" outline @click="addEmployee"
               :disabled="!canAddMoreEmployees" class="q-mr-sm" />
           </div>
           <div>
             <q-btn label="Reset" color="grey-7" flat @click="confirmReset" class="q-mr-sm" />
-            <q-btn icon="save" label="Save Work Plan" color="primary" unelevated @click="saveForm" />
+            <q-btn icon="save" label="Save" color="primary" unelevated @click="saveForm" />
           </div>
         </div>
       </q-card-actions>
