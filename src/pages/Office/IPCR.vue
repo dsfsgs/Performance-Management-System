@@ -6,13 +6,16 @@
 
     <div class="row q-mb-lg">
       <div class="col-12 col-md-4">
-        <q-select v-model="selectedDivision" :options="divisionOptions" outlined dense emit-value map-options
-          class="division-selector" />
+        <q-input v-model="searchText" outlined dense placeholder="Search employees..." clearable>
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
       </div>
     </div>
 
     <q-card flat bordered class="custom-table-container shadow-1">
-      <q-table :rows="sortedEmployees" :columns="employeeColumns" row-key="name" @row-click="onRowClick" hide-bottom
+      <q-table :rows="filteredEmployees" :columns="employeeColumns" row-key="name" @row-click="onRowClick" hide-bottom
         class="balanced-alignment-table">
         <!-- Header Slot -->
         <template v-slot:header>
@@ -37,35 +40,10 @@
       </q-table>
     </q-card>
 
-    <!-- Modal -->
-    <q-dialog v-model="showModal" persistent>
-      <q-card style="min-width: 500px" class="q-pa-md">
-        <q-card-section class="q-pb-none">
-          <div class="text-h6 text-weight-bold">IPCR Evaluation Details</div>
-          <q-separator class="q-my-md" />
-        </q-card-section>
-
-        <q-card-section v-if="selectedEmployee" class="q-pt-none">
-          <div class="text-subtitle1 q-mb-sm"><span class="text-weight-medium">Employee:</span> {{ selectedEmployee.name
-          }}
-          </div>
-          <div class="text-subtitle1 q-mb-sm"><span class="text-weight-medium">Position:</span> {{
-            selectedEmployee.position
-          }}</div>
-          <div class="text-subtitle1 q-mb-sm"><span class="text-weight-medium">Division:</span> {{
-            selectedEmployee.division
-          }}</div>
-          <div class="text-subtitle1 q-mb-sm"><span class="text-weight-medium">Status:</span> {{ selectedEmployee.status
-          }}
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-px-md q-pt-md">
-          <q-btn flat label="Cancel" color="grey-7" v-close-popup />
-          <q-btn label="Approve" color="positive" @click="confirmApproval"
-            :disable="selectedEmployee?.status === 'Approved'" />
-        </q-card-actions>
-      </q-card>
+    <!-- IPCR Report Component (replaces modal) -->
+    <q-dialog v-model="showIPCRReport" full-width>
+      <IPCRReport v-if="showIPCRReport" :employee="selectedEmployee" @close="showIPCRReport = false"
+        @approve="confirmApproval" />
     </q-dialog>
 
     <!-- Confirmation -->
@@ -94,13 +72,14 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import IPCRReport from 'src/components/office/IPCRReport.vue';
 
 const $q = useQuasar();
 
-const showModal = ref(false);
+const showIPCRReport = ref(false);
 const showConfirmation = ref(false);
 const selectedEmployee = ref(null);
-const selectedDivision = ref(null);
+const searchText = ref('');
 
 // Sample employees with 3 status types
 const employeeRows = ref([
@@ -127,32 +106,31 @@ const employeeColumns = [
   { name: 'status', label: 'Status', field: 'status', align: 'left' }
 ];
 
-// Division options
-const divisionOptions = computed(() => {
-  const divisions = [...new Set(employeeRows.value.map(emp => emp.division))];
-  return [{ label: 'Select Division', value: null }, ...divisions.map(d => ({ label: d, value: d }))];
-});
-
-// Filter by division
+// Filter by search text
 const filteredEmployees = computed(() => {
-  return !selectedDivision.value
-    ? employeeRows.value
-    : employeeRows.value.filter(emp => emp.division === selectedDivision.value);
+  if (!searchText.value) {
+    return [...employeeRows.value].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  }
+
+  const searchLower = searchText.value.toLowerCase();
+  return employeeRows.value
+    .filter(emp =>
+      emp.name.toLowerCase().includes(searchLower) ||
+      emp.position.toLowerCase().includes(searchLower) ||
+      emp.division.toLowerCase().includes(searchLower) ||
+      emp.status.toLowerCase().includes(searchLower)
+    )
+    .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 });
 
-// Sort by status order
-const sortedEmployees = computed(() => {
-  return [...filteredEmployees.value].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-});
-
-// Modal actions
+// IPCR report actions
 const onRowClick = (evt, row) => {
   selectedEmployee.value = row;
-  showModal.value = true;
+  showIPCRReport.value = true;
 };
 
 const confirmApproval = () => {
-  showModal.value = false;
+  showIPCRReport.value = false;
   showConfirmation.value = true;
 };
 
@@ -197,10 +175,6 @@ const getStatusIcon = (status) => {
 </script>
 
 <style scoped>
-.division-selector {
-  border-radius: 8px;
-}
-
 .custom-table-container {
   border-radius: 8px;
   overflow: hidden;
