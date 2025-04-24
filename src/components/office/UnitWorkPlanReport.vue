@@ -25,7 +25,12 @@
             </q-item-section>
           </q-item>
         </q-list>
+        <!-- Approved Button at the bottom -->
+        <div v-if="showApprovedButton" class="row justify-center q-mt-lg q-pb-lg">
+          <q-btn label="Approved" color="green" class="q-mt-md" />
+        </div>
       </div>
+      
 
       <!-- Report Content Area - Single Scrollable Container -->
       <div class="report-container">
@@ -168,6 +173,12 @@ import html2canvas from 'html2canvas';
 
 export default {
   name: 'UnitWorkPlanTabs',
+  props: {
+    showApprovedButton: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       selectedDivision: 0,

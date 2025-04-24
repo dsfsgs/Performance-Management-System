@@ -1,6 +1,6 @@
 <template>
+    <!-- App Header -->
     <div class="app-container">
-        <!-- App Header -->
         <div class="app-header">
             <div class="header-content">
                 <div class="text-h6 text-white">CITY OF TAGUM - HUMAN RESOURCE MANAGEMENT OFFICE</div>
@@ -67,7 +67,7 @@
                             <div class="text-subtitle2">Target Period: January - June 2025</div>
                         </div>
                         <div class="flex justify-end q-gutter-sm">
-                            <q-btn color="green-9" icon="print" label="Print" @click="printReport"
+                            <q-btn color="green-9" icon="print" label="Print" @click="directPrint"
                                 :loading="isPrinting" />
                             <q-btn color="green-9" icon="download" label="Download PDF" @click="downloadPdf"
                                 :loading="isGeneratingPdf" />
@@ -90,7 +90,7 @@
                     <q-tab-panels v-model="activeTab" animated>
                         <!-- IPCR Tab -->
                         <q-tab-panel name="ipcr">
-                            <div class="report-content" id="print-section">
+                            <div class="report-content" id="print-section-ipcr">
                                 <!-- Header with Logo -->
                                 <div class="header">
                                     <img src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png"
@@ -449,7 +449,7 @@
 
                         <!-- Performance Standard Tab -->
                         <q-tab-panel name="ps">
-                            <div class="report-content">
+                            <div class="report-content" id="print-section-ps">
                                 <!-- Header with Logo -->
                                 <div class="header-container">
                                     <div class="green-line">
@@ -570,7 +570,7 @@
 
                         <!-- Monthly Performance Output Tab -->
                         <q-tab-panel name="mpo">
-                            <div class="report-content">
+                            <div class="report-content" id="print-section-mpo">
                                 <!-- Header with Logo -->
                                 <div class="header-container">
                                     <div class="green-line">
@@ -699,7 +699,7 @@
 
                         <!-- Summary Monthly Performance Report Tab -->
                         <q-tab-panel name="smpr">
-                            <div class="report-content">
+                            <div class="report-content" id="print-section-smpr">
                                 <!-- Header with Logo -->
                                 <div class="header-container">
                                     <div class="green-line">
@@ -845,9 +845,14 @@
 
 <script setup>
 import { ref } from 'vue';
-import { jsPDF } from 'jspdf';
+import { useQuasar } from 'quasar';
+import { useIPCRStatus } from 'src/composables/useIPCRStatus';
 import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
+const $q = useQuasar();
+
+// Props
 const props = defineProps({
     employee: {
         type: Object,
@@ -855,38 +860,19 @@ const props = defineProps({
     }
 });
 
+// Emits
 defineEmits(['close', 'approve']);
 
-// Active tab state
+// State
 const activeTab = ref('ipcr');
 const isPrinting = ref(false);
 const isGeneratingPdf = ref(false);
 
-// Status style helpers
-const getStatusColor = (status) => {
-    switch (status) {
-        case 'Approved': return 'positive';
-        case 'Incomplete': return 'orange';
-        case 'Not Reviewed': return 'grey-6';
-        default: return 'grey';
-    }
-};
-
-const getStatusTextColor = (status) => {
-    return status === 'Not Reviewed' ? 'white' : 'white';
-};
-
-const getStatusIcon = (status) => {
-    switch (status) {
-        case 'Approved': return 'check_circle';
-        case 'Incomplete': return 'error_outline';
-        case 'Not Reviewed': return 'hourglass_empty';
-        default: return 'help_outline';
-    }
-};
+// Status helpers
+const { getStatusColor, getStatusTextColor, getStatusIcon } = useIPCRStatus();
 
 // Print report
-const printReport = () => {
+const directPrint = () => {
     isPrinting.value = true;
 
     // Create a hidden iframe with proper styling for printing
@@ -902,7 +888,14 @@ const printReport = () => {
 
     printFrame.onload = () => {
         const printDocument = printFrame.contentWindow.document;
-        const printSection = document.getElementById('print-section');
+        const printSectionId = `print-section-${activeTab.value}`;
+        const printSection = document.getElementById(printSectionId);
+        if (!printSection) {
+            console.error('Print section not found');
+            document.body.removeChild(printFrame);
+            isPrinting.value = false;
+            return;
+        }
 
         // Copy the CSS
         const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
@@ -913,83 +906,175 @@ const printReport = () => {
         // Add print-specific stylesheet
         const printStyle = document.createElement('style');
         printStyle.textContent = `
-      @page {
-        size: legal landscape;
-        margin: 10mm;
-      }
-      body { 
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-      }
-      .logo {
-        width: 120px;
-        height: auto;
-      }
-      .main-table {
-        table-layout: fixed;
-        width: 100%;
-      }
-      .main-table tr {
-        page-break-inside: avoid; /* Prevent rows from breaking across pages */
-      }
-      /* Force headers to NOT repeat */
-      .no-repeat-header {
-        display: table-header-group !important;
-        break-inside: avoid !important;
-        page-break-after: avoid !important;
-        page-break-inside: avoid !important;
-      }
-      /* Ensure tables don't break awkwardly */
-      .table-container {
-        page-break-inside: avoid;
-      }
-      /* Signature section handling */
-      .signature-section {
-        page-break-inside: avoid;
-        margin-top: 50px;
-      }
-    `;
+            @page {
+                size: legal landscape;
+                margin: 10mm;
+            }
+            body { 
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+            }
+            .app-container,
+            .report-container,
+            .report-content-scroll {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .report-content {
+                background-color: white !important;
+                padding: 20px !important;
+                margin: 0 !important;
+                width: 100% !important;
+                box-shadow: none !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+            thead {
+                display: table-row-group !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            /* Prevent thead from repeating */
+            thead tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            /* Prevent th from repeating */
+            th {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            tfoot {
+                display: table-row-group !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            /* Prevent tfoot from repeating */
+            tfoot tr {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+            }
+            th, td {
+                border: 1px solid #000 !important;
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid !important;
+            }
+            .no-print, 
+            .q-dialog__backdrop,
+            .q-tabs,
+            .report-header,
+            .division-nav,
+            .app-header {
+                display: none !important;
+            }
+            * {
+                color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .header-container {
+                display: flex !important;
+                align-items: center !important;
+                margin-bottom: 20px !important;
+            }
+            .city-logo {
+                margin-right: 20px !important;
+            }
+            .city-logo img {
+                width: 120px !important;
+                height: auto !important;
+            }
+            .header-text {
+                margin-left: 20px !important;
+            }
+            .green-banner {
+                background-color: #00703C !important;
+                color: white !important;
+                font-weight: bold !important;
+                padding: 8px 0 !important;
+                text-align: center !important;
+                width: 100% !important;
+            }
+            .mfo-column { width: 10%; }
+            .competency-column { width: 10%; }
+            .indicator-column { width: 10%; }
+            .output-column { width: 10%; }
+            .standard-column { width: 8%; }
+        `;
         printDocument.head.appendChild(printStyle);
 
-        // Clone and modify the content for printing
-        const content = printSection.cloneNode(true);
+        // Copy the content
+        printDocument.body.innerHTML = printSection.innerHTML;
 
-        // Remove buttons and other non-print elements
-        const buttons = content.querySelectorAll('button, .q-tabs, .q-tab-panels');
-        buttons.forEach(button => button.remove());
-
-        // Add the content to the iframe
-        printDocument.body.appendChild(content);
-
-        // Print after a short delay to ensure content is loaded
+        // Print and cleanup
         setTimeout(() => {
-            printFrame.contentWindow.focus();
             printFrame.contentWindow.print();
-            document.body.removeChild(printFrame);
-            isPrinting.value = false;
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+                isPrinting.value = false;
+            }, 500);
         }, 500);
     };
 
+    // Set iframe source to trigger onload
     printFrame.src = 'about:blank';
 };
 
-// Download as PDF
+// PDF download functionality
 const downloadPdf = async () => {
     isGeneratingPdf.value = true;
-
     try {
-        const element = document.getElementById('print-section');
+        const printSectionId = `print-section-${activeTab.value}`;
+        const element = document.getElementById(printSectionId);
+        if (!element) {
+            throw new Error('PDF section not found');
+        }
+
+        // Store original styles
+        const originalDisplayStyles = new Map();
+        document.querySelectorAll('.report-content').forEach(el => {
+            originalDisplayStyles.set(el, el.style.display);
+            el.style.display = 'none';
+        });
+
+        // Show only current tab content
+        element.style.display = 'block';
+
         const canvas = await html2canvas(element, {
-            scale: 2, // Higher quality
+            scale: 2,
             logging: false,
             useCORS: true,
-            allowTaint: true
+            allowTaint: true,
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+            backgroundColor: '#ffffff'
+        });
+
+        // Restore original display styles
+        document.querySelectorAll('.report-content').forEach(el => {
+            el.style.display = originalDisplayStyles.get(el) || '';
         });
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
-            orientation: 'portrait',
+            orientation: 'landscape',
             unit: 'mm',
             format: 'legal'
         });
@@ -999,9 +1084,15 @@ const downloadPdf = async () => {
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`${props.employee.name.replace(' ', '_')}_IPCR_Report.pdf`);
+        const fileName = `${props.employee.name.replace(/\s+/g, '_')}_${activeTab.value.toUpperCase()}_Report.pdf`;
+        pdf.save(fileName);
     } catch (error) {
         console.error('Error generating PDF:', error);
+        $q.notify({
+            type: 'negative',
+            message: `Failed to generate PDF: ${error.message}`,
+            position: 'top'
+        });
     } finally {
         isGeneratingPdf.value = false;
     }
@@ -1184,26 +1275,97 @@ const downloadPdf = async () => {
 }
 
 @media print {
-    body * {
-        visibility: hidden;
+    @page {
+        size: legal;
+        margin: 10mm;
     }
 
-    #print-section,
-    #print-section * {
-        visibility: visible;
-    }
-
-    #print-section {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
+    body {
         margin: 0;
-        padding: 0;
+        padding: 20px;
     }
 
-    .no-print {
+    .app-container {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .report-content {
+        background-color: white !important;
+        padding: 20px !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+
+    thead {
+        display: table-row-group !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Prevent thead from repeating */
+    thead tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    /* Prevent th from repeating */
+    th {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    tfoot {
+        display: table-row-group !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Prevent tfoot from repeating */
+    tfoot tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+    }
+
+    th, td {
+        border: 1px solid #000 !important;
+        padding: 8px !important;
+    }
+
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid !important;
+    }
+
+    .no-print, 
+    .q-dialog__backdrop,
+    .q-tabs,
+    .report-header,
+    .division-nav,
+    .app-header {
         display: none !important;
+    }
+
+    * {
+        color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 }
 </style>

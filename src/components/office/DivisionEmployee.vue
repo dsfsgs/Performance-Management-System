@@ -16,7 +16,7 @@
       </div>
 
       <div class="row q-gutter-sm">
-        <q-btn :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="handleAddEmployee"
+        <q-btn v-if="showAdd" :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="handleAddEmployee"
           text-color="white" icon-color="white" unelevated no-caps />
       </div>
     </div>
@@ -45,8 +45,8 @@
           <q-td :props="props">
             <div class="row items-center justify-center q-gutter-x-sm">
               <q-btn flat round size="sm" color="info" icon="visibility" @click="viewEmployee(props.row)" />
-              <q-btn flat round size="sm" color="primary" icon="edit" @click="editEmployee(props.row)" />
-              <q-btn flat round size="sm" color="negative" icon="delete" @click="deleteEmployee(props.row)" />
+              <q-btn v-if="showEdit" flat round size="sm" color="primary" icon="edit" @click="editEmployee(props.row)" />
+              <q-btn v-if="showDelete" flat round size="sm" color="negative" icon="delete" @click="deleteEmployee(props.row)" />
             </div>
           </q-td>
         </template>
@@ -77,13 +77,25 @@ export default {
       type: String,
       required: true
     },
-    targetPeriod: {  // Add this new prop to receive target period
+    targetPeriod: {  
       type: String,
       default: ""
     },
     employeeData: {
       type: Object,
       default: null
+    },
+    showAdd: {
+      type: Boolean,
+      default: true
+    },
+    showEdit: {
+      type: Boolean,
+      default: true
+    },
+    showDelete: {
+      type: Boolean,
+      default: true
     }
   },
   emits: ['back', 'create', 'add-employee'],
@@ -104,11 +116,9 @@ export default {
   },
   computed: {
     filteredEmployees() {
-      // If we have employee data from the prop, add it to the employees array
       let allEmployees = [...this.employees];
 
       if (this.employeeData && this.employeeData.employeeName) {
-        // Check if the employee already exists in the array
         const exists = allEmployees.some(emp =>
           emp.name === this.employeeData.employeeName &&
           emp.position === this.employeeData.position
@@ -251,7 +261,6 @@ export default {
       }).onOk(() => {
         this.employees = this.employees.filter(emp => emp.id !== employee.id);
 
-        // If the deleted employee is currently selected, clear the selection
         if (this.selectedEmployee && this.selectedEmployee.id === employee.id) {
           this.selectedEmployee = null;
         }
@@ -267,11 +276,9 @@ export default {
     handleSaveEmployee(data) {
       const { employee, performanceStandards } = data;
 
-      // Find the employee in the employees array
       const index = this.employees.findIndex(emp => emp.id === employee.id);
 
       if (index !== -1) {
-        // Update existing employee
         this.employees[index] = {
           ...this.employees[index],
           name: employee.name,
@@ -280,7 +287,6 @@ export default {
           performanceStandards: performanceStandards
         };
       } else {
-        // Add new employee
         const newEmployee = {
           id: `emp-${Date.now()}`,
           name: employee.name,
@@ -300,7 +306,6 @@ export default {
       });
     },
     handleAddEmployee() {
-      // Emit event with both division and targetPeriod data
       this.$emit('add-employee', {
         division: this.division,
         targetPeriod: this.targetPeriod
@@ -311,21 +316,16 @@ export default {
     this.fetchEmployees();
   },
   watch: {
-    // If employeeData changes (a new employee is added), refresh the filtered employees
     employeeData: {
       handler(newVal) {
         if (newVal && newVal.employeeName) {
-          // Handle the new employee data
-          this.$nextTick(() => {
-            const newEmployee = this.filteredEmployees.find(
-              emp => emp.name === newVal.employeeName && emp.position === newVal.position
-            );
-            if (newEmployee) {
-              // Optionally show this employee in the view modal
-              // this.selectedEmployee = newEmployee;
-              // this.showViewModal = true;
-            }
-          });
+          const newEmployee = this.filteredEmployees.find(
+            emp => emp.name === newVal.employeeName && emp.position === newVal.position
+          );
+          if (newEmployee) {
+            this.selectedEmployee = newEmployee;
+            this.showViewModal = true;
+          }
         }
       },
       deep: true
