@@ -6,14 +6,22 @@
         <div class="row q-col-gutter-md">
           <!-- Target Period Filter -->
           <div v-if="showTargetPeriodFilter" class="col-12" :class="filterColumnWidth">
-            <q-select v-model="targetPeriodFilter" :options="targetPeriodOptions" label="Filter by Target Period"
-              outlined dense clearable emit-value map-options />
-          </div>
-
-          <!-- Office Filter -->
-          <div v-if="showOfficeFilter" class="col-12" :class="filterColumnWidth">
-            <q-select v-model="officeFilter" :options="officeOptions" label="Filter by Office" outlined dense clearable
-              emit-value map-options />
+            <q-select 
+              v-model="targetPeriodFilter" 
+              :options="targetPeriodOptions" 
+              label="Filter by Target Period"
+              outlined 
+              dense 
+              clearable 
+              emit-value 
+              map-options
+              behavior="menu"
+              dropdown-icon="arrow_drop_down"
+              popup-content-class="dropdown-popup"
+              :menu-anchor="'bottom start'" 
+              :menu-self="'top start'"
+              class="full-width"
+            />
           </div>
         </div>
       </div>
@@ -94,14 +102,6 @@ export default {
       type: Boolean,
       default: false
     },
-    showOfficeFilter: {
-      type: Boolean,
-      default: false
-    },
-    showOfficeColumn: {
-      type: Boolean,
-      default: false
-    },
     showTargetPeriodFilter: {
       type: Boolean,
       default: true
@@ -109,7 +109,11 @@ export default {
     hideDivisionColumn: {
       type: Boolean,
       default: false
-    }
+    },
+    showOfficeColumn: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
   data() {
@@ -119,8 +123,8 @@ export default {
       showGenerateModal: false,
       showUnitWorkPlanModal: false,
       allColumns: [
-        { name: "office", label: "Office", field: "office", align: "left", showIf: 'showOfficeColumn' },
-        { name: "division", label: "Division", field: "division", align: "left" },
+        { name: "division", label: "Division", field: "division", align: "left", showIf: function() { return !this.hideDivisionColumn; } },
+        { name: "office", label: "Office", field: "office", align: "left", showIf: function() { return this.showOfficeColumn; } },
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
         { name: "status", label: "Status", field: "status", align: "left" }
@@ -131,8 +135,11 @@ export default {
   computed: {
     visibleColumns() {
       return this.allColumns.filter(col => {
-        if (col.showIf) {
-          return this[col.showIf];
+        if (typeof col.showIf === 'function') {
+          return col.showIf.call(this);
+        }
+        if (typeof col.showIf === 'boolean') {
+          return col.showIf;
         }
         return true;
       });
@@ -153,19 +160,16 @@ export default {
     },
     filteredRows() {
       return this.rows.filter(row => {
-        const matchesTargetPeriod = !this.targetPeriodFilter || row.targetPeriod === this.targetPeriodFilter;
-        const matchesOffice = !this.officeFilter || row.office === this.officeFilter;
-        return matchesTargetPeriod && matchesOffice;
+        return (!this.targetPeriodFilter || row.targetPeriod === this.targetPeriodFilter) 
+          && (!this.officeFilter || row.office === this.officeFilter);
       });
     },
     getFilterColumnClass() {
-      const activeFilters = (this.showTargetPeriodFilter ? 1 : 0) + (this.showOfficeFilter ? 1 : 0);
-      if (activeFilters === 0) return '';
-      return activeFilters === 1 ? 'col-md-4' : 'col-md-8';
+      if (!this.showTargetPeriodFilter && !this.showOfficeFilter) return '';
+      return 'col-md-4';
     },
     filterColumnWidth() {
-      const activeFilters = (this.showTargetPeriodFilter ? 1 : 0) + (this.showOfficeFilter ? 1 : 0);
-      return activeFilters > 1 ? 'col-md-6' : 'col-md-12';
+      return 'col-md-12';
     }
   },
   methods: {
@@ -233,3 +237,10 @@ export default {
   }
 }
 </script>
+
+<style>
+.dropdown-popup {
+  min-width: fit-content !important;
+  width: auto !important;
+}
+</style>
