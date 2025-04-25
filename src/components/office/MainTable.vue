@@ -71,7 +71,11 @@
 
     <!-- Unit Work Plan Report Modal -->
     <q-dialog v-model="showUnitWorkPlanModal" full-width>
-      <UnitWorkPlanReport :targetPeriod="targetPeriodFilter" @close="showUnitWorkPlanModal = false" />
+      <UnitWorkPlanReport 
+  :targetPeriod="targetPeriodFilter" 
+  @close="showUnitWorkPlanModal = false" 
+  :showApprovedButton="isUnitWorkPlanPage"
+/>
     </q-dialog>
   </div>
 </template>
@@ -114,6 +118,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isUnitWorkPlanPage: {
+    type: Boolean,
+    default: false
+  }
   },
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
   data() {

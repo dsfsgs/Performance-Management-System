@@ -27,7 +27,7 @@
         </q-list>
         <!-- Approved Button at the bottom -->
         <div v-if="showApprovedButton" class="row justify-center q-mt-lg q-pb-lg">
-          <q-btn label="Approved" color="green" class="q-mt-md" />
+          <q-btn label="Approve" color="green" class="q-mt-md" />
         </div>
       </div>
       
