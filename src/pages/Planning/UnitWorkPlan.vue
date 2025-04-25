@@ -29,12 +29,13 @@
     <!-- Office Selection & MainTable (shown when no division is selected) -->
     <div v-if="selectedOffice && !selectedDivision">
       <MainTable 
-        :rows="filteredRows" 
-        @row-click="onDivisionClick" 
-        :hideCreateButton="true" 
-        :hideOPCRButton="true"
-        :showOfficeColumn="true"
-      />
+  :rows="filteredRows" 
+  @row-click="onDivisionClick" 
+  :hideCreateButton="true" 
+  :hideOPCRButton="true"
+  :showOfficeColumn="true"
+  :isUnitWorkPlanPage="true"
+/>
     </div>
     
     <!-- Division Detail -->

@@ -141,8 +141,8 @@ export default {
       default: false
     },
     employee: {
-      type: Object,
-      required: true
+      type: [Object, null],
+      default: null
     },
     performanceStandards: {
       type: Array,
