@@ -1,461 +1,921 @@
 <template>
   <q-dialog v-model="showModal" persistent>
-    <q-card class="my-card" style="min-width: 1100px; max-width: 1200px;">
-      <q-card-section class="header-section row items-center justify-between">
-        <div class="text-h6">Generate OPCR</div>
-        <q-btn flat round dense icon="close" v-close-popup color="negative" />
+    <q-card class="my-card" style="width: 90vw; max-width: 1200px; border-radius: 12px;">
+      <!-- Header section -->
+      <q-card-section class="header-section row items-center justify-between"
+        style="background-color: #00703C; height: 50px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <div class="text-h6 text-white">Office of the City Mayor</div>
+        <q-btn flat round dense icon="close" v-close-popup color="white" />
       </q-card-section>
 
       <q-separator />
 
-      <q-card-section class="q-pa-md content-section">
-        <!-- 1. STRATEGIC FUNCTION Table -->
-        <div class="section-container q-mb-lg">
-          <div class="section-title q-mb-sm">A. STRATEGIC FUNCTION</div>
-          <div class="competency-table">
-            <table class="full-width">
-              <thead>
-                <tr>
-                  <th class="text-center" rowspan="2" width="20%">Function</th>
-                  <th class="text-center" colspan="3" width="30%">Required Competency & Proficiency Level</th>
-                  <th class="text-center" rowspan="2" width="20%">Success Indicator</th>
-                  <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
-                  <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Core</th>
-                  <th class="text-center">Technical</th>
-                  <th class="text-center">Leadership</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="mfo-content">
-                      <div class="mfo-header q-pa-sm q-mb-sm">
-                        MFO 1: Strategic Planning and Management
-                      </div>
-                      <q-separator class="q-mb-sm" />
-                      <div class="q-py-sm q-px-md text-center output-label">
-                        Output
-                      </div>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    SP - 4<br>
-                    DM - 4<br>
-                    PM - 4
-                  </td>
-                  <td class="text-center">
-                    SPP - 4<br>
-                    M&E - 4<br>
-                    RM - 4
-                  </td>
-                  <td class="text-center">
-                    LDP - 4<br>
-                    CDP - 4<br>
-                    TPM - 4
-                  </td>
-                  <td class="text-center">
-                    Annual strategic plans developed and implemented with 95% compliance rate
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="strategicBudget" placeholder="Enter budget"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.strategicBudget }"
-                      :error="errors.strategicBudget" error-message="Field is required" lazy-rules
-                      @blur="validateField('strategicBudget')" ref="strategicBudgetRef">
-                      <template v-slot:prepend>
-                        <q-icon name="attach_money" />
-                      </template>
-                    </q-input>
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="strategicAccountable" placeholder="Enter division/individual"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.strategicAccountable }"
-                      :error="errors.strategicAccountable" error-message="Field is required" lazy-rules
-                      @blur="validateField('strategicAccountable')" ref="strategicAccountableRef">
-                      <template v-slot:prepend>
-                        <q-icon name="people" />
-                      </template>
-                    </q-input>
-                  </td>
-                </tr>
-              </tbody>
+      <div class="row justify-between items-center q-px-md q-py-sm bg-grey-3">
+        <div class="text-h6">OPCR</div>
+        <div>
+          <q-btn label="Input" icon="edit" color="green" unelevated rounded class="action-btn q-mr-sm"
+            @click="showInputModal = true" />
+          <q-btn label="Print" icon="print" color="green" unelevated rounded class="action-btn q-mr-sm"
+            @click="printOPCR" />
+          <q-btn label="Save as PDF" icon="picture_as_pdf" color="green" unelevated rounded class="action-btn"
+            @click="exportToPDF" />
+        </div>
+      </div>
+
+      <q-separator />
+
+      <div style="overflow-y: auto; max-height: 70vh; padding: 8px;">
+        <div class="preview-container" id="opcr-preview">
+          <!-- Header Section with Logos -->
+          <div class="header-with-logos">
+            <div class="header-row row items-center justify-between">
+              <div class="header-logo">
+                <img src="../../assets/rotp.png" alt="Republic of the Philippines" style="height: 80px;">
+              </div>
+              <div class="header-text-content text-center">
+                <div class="text-bold" style="margin-bottom: 5px;">Republic of the Philippines</div>
+                <div class="text-bold" style="margin-bottom: 5px;">Province of Davao del Norte</div>
+                <div class="text-bold" style="font-size: 1rem; margin-bottom: 10px;">CITY OF TAGUM</div>
+                <div class="text-bold" style="font-size: 1.1rem; margin-top: 15px;">OFFICE PERFORMANCE COMMITMENT AND
+                  REVIEW (OPCR)</div>
+              </div>
+              <div class="header-logo">
+                <img src="../../assets/tagumlogo.png" alt="City of Tagum" style="height: 80px;">
+              </div>
+            </div>
+          </div>
+
+          <div class="commitment-container q-mt-md">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+              <!-- Commitment Statement -->
+              <tr>
+                <td style="width: 100%; padding: 8px; border: 1px solid #000; vertical-align: top;">
+                  I, <b>JANYLENE A. PALERMO, MM</b>, CHRM Officer of the CITY HUMAN RESOURCE MANAGEMENT OFFICE, commit
+                  to deliver and agree to be rated on the attainment of the following targets in accordance with the
+                  indicated measures for the period of <b>JANUARY–JUNE, 2024</b>.
+
+                  <!-- Signatory Info Bottom Right -->
+                  <div style="margin-top: 20px; text-align: right;">
+                    <div><b>JANYLENE A. PALERMO, MM</b></div>
+                    <div>City Human Resource Mgt. Officer</div>
+                    <div>Date: January 8, 2024</div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Approval Section -->
+              <tr>
+                <td style="width: 100%; padding: 0; border: 1px solid #000;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <th
+                        style="padding: 8px; width: 50%; border-right: 1px solid #000; text-align: left; border-bottom: 1px solid #000;">
+                        Approved by:
+                      </th>
+                      <th style="padding: 8px; width: 50%; text-align: center; border-bottom: 1px solid #000;">
+                        Date
+                      </th>
+                    </tr>
+                    <!-- Combined REY T. UY and City Mayor in one cell with line break -->
+                    <tr>
+                      <td
+                        style="padding: 8px; border-right: 1px solid #000; text-align: center; height: 120px; vertical-align: bottom;">
+                        <!-- Increased height and aligned to the bottom -->
+                        <div style="font-weight: bold; font-size: 1.1em;">REY T. UY</div>
+                        <hr style="margin: 5px 0; border-top: 1px solid #000;" />
+                        <div>City Mayor</div>
+                      </td>
+                      <td style="text-align: center;"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
             </table>
           </div>
-        </div>
 
-        <!-- 2. CORE FUNCTION Table -->
-        <div class="section-container q-mb-lg">
-          <div class="section-title q-mb-sm">B. CORE FUNCTION</div>
-          <div class="competency-table">
-            <table class="full-width">
-              <thead>
-                <tr>
-                  <th class="text-center" rowspan="2" width="20%">Function</th>
-                  <th class="text-center" colspan="3" width="30%">Required Competency & Proficiency Level</th>
-                  <th class="text-center" rowspan="2" width="20%">Success Indicator</th>
-                  <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
-                  <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Core</th>
-                  <th class="text-center">Technical</th>
-                  <th class="text-center">Leadership</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="mfo-content">
-                      <div class="mfo-header q-pa-sm q-mb-sm">
-                        MFO 1: Recruitment, Selection and Placement
-                      </div>
-                      <q-separator class="q-mb-sm" />
-                      <div class="q-py-sm q-px-md text-center output-label">
-                        Output
-                      </div>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    DSE - 4<br>
-                    EI - 4<br>
-                    IS - 4
-                  </td>
-                  <td class="text-center">
-                    P&O - 4<br>
-                    M&E - 4<br>
-                    RM - 4
-                  </td>
-                  <td class="text-center">
-                    TSC - 4<br>
-                    PSDM - 4<br>
-                    MPCR - 4
-                  </td>
-                  <td class="text-center">
-                    1030 Recruitment, Selection and Placement related documents approved and signed without lapses as
-                    per schedule
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="coreBudget" placeholder="Enter budget"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget }"
-                      :error="errors.coreBudget" error-message="Field is required" lazy-rules
-                      @blur="validateField('coreBudget')" ref="coreBudgetRef">
-                      <template v-slot:prepend>
-                        <q-icon name="attach_money" />
-                      </template>
-                    </q-input>
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="coreAccountable" placeholder="Enter division/individual"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable }"
-                      :error="errors.coreAccountable" error-message="Field is required" lazy-rules
-                      @blur="validateField('coreAccountable')" ref="coreAccountableRef">
-                      <template v-slot:prepend>
-                        <q-icon name="people" />
-                      </template>
-                    </q-input>
-                  </td>
-                </tr>
-              </tbody>
+          <!-- Rating Scale Table -->
+          <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <table class="rating-scale-table" style="border: 1px solid #000; border-collapse: collapse; width: auto;">
+              <tr>
+                <td style="border: 1px solid #000; padding: 6px 14px; min-width: 180px;">Outstanding</td>
+                <td style="border: 1px solid #000; padding: 6px 14px; text-align: center; min-width: 50px;">5</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6px 14px;">Very Satisfactory</td>
+                <td style="border: 1px solid #000; padding: 6px 14px; text-align: center;">4</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6px 14px;">Satisfactory</td>
+                <td style="border: 1px solid #000; padding: 6px 14px; text-align: center;">3</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6px 14px;">Unsatisfactory</td>
+                <td style="border: 1px solid #000; padding: 6px 14px; text-align: center;">2</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid #000; padding: 6px 14px;">Poor</td>
+                <td style="border: 1px solid #000; padding: 6px 14px; text-align: center;">1</td>
+              </tr>
             </table>
           </div>
-        </div>
 
-        <!-- 3. SUPPORT FUNCTION Table -->
-        <div class="section-container q-mb-lg">
-          <div class="section-title q-mb-sm">C. SUPPORT FUNCTION</div>
-          <div class="competency-table">
-            <table class="full-width">
-              <thead>
-                <tr>
-                  <th class="text-center" rowspan="2" width="20%">Function</th>
-                  <th class="text-center" colspan="3" width="30%">Required Competency & Proficiency Level</th>
-                  <th class="text-center" rowspan="2" width="20%">Success Indicator</th>
-                  <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
-                  <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Core</th>
-                  <th class="text-center">Technical</th>
-                  <th class="text-center">Leadership</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="mfo-content">
-                      <div class="q-py-sm q-px-md text-center output-label">
-                        Output
-                      </div>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    CS - 4<br>
-                    ORG - 4<br>
-                    CM - 4
-                  </td>
-                  <td class="text-center">
-                    AS - 4<br>
-                    FM - 4<br>
-                    LM - 4
-                  </td>
-                  <td class="text-center">
-                    TL - 4<br>
-                    PM - 4<br>
-                    DM - 4
-                  </td>
-                  <td class="text-center">
-                    Monthly financial reports prepared and submitted on time with 100% accuracy
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="supportBudget1" placeholder="Enter budget"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget1 }"
-                      :error="errors.supportBudget1" error-message="Field is required" lazy-rules
-                      @blur="validateField('supportBudget1')" ref="supportBudget1Ref">
-                      <template v-slot:prepend>
-                        <q-icon name="attach_money" />
-                      </template>
-                    </q-input>
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="supportAccountable1" placeholder="Enter division/individual"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable1 }"
-                      :error="errors.supportAccountable1" error-message="Field is required" lazy-rules
-                      @blur="validateField('supportAccountable1')" ref="supportAccountable1Ref">
-                      <template v-slot:prepend>
-                        <q-icon name="people" />
-                      </template>
-                    </q-input>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="mfo-content">
-                      <div class="q-py-sm q-px-md text-center output-label">
-                        Output
-                      </div>
-                    </div>
-                  </td>
-                  <td class="text-center">
-                    CS - 4<br>
-                    ORG - 4<br>
-                    CM - 4
-                  </td>
-                  <td class="text-center">
-                    LS - 4<br>
-                    FM - 4<br>
-                    LM - 4
-                  </td>
-                  <td class="text-center">
-                    TL - 4<br>
-                    PM - 4<br>
-                    DM - 4
-                  </td>
-                  <td class="text-center">
-                    Office supplies and equipment maintained and replenished with 98% availability rate
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="supportBudget2" placeholder="Enter budget"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget2 }"
-                      :error="errors.supportBudget2" error-message="Field is required" lazy-rules
-                      @blur="validateField('supportBudget2')" ref="supportBudget2Ref">
-                      <template v-slot:prepend>
-                        <q-icon name="attach_money" />
-                      </template>
-                    </q-input>
-                  </td>
-                  <td class="text-center">
-                    <q-input dense outlined v-model="supportAccountable2" placeholder="Enter division/individual"
-                      class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable2 }"
-                      :error="errors.supportAccountable2" error-message="Field is required" lazy-rules
-                      @blur="validateField('supportAccountable2')" ref="supportAccountable2Ref">
-                      <template v-slot:prepend>
-                        <q-icon name="people" />
-                      </template>
-                    </q-input>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <!-- Main OPCR Table -->
+          <table class="opcr-table q-mt-md"
+            style="border-collapse: collapse; border: 1px solid black; font-size: 11px;">
+            <!-- Table headers -->
+            <thead>
+              <tr>
+                <th rowspan="2" style="border: 1px solid black; width: 8%;">MFO</th>
+                <th rowspan="2" style="border: 1px solid black; width: 20%;">REQUIRED COMPETENCY & PROFIENCY LEVEL</th>
+                <th rowspan="2" style="border: 1px solid black; width: 12%;">SUCCESS INDICATOR</th>
+                <th rowspan="2" style="border: 1px solid black; width: 10%;">ALLOTED BUDGET</th>
+                <th rowspan="2" style="border: 1px solid black; width: 10%;">DIVISION/ INDIVIDUAL ACCOUNTABLE</th>
+                <th rowspan="2" style="border: 1px solid black; width: 12%;">ACTUAL ACCOMPLISHMENT</th>
+                <th colspan="4" style="border: 1px solid black; width: 12%;">RATING</th>
+                <th rowspan="2" style="border: 1px solid black; width: 10%;">PROFIENCY RESULT</th>
+                <th rowspan="2" style="border: 1px solid black; width: 6%;">REMARKS</th>
+              </tr>
+              <tr>
+                <th style="border: 1px solid black; width: 3%;">Q</th>
+                <th style="border: 1px solid black; width: 3%;">E</th>
+                <th style="border: 1px solid black; width: 3%;">T</th>
+                <th style="border: 1px solid black; width: 3%;">A</th>
+              </tr>
+            </thead>
 
-        <!-- Action Buttons -->
-        <q-card-actions align="right" class="q-pa-md">
-          <q-btn label="Print" icon="print" color="secondary" unelevated @click="printOPCR" rounded
-            class="action-btn q-mr-md" />
-          <q-btn label="Save" icon="save" color="primary" unelevated @click="validateAndSave" rounded
-            class="action-btn" />
-        </q-card-actions>
-      </q-card-section>
+            <tbody>
+              <!-- STRATEGIC FUNCTIONS -->
+              <tr>
+                <td colspan="12" class="section-header" style="border: 1px solid black;">STRATEGIC FUNCTIONS:</td>
+              </tr>
+              <tr>
+                <td style="border: 1px solid black;">Enhanced Competency of Workforce</td>
+                <td style="border: 1px solid black;">
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Monitoring & Evaluation (Superior)<br>
+                  8. Process Management (Superior)<br>
+                  9. Build Collaborative and Inclusive Working Relationships (Superior)
+                </td>
+                <td>18 provision of total workforce were given intervention without lapses as per schedule</td>
+                <td>P 19,101,441.00 (Personal Services)</td>
+                <td>ARPMID</td>
+                <td>36 provision of total workforce were given intervention without lapses as per schedule</td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior<br>
+                  9. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+
+              <!-- CORE FUNCTIONS -->
+              <tr>
+                <td colspan="12" class="section-header" style="border: 1px solid black;">CORE FUNCTIONS:</td>
+              </tr>
+              <!-- MFO 1 -->
+              <tr>
+                <td style="border: 1px solid black;">MFO 1<br>Recruitment, Selection and Placement</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Process Management (Superior)<br>
+                  8. Records Management (Superior)
+                </td>
+                <td>7,474 Recruitment, Selection and Placement related documents/activities approved and signed
+                  without
+                  lapses before the schedule</td>
+                <td>P 19,101,441.00 (Personal Services)</td>
+                <td>ARPMID</td>
+                <td>9,712 Recruitment, Selection and Selection related documents/activities approved and signed with
+                  lapses
+                  within the schedule</td>
+                <td>4</td>
+                <td>2</td>
+                <td>3</td>
+                <td>3</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+              <!-- MFO 2 -->
+              <tr>
+                <td>MFO 2<br>Performance Management</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Monitoring & Evaluation (Superior)<br>
+                  8. Managing Performance & Coaching for Results (Superior)
+                </td>
+                <td>1,100 Performance Management related documents/activities monitored without lapses within the
+                  schedule
+                </td>
+                <td>P 19,101,441.00 (Personal Services)</td>
+                <td>ARPMID</td>
+                <td>1,482 Performance Management related documents/activities monitored without lapses before the
+                  schedule
+                </td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+              <!-- MFO 3 -->
+              <tr>
+                <td>MFO 3<br>Employees Compensation and Benefits</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Process Management (Superior)<br>
+                  8. Records Management (Superior)
+                </td>
+                <td>1,194 employees Compensation and Benefits related documents/activities approved and signed
+                  without
+                  lapses before the schedule</td>
+                <td>P 19,101,441.00 (Personal Services)</td>
+                <td>BHRD, ARPMID</td>
+                <td>1,239 Employees Compensation and Benefits related documents/activities signed and approved with
+                  lapses
+                  within the schedule</td>
+                <td>3</td>
+                <td>2</td>
+                <td>3</td>
+                <td>2.67</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+              <!-- MFO 4 -->
+              <tr>
+                <td>MFO 4<br>Administrative Support Services</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Process Management (Superior)<br>
+                  8. Problem Solving and Decision Making (Superior)<br>
+                  9. Monitoring and Evaluation (Superior)
+                </td>
+                <td>1,691 Administrative Support Services related documents/activities monitored without lapses
+                  within the
+                  schedule</td>
+                <td>P 19,101,441.00 (Personal Services)</td>
+                <td>ARPMID, ASD, BHRD</td>
+                <td>3,430 Administrative Support Services related documents/activities signed and approved with
+                  lapses
+                  within the schedule</td>
+                <td>5</td>
+                <td>2</td>
+                <td>3</td>
+                <td>3.33</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior<br>
+                  9. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+              <!-- MFO 5 -->
+              <tr>
+                <td>MFO 5<br>Learning and Development</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Monitoring and Evaluation (Superior)<br>
+                  8. Thinking Strategically and Creatively (Superior)<br>
+                  9. Managing Performance & Coaching for Results (Superior)
+                </td>
+                <td>924 Learning and Development related documents/activities monitored without lapses before the
+                  schedule
+                </td>
+                <td>
+                  P 19,101,441.00 (Personal Services)<br>
+                  P 565,000.00 (Personal Enhancement Program)<br>
+                  P 1,000,000.00 (Burial and/or Financial Assistance to Employees)<br>
+                  P 900,000.00 (Holistic Health and Wellness Program)<br>
+                  P 999,500.00 (PCSA Celebration and Sports Activities)
+                </td>
+                <td>BHRD</td>
+                <td>744 Learning and Development related documents activities monitored without lapses before
+                  schedule</td>
+                <td>2</td>
+                <td>5</td>
+                <td>5</td>
+                <td>4</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior<br>
+                  9. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+              <!-- MFO 6 -->
+              <tr>
+                <td>MFO 6<br>Rewards and Recognition</td>
+                <td>
+                  1. Delivering Service Excellence (Superior)<br>
+                  2. Exemplifying Integrity (Superior)<br>
+                  3. Interpersonal Skills (Superior)<br>
+                  4. Planning and Organizing(Superior)<br>
+                  5. Partnering & Networking (Superior)<br>
+                  6. Attention to Detail (Superior)<br>
+                  7. Monitoring and Evaluation (Superior)<br>
+                  8. Records Management (Superior)
+                </td>
+                <td>50 Rewards and Recognition related documents/activities monitored without lapses before the
+                  schedule
+                </td>
+                <td>P 270,000.00 (Operationalization of PRAISE Committee)</td>
+                <td>BHRD</td>
+                <td>46 Rewards and Recognition related documents/activities monitored without lapses before schedule
+                </td>
+                <td>2</td>
+                <td>5</td>
+                <td>5</td>
+                <td>4</td>
+                <td>
+                  1. Superior<br>
+                  2. Superior<br>
+                  3. Superior<br>
+                  4. Superior<br>
+                  5. Superior<br>
+                  6. Superior<br>
+                  7. Superior<br>
+                  8. Superior
+                </td>
+                <td>Retained Competency</td>
+              </tr>
+
+              <!-- SUPPORT FUNCTIONS -->
+              <tr>
+                <td colspan="12" class="section-header" style="border: 1px solid black;">SUPPORT FUNCTIONS:</td>
+              </tr>
+              <!-- Health and Wellness -->
+              <tr>
+                <td>Health and Wellness</td>
+                <td>Not Applicable</td>
+                <td>80% of the total 24 hours required Health & Wellness activities attended without lapses on time
+                </td>
+                <td>P 19,750,511.00 (Personal Services)</td>
+                <td>ASD, ARPMID, BHRDD</td>
+                <td>24 hours required Health & Wellness activities attended without lapses before scheduled time
+                </td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>5</td>
+                <td>Not Applicable</td>
+                <td></td>
+              </tr>
+              <!-- Daily Time Record -->
+              <tr>
+                <td>Daily Time Record (DTR)</td>
+                <td>Not Applicable</td>
+                <td>156 DTRs reviewed without lapses within 2nd working days of the succeeding month</td>
+                <td>P 19,750,511.00 (Personal Services)</td>
+                <td>ASD, ARPMID, BHRDD</td>
+                <td>240 DTRs reviewed without lapses within the 2nd working day of the succeeding month</td>
+                <td>5</td>
+                <td>5</td>
+                <td>3</td>
+                <td>4.33</td>
+                <td>Not Applicable</td>
+                <td></td>
+              </tr>
+              <!-- Monitoring and Coaching -->
+              <tr>
+                <td>Monitoring and Coaching</td>
+                <td>Not Applicable</td>
+                <td>10 Monitoring/ Coaching evaluated and approved without lapses within schedule</td>
+                <td>P 19,750,511.00 (Personal Services)</td>
+                <td>ASD, ARPMID, BHRDD</td>
+                <td>12 Monitoring/ Coaching Journal evaluated and approved without lapses within schedule</td>
+                <td>4</td>
+                <td>5</td>
+                <td>3</td>
+                <td>4</td>
+                <td>Not Applicable</td>
+                <td></td>
+              </tr>
+              <!-- OPCR -->
+              <tr>
+                <td>Office Performance Commitment & Review (OPCR)</td>
+                <td>Not Applicable</td>
+                <td>1 OPCR Accomplishment and 1 OPCR Target reviewed and submitted without lapses within deadline
+                </td>
+                <td>P 19,750,511.00 (Personal Services)</td>
+                <td>ASD,ARPMID,BHRDD</td>
+                <td>1 OPCR Accomplishment and 1 OPCR Target reviewed and submitted with 1 revision beyond deadline
+                </td>
+                <td>5</td>
+                <td>3</td>
+                <td>1</td>
+                <td>3</td>
+                <td>Not Applicable</td>
+                <td></td>
+              </tr>
+              <!-- Personnel Mechanism Meetings -->
+              <tr>
+                <td>Personnel Mechanism Meetings</td>
+                <td>Not Applicable</td>
+                <td>10 Personnel Mechanism meetings administered without lapses as scheduled</td>
+                <td>P50,000.00 (Program for Personnel Mechanisms)</td>
+                <td>CHRMO</td>
+                <td>10 Personnel Mechanism meetings administered without lapses as scheduled</td>
+                <td>3</td>
+                <td>5</td>
+                <td>5</td>
+                <td>4.33</td>
+                <td>Not Applicable</td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td colspan="12" style="border: 1px solid black; padding: 0;">
+                  <div class="text-bold text-left q-mb-sm" style="padding: 8px;">AVERAGE RATING</div>
+                  <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
+                    <tr>
+                      <th colspan="2" style="border: 1px solid black; padding: 8px; width: 40%;">Category</th>
+                      <th
+                        style="border: 1px solid black; padding: 8px; width: 60%; text-align: center; font-style: italic;">
+                        COMPETENCY ASSESSMENT (Subjective)
+                      </th>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid black; padding: 8px;">Strategic Functions:</td>
+                      <td style="border: 1px solid black; padding: 8px; text-align: center;">5.00</td>
+                      <td rowspan="5" style="border: 1px solid black;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid black; padding: 8px;">Core Functions:</td>
+                      <td style="border: 1px solid black; padding: 8px; text-align: center;">3.72</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid black; padding: 8px;">Support Functions:</td>
+                      <td style="border: 1px solid black; padding: 8px; text-align: center;">4.13</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid black; padding: 8px;">Final Rating:</td>
+                      <td style="border: 1px solid black; padding: 8px; text-align: center;">4.19</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid black; padding: 8px;">Adjectival Rating:</td>
+                      <td style="border: 1px solid black; padding: 8px;"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- SIGNATORY SECTION -->
+              <tr>
+                <td colspan="12" style="border: 1px solid black; padding: 0;">
+                  <table style="width: 100%; border-collapse: collapse; border-top: 1px solid black;">
+                    <tr>
+                      <td style="border: 1px solid black; padding: 6px; border-right: none; width: 15%;">Assessed by:
+                      </td>
+                      <td colspan="4" style="border: 1px solid black; border-left: none; width: 60%;"></td>
+                      <td style="border: 1px solid black; padding: 6px; width: 15%;">Final Rating by:</td>
+                      <td style="border: 1px solid black; padding: 6px; width: 10%;">Date</td>
+                    </tr>
+                    <tr>
+                      <td rowspan="2" style="border: 1px solid black; height: 80px; border-right: none; width: 15%;">
+                      </td>
+                      <td rowspan="6" style="border: 1px solid black; width: 15%;"></td>
+                      <td rowspan="6" style="border: 1px solid black; width: 5%;"></td>
+                      <td rowspan="2" style="border: 1px solid black; height: 80px; width: 40%;"></td>
+                      <td rowspan="6" style="border: 1px solid black; width: 5%;"></td>
+                      <td rowspan="6"
+                        style="border: 1px solid black; text-align: center; vertical-align: bottom; padding-top: 10px; width: 15%;">
+                        <div class="text-weight-bold">REY T. UY</div>
+                        <div style="border-top: 3px solid black; margin-bottom: 3px;"></div>
+                        <div class="text-caption">City Mayor</div>
+                      </td>
+                      <td rowspan="6" style="border: 1px solid black; width: 10%;"></td>
+                    </tr>
+                    <tr></tr>
+                    <tr>
+                      <td style="border: 1px solid black; height: 20px; text-align: center; border-right: none;">
+                        Planning Office</td>
+                      <td style="border: 1px solid black; height: 20px; text-align: center;">Performance Management Team
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Input Modal -->
+      <q-dialog v-model="showInputModal">
+        <InputPage @save="handleSave" @close="showInputModal = false" />
+      </q-dialog>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
+import { ref } from 'vue';
+import InputPage from './InputPage.vue';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 export default {
+  components: {
+    InputPage
+  },
   props: {
     show: {
       type: Boolean,
       default: false
     }
   },
-  data() {
-    return {
-      showModal: this.show,
-      strategicBudget: '',
-      strategicAccountable: '',
-      coreBudget: '',
-      coreAccountable: '',
-      supportBudget1: '',
-      supportAccountable1: '',
-      supportBudget2: '',
-      supportAccountable2: '',
-      errors: {
-        strategicBudget: false,
-        strategicAccountable: false,
-        coreBudget: false,
-        coreAccountable: false,
-        supportBudget1: false,
-        supportAccountable1: false,
-        supportBudget2: false,
-        supportAccountable2: false
-      },
-      firstInvalidFieldFocused: false
-    }
-  },
-  methods: {
-    validateField(fieldName) {
-      const isValid = !!this[fieldName];
-      this.errors[fieldName] = !isValid;
-      return isValid;
-    },
-    validateForm() {
-      const requiredFields = [
-        'strategicBudget', 'strategicAccountable',
-        'coreBudget', 'coreAccountable',
-        'supportBudget1', 'supportAccountable1',
-        'supportBudget2', 'supportAccountable2'
-      ];
+  setup(props, { emit }) {
+    const showModal = ref(props.show);
+    const showInputModal = ref(false);
 
-      let isValid = true;
+    const printOPCR = () => {
+      const printContent = document.getElementById('opcr-preview').cloneNode(true);
 
-      requiredFields.forEach(field => {
-        const fieldValid = this.validateField(field);
-        if (!fieldValid) {
-          isValid = false;
-          if (this.$refs[field + 'Ref'] && !this.firstInvalidFieldFocused) {
-            this.$refs[field + 'Ref'].focus();
-            this.firstInvalidFieldFocused = true;
+      const printStyles = `
+        <style>
+          @page {
+            size: legal landscape;
+            margin: 10mm;
           }
-        }
-      });
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+          }
+          .header-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            margin-bottom: 15px !important;
+          }
+          .header-text-content {
+            flex-grow: 1 !important;
+            text-align: center !important;
+            padding: 0 20px !important;
+          }
+          .header-text-content div {
+            margin: 5px 0 !important;
+          }
+          .header-text-content div:last-child {
+            margin-top: 15px !important;
+          }
+          .header-logo {
+            flex-shrink: 0 !important;
+            width: 80px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .header-logo img {
+            max-height: 70px !important;
+            width: auto !important;
+            height: auto !important;
+            display: block !important;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
+          }
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            vertical-align: top;
+          }
+          .section-header {
+            background-color: #d9d9d9 !important;
+            font-weight: bold;
+          }
+          .rating-scale-table {
+            float: right;
+            margin-left: 20px;
+            margin-bottom: 10px;
+            width: auto;
+            max-width: 180px;
+          }
+        </style>
+      `;
 
-      return isValid;
-    },
-    shakeAllInvalidFields() {
-      Object.keys(this.errors).forEach(field => {
-        if (this.errors[field]) {
-          this.$refs[field + 'Ref'].$el.classList.remove('shake-animation');
-          void this.$refs[field + 'Ref'].$el.offsetWidth;
-          this.$refs[field + 'Ref'].$el.classList.add('shake-animation');
-        }
-      });
-    },
-    validateAndSave() {
-      this.firstInvalidFieldFocused = false;
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
 
-      if (!this.validateForm()) {
-        this.$q.notify({
-          type: 'negative',
-          message: 'Please fill all required fields',
-          position: 'top',
-          icon: 'warning',
-          timeout: 3000,
-          actions: [
-            { icon: 'close', color: 'white' }
-          ]
-        });
-        this.shakeAllInvalidFields();
-        return;
-      }
-
-      this.$q.notify({
-        type: 'positive',
-        message: 'OPCR saved successfully!',
-        icon: 'check_circle',
-        timeout: 2000,
-        actions: [
-          { icon: 'close', color: 'white' }
-        ]
-      });
-      this.$emit('save', {
-        strategic: {
-          budget: this.strategicBudget,
-          accountable: this.strategicAccountable
-        },
-        core: {
-          budget: this.coreBudget,
-          accountable: this.coreAccountable
-        },
-        support: {
-          budget1: this.supportBudget1,
-          accountable1: this.supportAccountable1,
-          budget2: this.supportBudget2,
-          accountable2: this.supportAccountable2
-        }
-      });
-    },
-    printOPCR() {
-      // Create a print-friendly version of the content
-      const printContent = document.createElement('div');
-      printContent.innerHTML = document.querySelector('.content-section').innerHTML;
-
-      // Create a new window for printing
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(`
         <html>
           <head>
             <title>OPCR Report</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-              th { background-color: #f2f2f2; }
-              .section-title { font-size: 16px; font-weight: bold; margin: 15px 0; }
-              .mfo-header { font-weight: bold; background-color: #f9f9f9; padding: 5px; }
-              .output-label { font-weight: bold; }
-              @media print {
-                .no-print { display: none; }
-              }
-            </style>
+            ${printStyles}
           </head>
           <body>
-            <h1 style="text-align: center;">OPCR Report</h1>
-            ${printContent.innerHTML.replace(/\\<q-input.*?\\<\/q-input\\>/g, function (match) {
-        const valueMatch = match.match(/v-model="([^"]+)"/);
-        if (valueMatch && valueMatch[1]) {
-          return this[valueMatch[1]] || '_______________';
-        }
-        return '_______________';
-      })}
+            ${printContent.innerHTML}
           </body>
         </html>
       `);
+      iframeDoc.close();
 
-      // Remove buttons and inputs from the print version
-      const elementsToRemove = printWindow.document.querySelectorAll('.q-btn, .q-field');
-      elementsToRemove.forEach(el => {
-        el.parentNode.removeChild(el);
+      iframe.onload = function () {
+        setTimeout(() => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          document.body.removeChild(iframe);
+        }, 500);
+      };
+    };
+
+    const exportToPDF = async () => {
+      // Create a temporary iframe to match print styling
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '1000px'; // Set a reasonable width for rendering
+      iframe.style.height = '1000px';
+      document.body.appendChild(iframe);
+
+      const content = document.getElementById('opcr-preview');
+
+      // Apply the same styling as the print function
+      const printStyles = `
+        <style>
+          @page {
+            size: legal landscape;
+            margin: 10mm;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+          }
+          .header-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            margin-bottom: 15px !important;
+          }
+          .header-text-content {
+            flex-grow: 1 !important;
+            text-align: center !important;
+            padding: 0 20px !important;
+          }
+          .header-text-content div {
+            margin: 5px 0 !important;
+          }
+          .header-text-content div:last-child {
+            margin-top: 15px !important;
+          }
+          .header-logo {
+            flex-shrink: 0 !important;
+            width: 80px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          .header-logo img {
+            max-height: 70px !important;
+            width: auto !important;
+            height: auto !important;
+            display: block !important;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
+          }
+          tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+          }
+          th, td {
+            border: 1px solid #000;
+            padding: 4px;
+            vertical-align: top;
+          }
+          .section-header {
+            background-color: #d9d9d9 !important;
+            font-weight: bold;
+          }
+          .rating-scale-table {
+            float: right;
+            margin-left: 20px;
+            margin-bottom: 10px;
+            width: auto;
+            max-width: 180px;
+          }
+        </style>
+      `;
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(`
+        <html>
+          <head>
+            <title>OPCR Report</title>
+            ${printStyles}
+          </head>
+          <body>
+            ${content.innerHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      // Wait for iframe content to load
+      await new Promise(resolve => {
+        iframe.onload = resolve;
+        // If already loaded, resolve immediately
+        if (iframeDoc.readyState === 'complete') {
+          resolve();
+        }
       });
 
-      // Trigger print
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-    }
+      try {
+        // Create PDF with the same dimensions as legal landscape
+        // Legal size is 8.5" x 14" (612 x 1008 points)
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'legal',
+          compress: true
+        });
+
+        // Get the content from iframe
+        const element = iframeDoc.body;
+
+        // Match the print margins (10mm)
+        const margins = { top: 10, right: 10, bottom: 10, left: 10 };
+
+        // Calculate available space for content
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        // Set up html2canvas options
+        const options = {
+          scale: 1.5, // Higher scale for better quality while maintaining size
+          useCORS: true,
+          allowTaint: true,
+          scrollX: 0,
+          scrollY: 0
+        };
+
+        // Generate canvas from the element
+        const canvas = await html2canvas(element, options);
+
+        // Calculate dimensions
+        const imgWidth = pageWidth - margins.left - margins.right;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Calculate pages needed
+        const pageCount = Math.ceil(imgHeight / (pageHeight - margins.top - margins.bottom));
+
+        // Add content page by page
+        for (let i = 0; i < pageCount; i++) {
+          if (i > 0) {
+            pdf.addPage('legal', 'landscape');
+          }
+
+          // Calculate which portion of the image to use for this page
+          const sourceY = i * canvas.height / pageCount;
+          const sourceHeight = canvas.height / pageCount;
+
+          // Create a new canvas for this page section
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sourceHeight;
+          const ctx = pageCanvas.getContext('2d');
+
+          // Draw the portion of the source canvas
+          ctx.drawImage(
+            canvas,
+            0, sourceY, canvas.width, sourceHeight,
+            0, 0, pageCanvas.width, pageCanvas.height
+          );
+
+          // Add to PDF
+          const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+          pdf.addImage(
+            pageImgData,
+            'JPEG',
+            margins.left,
+            margins.top,
+            imgWidth,
+            (pageHeight - margins.top - margins.bottom)
+          );
+        }
+
+        pdf.save('OPCR-JAN-JUNE-2024.pdf');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+      } finally {
+        // Clean up
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }
+    };
+
+    const handleSave = (opcrData) => {
+      emit('save', opcrData);
+      showInputModal.value = false;
+    };
+
+    return {
+      showModal,
+      showInputModal,
+      printOPCR,
+      exportToPDF,
+      handleSave
+    };
   },
   watch: {
     show(newVal) {
@@ -471,133 +931,423 @@ export default {
 </script>
 
 <style scoped>
+/* Header Styles */
+.header-with-logos {
+  margin-bottom: 20px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.header-text-content {
+  flex-grow: 1;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.header-text-content div {
+  margin: 5px 0;
+}
+
+.header-text-content div:last-child {
+  margin-top: 15px;
+}
+
+.header-logo {
+  flex-shrink: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-logo img {
+  max-height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Print-specific styles */
+@media print {
+  .header-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 15px !important;
+  }
+
+  .header-text-content div {
+    margin: 5px 0 !important;
+  }
+
+  .header-text-content div:last-child {
+    margin-top: 15px !important;
+  }
+
+  .header-logo img {
+    max-height: 70px !important;
+  }
+}
+
 .my-card {
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
 
 .header-section {
-  background-color: #6b7280;
-  /* Changed to a medium gray color */
-  padding: 18px 20px;
+  padding: 0 20px;
   color: #ffffff;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .content-section {
-  padding: 24px;
+  padding: 16px;
   background-color: #ffffff;
-}
-
-.section-container {
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 20px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-  margin-bottom: 24px;
-}
-
-.section-container:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1a2433;
-  padding-left: 10px;
-  border-left: 4px solid #1976d2;
-  margin-bottom: 16px;
-}
-
-.mfo-header {
-  border-radius: 6px;
-  background-color: #f5f7fa;
-  font-weight: 500;
-  text-align: center;
-}
-
-.mfo-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.output-label {
-  font-weight: 500;
-  color: #455a64;
-}
-
-.competency-table {
-  :deep(table) {
-    border-collapse: collapse;
-    width: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e0e0e0;
-  }
-
-  th,
-  td {
-    border: 1px solid #e0e0e0;
-    padding: 12px;
-    vertical-align: middle;
-    color: #333;
-  }
-
-  :deep(th),
-  :deep(td) {
-    border: 1px solid #e0e0e0;
-    padding: 10px;
-    vertical-align: middle;
-  }
-
-  thead {
-    background-color: #263238;
-  }
-
-  :deep(thead) {
-    background-color: #f5f5f5;
-  }
-
-  th {
-    font-weight: 500;
-    color: #ffffff;
-    font-size: 0.9rem;
-  }
-
-  :deep(thead th) {
-    font-weight: 500;
-    color: #424242;
-  }
-
-  :deep(tbody) {
-    background-color: white;
-  }
-
-  :deep(tbody tr:hover) {
-    background-color: #fafafa;
-  }
-}
-
-:deep(.q-field--outlined .q-field__control) {
-  height: 40px;
-  min-height: 40px;
-  border-radius: 6px;
-}
-
-:deep(.q-field--error .q-field__bottom) {
-  padding-top: 4px;
-  color: #f44336;
-  font-size: 0.75rem;
 }
 
 .q-separator {
   background-color: rgba(0, 0, 0, 0.08);
   height: 1px;
+}
+
+.action-btn {
+  min-width: 100px;
+  padding: 6px 12px;
+  background-color: #00703C;
+  color: white;
+}
+
+.action-btn:hover {
+  background-color: #005a30;
+}
+
+.preview-container {
+  padding: 12px;
+  background-color: white;
+}
+
+.city-logo {
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+}
+
+.green-line {
+  width: 80px;
+  height: 110px;
+  margin-right: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.line {
+  width: 80px;
+  height: 40px;
+  background-color: #036431;
+}
+
+.header-text {
+  margin-left: 16px;
+  width: 100%;
+}
+
+.padded-text {
+  padding-left: 8px;
+}
+
+.green-banner {
+  background-color: #036431;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 6px 0;
+  text-align: left;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* Tables */
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.info-table td {
+  border: 1px solid #000;
+  padding: 6px;
+}
+
+.main-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.main-table th,
+.main-table td {
+  border: 1px solid #000;
+  padding: 6px;
+  font-size: 11px;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.main-table th {
+  background-color: #f2f2f2;
+}
+
+/* Column width specifications */
+.mfo-column {
+  width: 10%;
+}
+
+.competency-column {
+  width: 9%;
+}
+
+.competency-header {
+  width: 27%;
+}
+
+.indicator-column {
+  width: 13%;
+}
+
+.output-column {
+  width: 10%;
+}
+
+.standards-header {
+  width: 40%;
+}
+
+.standard-column {
+  width: 8%;
+}
+
+.mfo-cell {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Table container with horizontal scrolling for small screens only */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Commitment and Approval Section */
+.commitment-container table {
+  border: 1px solid #000;
+}
+
+.commitment-container td {
+  padding: 6px;
+  vertical-align: top;
+}
+
+.commitment-container .approval-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Final Rating Section */
+.final-rating-container {
+  margin-top: 16px;
+}
+
+.final-rating-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.final-rating-container table td {
+  border: 1px solid #000;
+  padding: 4px;
+}
+
+/* Rating columns in main table */
+.opcr-table th[rowspan="2"] {
+  width: 3%;
+}
+
+/* Responsive design for smaller screens */
+@media screen and (max-width: 1200px) {
+  .main-table {
+    font-size: 10px;
+  }
+
+  .main-table th,
+  .main-table td {
+    padding: 4px;
+    font-size: 10px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+
+  .main-table th,
+  .main-table td {
+    padding: 3px;
+    font-size: 9px;
+  }
+
+  .header-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .green-line {
+    display: none;
+  }
+
+  .header-text {
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+#opcr-preview {
+  padding: 12px;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  color: #000;
+}
+
+#opcr-preview .opcr-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 10px;
+  border: 1px solid #000 !important;
+}
+
+#opcr-preview .opcr-table th,
+#opcr-preview .opcr-table td {
+  border: 1px solid #000 !important;
+  padding: 4px;
+  vertical-align: top;
+}
+
+#opcr-preview .opcr-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: center;
+}
+
+#opcr-preview .section-header {
+  background-color: #d9d9d9;
+  font-weight: bold;
+  padding: 4px;
+}
+
+/* Rating Scale Table */
+.rating-scale-table {
+  border: 1px solid #000;
+  border-collapse: collapse;
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 10px;
+  width: auto;
+  max-width: 180px;
+  font-size: 10px;
+}
+
+.rating-scale-table td {
+  padding: 6px 14px;
+  min-width: auto;
+}
+
+/* Signatory section specific styles */
+#opcr-preview table[style*="border-top: 1px solid black"] td {
+  padding: 6px 4px !important;
+}
+
+@media print {
+  body {
+    font-family: Arial, sans-serif !important;
+    font-size: 11px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    size: legal landscape !important;
+    margin: 10mm !important;
+  }
+
+  .text-center,
+  .text-center * {
+    text-align: center !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    border: 1px solid #000 !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #000 !important;
+    padding: 4px !important;
+    vertical-align: top !important;
+  }
+
+  .section-header {
+    background-color: #d9d9d9 !important;
+    font-weight: bold !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .rating-scale-table {
+    float: right !important;
+    margin-left: 20px !important;
+    margin-bottom: 10px !important;
+    width: auto !important;
+    max-width: 180px !important;
+    font-size: 10px !important;
+  }
+
+  .rating-scale-table td {
+    padding: 4px 8px !important;
+    min-width: auto !important;
+  }
+
+  #opcr-preview table[style*="border-top: 1px solid black"] td:last-child {
+    width: 10% !important;
+  }
+
+  #opcr-preview {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
 }
 </style>

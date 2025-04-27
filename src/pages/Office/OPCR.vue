@@ -14,11 +14,11 @@
 <script>
 import MainTable from 'src/components/office/MainTable.vue';
 import GenerateOPCR from 'src/components/office/GenerateOPCR.vue';
-
 export default {
   components: {
     MainTable,
     GenerateOPCR
+
   },
   data() {
     return {
