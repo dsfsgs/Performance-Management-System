@@ -11,7 +11,6 @@
 
 <script>
 import MainTable from 'src/components/office/MainTable.vue';
-
 export default {
   components: {
     MainTable
