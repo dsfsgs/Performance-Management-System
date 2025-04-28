@@ -1,3 +1,4 @@
+<!--UnitWorkplanReport.vue-->
 <template>
   <div class="app-container">
     <!-- App Header -->
@@ -24,7 +25,7 @@
             @click="selectDivision(division.division, division.target_period)" active-class="active-division">
             <q-item-section>
               <q-item-label>{{ division.division }}</q-item-label>
-              <q-item-label caption>{{ division.target_period }}</q-item-label>
+              <!-- <q-item-label caption>{{ division.target_period }}</q-item-label> -->
             </q-item-section>
           </q-item>
         </q-list>

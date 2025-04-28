@@ -23,7 +23,7 @@
 
     <!-- Office Selection Modal -->
     <q-dialog v-model="showOfficeModal" persistent transition-show="scale" transition-hide="scale">
-      <q-card>
+      <q-card style="width: 100%; max-width: 50vw;">
         <q-card-section>
           <div class="text-h6">Select Office</div>
           <div class="text-caption text-grey-7">Step 1 of 3</div>
@@ -58,7 +58,7 @@
 
     <!-- Employee Selection Modal -->
     <q-dialog v-model="showEmployeeModal" persistent transition-show="scale" transition-hide="scale">
-      <q-card>
+      <q-card style="width: 100%; max-width: 50vw;">
         <q-card-section>
           <div class="text-h6">Select Employee</div>
           <div class="text-caption text-grey-7">Step 2 of 3</div>
@@ -96,7 +96,7 @@
 
     <!-- Role Selection Modal -->
     <q-dialog v-model="showRoleModal" persistent transition-show="scale" transition-hide="scale">
-      <q-card>
+      <q-card style="width: 100%; max-width: 50vw;">
         <q-card-section>
           <div class="text-h6">Assign Role</div>
           <div class="text-caption text-grey-7">Step 3 of 3</div>
@@ -121,7 +121,7 @@
 
     <!-- Confirmation Dialog -->
     <q-dialog v-model="showConfirmation" persistent transition-show="scale" transition-hide="scale">
-      <q-card>
+      <q-card style="width: 100%; max-width: 50vw;">
         <q-card-section>
           <div class="text-h6">Confirm User Creation</div>
         </q-card-section>
@@ -352,7 +352,7 @@ export default {
       );
     };
 
-  
+
     // Update the openEmployeeModal function
     const openEmployeeModal = () => {
       if (selectedOffice.value) {

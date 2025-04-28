@@ -28,19 +28,19 @@
 
     <!-- Office Selection & MainTable (shown when no division is selected) -->
     <div v-if="selectedOffice && !selectedDivision">
-      <MainTable 
-        :rows="filteredRows" 
-        @row-click="onDivisionClick" 
-        :hideCreateButton="true" 
+      <MainTable
+        :rows="filteredRows"
+        @row-click="onDivisionClick"
+        :hideCreateButton="true"
         :hideOPCRButton="true"
         :showOfficeColumn="true"
       />
     </div>
-    
+
     <!-- Division Detail -->
     <div v-if="selectedDivision && selectedOffice" class="division-employee-container">
-      <DivisionEmployee 
-        :division="selectedDivision" 
+      <DivisionEmployee
+        :division="selectedDivision"
         :targetPeriod="selectedTargetPeriod"
         :employeeData="null"
         @back="handleBack"
@@ -55,7 +55,7 @@
 
 <script>
 import MainTable from 'src/components/office/MainTable.vue';
-import DivisionEmployee from 'src/components/office/DivisionEmployee.vue';
+import DivisionEmployee from 'src/components/unitworkplan/DivisionEmployee.vue';
 
 export default {
   components: {

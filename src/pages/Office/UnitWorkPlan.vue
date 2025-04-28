@@ -1,3 +1,4 @@
+<!--UnitWorkPlan.vue-->
 <template>
   <q-page padding>
     <div class="row items-center justify-between q-mb-md">
@@ -27,7 +28,7 @@
 
 <script>
 import UnitWorkPlanForm from 'src/components/unitworkplan/UnitWorkPlanForm.vue';
-import DivisionEmployee from 'src/components/office/DivisionEmployee.vue';
+import DivisionEmployee from 'src/components/unitworkplan/DivisionEmployee.vue';
 import MainTable from 'src/components/office/MainTable.vue';
 import { useUnitWorkPlanStore } from 'src/stores/office/unit_work_plantStore';
 

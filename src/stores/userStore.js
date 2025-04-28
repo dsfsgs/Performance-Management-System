@@ -1,4 +1,4 @@
-
+//UserStore.js
 import { defineStore } from 'pinia'
 import { api } from 'src/boot/axios'
 
@@ -51,21 +51,19 @@ export const useUserStore = defineStore('user', {
   }
 },
 
-    async updateUserCredentials(updatedData) {
-      const token = localStorage.getItem('token')
-      if (!token) return
-      try {
-        const response = await api.put('/user/update_credentials', updatedData, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        this.user.username = response.data.username // Update store state
-        return response.data
-      } catch (error) {
-        console.error('Failed to update user credentials:', error)
-        throw error
-      }
-    },
-
+      async updateUserCredentials(updatedData) {
+  const token = localStorage.getItem('token')
+  if (!token) return
+  try {
+    const response = await api.post(`/user/update/credentials/{id}`, updatedData, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response.data
+  } catch (error) {
+    console.error('Failed to update user credentials:', error)
+    throw error
+  }
+},
     async logout(router) {
       const token = localStorage.getItem('token')
       if (!token) return
