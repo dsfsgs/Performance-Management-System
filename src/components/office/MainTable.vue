@@ -5,9 +5,10 @@
       <div class="col-12" :class="getFilterColumnClass">
         <div class="row q-col-gutter-md">
           <!-- Combined Target Period Filter -->
+          <!-- filepath: c:\xampp\htdocs\PMS-2025\Performance-Management-System\src\components\office\MainTable.vue -->
           <div v-if="showTargetPeriodFilter" class="col-12 col-md-6">
             <q-select v-model="targetPeriodFilter" :options="targetPeriodOptions" label="Target Period" outlined dense
-              clearable emit-value map-options />
+              clearable emit-value map-options style="min-width: 250px;" />
           </div>
 
           <!-- Office Filter -->
@@ -38,7 +39,7 @@
     </div>
 
     <!-- Main Table -->
-    <q-table :rows="filteredRows" :columns="visibleColumns" row-key="id" @row-click="onRowClick">
+    <q-table :rows="displayRows" :columns="visibleColumns" row-key="id" @row-click="onRowClick">
       <template v-slot:header>
         <q-tr>
           <q-th v-for="col in visibleColumns" :key="col.name" style="background-color: #EBEBEB; text-align: left;">
@@ -55,6 +56,13 @@
             {{ props.row.status }}
           </q-badge>
         </q-td>
+      </template>
+
+      <!-- This will use Quasar's default empty table styling -->
+      <template v-slot:no-data>
+        <div class="full-width row flex-center q-pa-md text-grey-6">
+          No data available
+        </div>
       </template>
     </q-table>
 
@@ -73,7 +81,6 @@
 <script>
 import GenerateOPCR from './GenerateOPCR.vue';
 import UnitWorkPlanReport from './UnitWorkPlanReport.vue';
-
 
 export default {
   components: {
@@ -166,6 +173,10 @@ export default {
         const matchesOffice = !this.officeFilter || row.office === this.officeFilter;
         return matchesPeriod && matchesOffice;
       });
+    },
+    displayRows() {
+      // If target period is not selected, return empty array to trigger "no data" message
+      return this.targetPeriodFilter ? this.filteredRows : [];
     },
     getFilterColumnClass() {
       if (!this.showTargetPeriodFilter && !this.showOfficeFilter) return '';
