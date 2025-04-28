@@ -99,8 +99,7 @@
                                         <div class="title">INDIVIDUAL PERFORMANCE COMMITMENT AND REVIEW (IPCR)</div>
                                         <div class="title">CITY OF HUMAN RESOURCE MANAGEMENT OFFICE</div>
                                     </div>
-                                    <img src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png"
-                                        alt="City of Tagum Logo" class="logo">
+                                    <img src="/src/assets/RP.png" alt="City of Tagum Logo" class="logo">
                                 </div>
 
                                 <div>
@@ -117,7 +116,7 @@
                                             <div style="display: flex; justify-content: flex-end; padding-right: 80px;">
                                                 <div style="padding-bottom: 10px; text-align: center;">
                                                     <div style="padding-top: 30px;"><strong><u>{{ employee?.name
-                                                                }}</u></strong></div>
+                                                    }}</u></strong></div>
                                                     <div>{{ employee?.position }}</div>
                                                     <div>Date:<strong><u>01/21/2025</u></strong></div>
                                                 </div>
@@ -422,12 +421,50 @@
                                                     </td>
                                                     <td colspan="4">4 = VERY SATISFACTORY</td>
                                                 </tr>
+                                                <tr>
+                                                    <td colspan="8"><strong>Comments and Recommendations for
+                                                            Development
+                                                            Purposes</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="8">
+                                                        <div style="height: 50px;"></div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Discussed with:</strong></td>
+                                                    <td><strong>Date:</strong></td>
+                                                    <td colspan="2"><strong>Assessed by:</strong></td>
+                                                    <td><strong>Date:</strong></td>
+                                                    <td colspan="2"><strong>Final Rating by:</strong></td>
+                                                    <td><strong>Date:</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding-top: 50px; text-align: center;">
+                                                        <div><strong><u>{{ employee?.name }}</u></strong></div>
+                                                        <div>{{ employee?.position }}</div>
+                                                        <div>Date:<u>01/21/2025</u></div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td colspan="2" style="padding-top: 50px; text-align: center;">
+                                                        <div><strong><u>{{ employee?.name }}</u></strong></div>
+                                                        <div>{{ employee?.position }}</div>
+                                                        <div>Date:<u>01/21/2025</u></div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td colspan="2" style="padding-top: 50px; text-align: center;">
+                                                        <div><strong><u>{{ employee?.name }}</u></strong></div>
+                                                        <div>{{ employee?.position }}</div>
+                                                        <div>Date:<u>01/21/2025</u></div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
                                             </tfoot>
                                         </table>
                                     </div>
 
                                     <!-- Signature Section -->
-                                    <div class="q-mt-xl row">
+                                    <!-- <div class="q-mt-xl row">
                                         <div class="col-6">
                                             <div class="text-center">Rated by:</div>
                                             <div class="text-center q-mt-lg">
@@ -442,7 +479,7 @@
                                                 <div>City Mayor</div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </q-tab-panel>
@@ -451,26 +488,15 @@
                         <q-tab-panel name="ps">
                             <div class="report-content" id="print-section-ps">
                                 <!-- Header with Logo -->
-                                <div class="header-container">
-                                    <div class="green-line">
-                                        <div class="line"></div>
+                                <div class="header">
+                                    <img src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png"
+                                        alt="City of Tagum Logo" class="logo">
+                                    <div class="center-text">
+                                        <div class="title">{{ employee?.division }}</div>
+                                        <div class="title">PERFORMANCE STANDARDS FOR RATING PERIOD <u>January - June
+                                                2025</u></div>
                                     </div>
-                                    <div class="city-logo">
-                                        <img class="logo" alt="City of Tagum Logo"
-                                            src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
-                                    </div>
-                                    <div class="header-text">
-                                        <div class="text-green-9 text-caption padded-text">REPUBLIC OF THE PHILIPPINES
-                                        </div>
-                                        <div class="text-green-9 text-caption padded-text">PROVINCE OF DAVAO DEL NORTE
-                                        </div>
-                                        <div class="text-green-9 text-h5 text-weight-bold padded-text">CITY OF TAGUM
-                                        </div>
-
-                                        <div class="green-banner">
-                                            <div class="padded-text">PERFORMANCE STANDARD</div>
-                                        </div>
-                                    </div>
+                                    <img src="/src/assets/RP.png" alt="City of Tagum Logo" class="logo">
                                 </div>
 
                                 <!-- Main Content -->
@@ -479,11 +505,7 @@
                                         <tbody>
                                             <tr>
                                                 <td><strong>Employee:</strong> {{ employee?.name }}</td>
-                                                <td><strong>Rating Period:</strong> January - June 2025</td>
-                                            </tr>
-                                            <tr>
                                                 <td><strong>Position:</strong> {{ employee?.position }}</td>
-                                                <td><strong>Division:</strong> {{ employee?.division }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -493,76 +515,171 @@
                                         <table class="full-width main-table">
                                             <thead class="no-repeat-header">
                                                 <tr>
-                                                    <th rowspan="2" class="text-center">MAJOR FINAL OUTPUT</th>
-                                                    <th colspan="5" class="text-center">PERFORMANCE STANDARDS</th>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-center">5 - Outstanding</th>
-                                                    <th class="text-center">4 - Very Satisfactory</th>
-                                                    <th class="text-center">3 - Satisfactory</th>
-                                                    <th class="text-center">2 - Unsatisfactory</th>
-                                                    <th class="text-center">1 - Poor</th>
+                                                    <th>MFO</th>
+                                                    <th>SUCCESS INDICATOR</th>
+                                                    <th>RATING</th>
+                                                    <th>Q (Quantity)</th>
+                                                    <th>E (Effectiveness)</th>
+                                                    <th>T (Timeliness)</th>
+                                                    <th>Mode of Verification</th>
+                                                    <th>Remarks</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <!-- Strategic Functions -->
                                                 <tr>
-                                                    <td colspan="6" class="section-header">STRATEGIC FUNCTION (20%)</td>
+                                                    <td colspan="8" class="section-header">STRATEGIC FUNCTION (20%)</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Strategic Plan Implementation</td>
-                                                    <td>Q - 100% completion<br>E - Excellent quality<br>T - Ahead of
-                                                        schedule</td>
-                                                    <td>Q - 90-99% completion<br>E - Good quality<br>T - On schedule
-                                                    </td>
-                                                    <td>Q - 80-89% completion<br>E - Acceptable quality<br>T - Minimal
-                                                        delay</td>
-                                                    <td>Q - 70-79% completion<br>E - Needs improvement<br>T - With
-                                                        delays</td>
-                                                    <td>Q - Below 70% completion<br>E - Poor quality<br>T - Significant
-                                                        delays</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                </tr>
+                                                <!-- Rating -->
+                                                <tr>
+                                                    <td style="text-align: center;">5</td>
+                                                    <td style="text-align: center;">25</td>
+                                                    <td style="text-align: center;">Without error</td>
+                                                    <td style="text-align: center;">6 months</td>
+                                                    <td rowspan="5">VISUAL REPRESENTATION</td>
+                                                    <td rowspan="5"></td>
+
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">4</td>
+                                                    <td style="text-align: center;">23</td>
+                                                    <td style="text-align: center;">1-5 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">3</td>
+                                                    <td style="text-align: center;">20</td>
+                                                    <td style="text-align: center;">5-10 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">2</td>
+                                                    <td style="text-align: center;">15</td>
+                                                    <td style="text-align: center;">More than 10 errors</td>
+                                                    <td style="text-align: center;">More than 6 months</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">1</td>
+                                                    <td style="text-align: center;">10</td>
+                                                    <td style="text-align: center;"></td>
+                                                    <td style="text-align: center;"></td>
                                                 </tr>
 
                                                 <!-- Core Functions -->
                                                 <tr>
-                                                    <td colspan="6" class="section-header">CORE FUNCTION (60%)</td>
+                                                    <td colspan="8" class="section-header">CORE FUNCTION (60%)</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Recruitment and Selection</td>
-                                                    <td>Q - 100% compliance<br>E - 0 errors<br>T - 1 day</td>
-                                                    <td>Q - 95-99% compliance<br>E - 1-2 errors<br>T - 2 days</td>
-                                                    <td>Q - 90-94% compliance<br>E - 3-4 errors<br>T - 3 days</td>
-                                                    <td>Q - 85-89% compliance<br>E - 5-6 errors<br>T - 4 days</td>
-                                                    <td>Q - Below 85% compliance<br>E - 7+ errors<br>T - 5+ days</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                </tr>
+                                                <!-- Rating -->
+                                                <tr>
+                                                    <td style="text-align: center;">5</td>
+                                                    <td style="text-align: center;">25</td>
+                                                    <td style="text-align: center;">Without error</td>
+                                                    <td style="text-align: center;">6 months</td>
+                                                    <td rowspan="5">VISUAL REPRESENTATION</td>
+                                                    <td rowspan="5"></td>
+
                                                 </tr>
                                                 <tr>
-                                                    <td>Employee Development</td>
-                                                    <td>Q - 100% completion<br>E - Excellent feedback<br>T - Ahead of
-                                                        schedule</td>
-                                                    <td>Q - 90-99% completion<br>E - Very good feedback<br>T - On
-                                                        schedule</td>
-                                                    <td>Q - 80-89% completion<br>E - Good feedback<br>T - Minimal delay
-                                                    </td>
-                                                    <td>Q - 70-79% completion<br>E - Average feedback<br>T - With delay
-                                                    </td>
-                                                    <td>Q - Below 70% completion<br>E - Poor feedback<br>T - Significant
-                                                        delay</td>
+                                                    <td style="text-align: center;">4</td>
+                                                    <td style="text-align: center;">23</td>
+                                                    <td style="text-align: center;">1-5 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">3</td>
+                                                    <td style="text-align: center;">20</td>
+                                                    <td style="text-align: center;">5-10 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">2</td>
+                                                    <td style="text-align: center;">15</td>
+                                                    <td style="text-align: center;">More than 10 errors</td>
+                                                    <td style="text-align: center;">More than 6 months</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">1</td>
+                                                    <td style="text-align: center;">10</td>
+                                                    <td style="text-align: center;"></td>
+                                                    <td style="text-align: center;"></td>
                                                 </tr>
 
                                                 <!-- Support Functions -->
                                                 <tr>
-                                                    <td colspan="6" class="section-header">SUPPORT FUNCTION (20%)</td>
+                                                    <td colspan="8" class="section-header">SUPPORT FUNCTION (20%)</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Administrative Support</td>
-                                                    <td>Q - 100% completion<br>E - 0 errors<br>T - Same day</td>
-                                                    <td>Q - 95-99% completion<br>E - 1-2 errors<br>T - Next day</td>
-                                                    <td>Q - 90-94% completion<br>E - 3-4 errors<br>T - 2 days</td>
-                                                    <td>Q - 85-89% completion<br>E - 5-6 errors<br>T - 3 days</td>
-                                                    <td>Q - Below 85% completion<br>E - 7+ errors<br>T - 4+ days</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                    <td rowspan="6">Strategic Plan Implementation</td>
+                                                </tr>
+                                                <!-- Rating -->
+                                                <tr>
+                                                    <td style="text-align: center;">5</td>
+                                                    <td style="text-align: center;">25</td>
+                                                    <td style="text-align: center;">Without error</td>
+                                                    <td style="text-align: center;">6 months</td>
+                                                    <td rowspan="5">VISUAL REPRESENTATION</td>
+                                                    <td rowspan="5"></td>
+
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">4</td>
+                                                    <td style="text-align: center;">23</td>
+                                                    <td style="text-align: center;">1-5 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">3</td>
+                                                    <td style="text-align: center;">20</td>
+                                                    <td style="text-align: center;">5-10 errors</td>
+                                                    <td style="text-align: center;"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">2</td>
+                                                    <td style="text-align: center;">15</td>
+                                                    <td style="text-align: center;">More than 10 errors</td>
+                                                    <td style="text-align: center;">More than 6 months</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;">1</td>
+                                                    <td style="text-align: center;">10</td>
+                                                    <td style="text-align: center;"></td>
+                                                    <td style="text-align: center;"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
+                                        <!-- Signature Section -->
+                                        <div class="q-mt-xl row">
+                                            <div class="col-4">
+                                                <div class="text-center">Conformed:</div>
+                                                <div class="text-center q-mt-lg">
+                                                    <div class="text-weight-bold"><u>JANYLENE A. PALERMO, MM</u></div>
+                                                    <div>City Human Resource Management Officer</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-center">Discussed With:</div>
+                                                <div class="text-center q-mt-lg">
+                                                    <div class="text-weight-bold"><u>HON. REY T. UY</u></div>
+                                                    <div>City Mayor</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="text-center">Approved by:</div>
+                                                <div class="text-center q-mt-lg">
+                                                    <div class="text-weight-bold"><u>HON. REY T. UY</u></div>
+                                                    <div>City Mayor</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -573,23 +690,18 @@
                             <div class="report-content" id="print-section-mpo">
                                 <!-- Header with Logo -->
                                 <div class="header-container">
-                                    <div class="green-line">
-                                        <div class="line"></div>
-                                    </div>
-                                    <div class="city-logo">
-                                        <img class="logo" alt="City of Tagum Logo"
-                                            src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
-                                    </div>
                                     <div class="header-text">
-                                        <div class="text-green-9 text-caption padded-text">REPUBLIC OF THE PHILIPPINES
+                                        <div class="padded-text">Republic of the Philippinees
                                         </div>
-                                        <div class="text-green-9 text-caption padded-text">PROVINCE OF DAVAO DEL NORTE
+                                        <div class="padded-text">Province of Davao del Norte
                                         </div>
-                                        <div class="text-green-9 text-h5 text-weight-bold padded-text">CITY OF TAGUM
+                                        <div class="text-weight-bold padded-text">CITY OF TAGUM
                                         </div>
 
-                                        <div class="green-banner">
-                                            <div class="padded-text">MONTHLY PERFORMANCE OUTPUT</div>
+                                        <div
+                                            style="border: 3px double black; text-align: center; color: black; width: auto; padding: 5px;">
+                                            <div class="text-weight-bold padded-text">MONTHLY PERFORMANCE OUTPUT REPORT
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -600,11 +712,9 @@
                                         <tbody>
                                             <tr>
                                                 <td><strong>Employee:</strong> {{ employee?.name }}</td>
-                                                <td><strong>Month:</strong> January 2025</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Position:</strong> {{ employee?.position }}</td>
+                                                <td><strong>Office:</strong> {{ employee?.division }}</td>
                                                 <td><strong>Division:</strong> {{ employee?.division }}</td>
+                                                <td><strong>Month:</strong> January 2025</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -614,85 +724,177 @@
                                         <table class="full-width main-table">
                                             <thead class="no-repeat-header">
                                                 <tr>
-                                                    <th class="text-center">MAJOR FINAL OUTPUT</th>
-                                                    <th class="text-center">TARGET FOR THE MONTH</th>
-                                                    <th class="text-center">ACTUAL ACCOMPLISHMENT</th>
-                                                    <th class="text-center">% ACCOMPLISHMENT</th>
-                                                    <th class="text-center">REMARKS</th>
+                                                    <th rowspan="4" class="text-center">MAJOR FINAL OUTPUT</th>
+                                                    <th colspan="18" class="text-center">ACCOMPLISHMENTS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="6">QUANTITY</th>
+                                                    <th colspan="6">EFFECTIVENESS</th>
+                                                    <th colspan="6">TIMELINESS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>Wk 1</th>
+                                                    <th>Wk 2</th>
+                                                    <th>Wk 3</th>
+                                                    <th>Wk 4</th>
+                                                    <th>Wk 5</th>
+                                                    <th>TOTAL</th>
+                                                    <th>Wk 1</th>
+                                                    <th>Wk 2</th>
+                                                    <th>Wk 3</th>
+                                                    <th>Wk 4</th>
+                                                    <th>Wk 5</th>
+                                                    <th>TOTAL</th>
+                                                    <th>Wk 1</th>
+                                                    <th>Wk 2</th>
+                                                    <th>Wk 3</th>
+                                                    <th>Wk 4</th>
+                                                    <th>Wk 5</th>
+                                                    <th>TOTAL</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <!-- Strategic Functions -->
                                                 <tr>
-                                                    <td colspan="5" class="section-header">STRATEGIC FUNCTION</td>
+                                                    <td colspan="19" class="section-header">STRATEGIC FUNCTION</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Strategic Plan Implementation</td>
-                                                    <td>Conduct 2 strategic planning sessions</td>
-                                                    <td>Conducted 2 strategic planning sessions</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td>Completed as scheduled</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                 </tr>
 
                                                 <!-- Core Functions -->
                                                 <tr>
-                                                    <td colspan="5" class="section-header">CORE FUNCTION</td>
+                                                    <td colspan="19" class="section-header">CORE FUNCTION</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Recruitment and Selection</td>
-                                                    <td>Process 50 job applications</td>
-                                                    <td>Processed 54 job applications</td>
-                                                    <td class="text-center">108%</td>
-                                                    <td>Exceeded target</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Employee Development</td>
-                                                    <td>Conduct 2 training programs</td>
-                                                    <td>Conducted 2 training programs</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td>Completed as scheduled</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                 </tr>
 
                                                 <!-- Support Functions -->
                                                 <tr>
-                                                    <td colspan="5" class="section-header">SUPPORT FUNCTION</td>
+                                                    <td colspan="19" class="section-header">SUPPORT FUNCTION</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Administrative Support</td>
-                                                    <td>Process 100 administrative documents</td>
-                                                    <td>Processed 105 administrative documents</td>
-                                                    <td class="text-center">105%</td>
-                                                    <td>Exceeded target</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                 </tr>
 
                                                 <!-- Summary -->
                                                 <tr>
-                                                    <td colspan="3" class="text-right text-weight-bold">AVERAGE %
-                                                        ACCOMPLISHMENT:</td>
-                                                    <td class="text-center text-weight-bold">103%</td>
+                                                    <td colspan="13"></td>
+                                                    <td>Wk 1</td>
+                                                    <td>Wk 2</td>
+                                                    <td>Wk 3</td>
+                                                    <td>Wk 4</td>
+                                                    <td>Wk 5</td>
+                                                    <td>TOTAL</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="13">MAN DAY(S) LOST THRU ABSENCE</td>
                                                     <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="13">MAN HRS./MINUTES LOST THRU TARDINESS/UNDERTIME</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="19">OBSERVATIONS/REMARKS: <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="6">Aboved entries are true and correct:</td>
+                                                    <td colspan="3">Date:</td>
+                                                    <td colspan="7">Confirmed:</td>
+                                                    <td colspan="3">Date:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="3">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="7">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="3">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
 
-                                    <!-- Signature Section -->
-                                    <div class="q-mt-xl row">
-                                        <div class="col-6">
-                                            <div class="text-center">Prepared by:</div>
-                                            <div class="text-center q-mt-lg">
-                                                <div class="text-weight-bold">{{ employee?.name }}</div>
-                                                <div>{{ employee?.position }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="text-center">Verified by:</div>
-                                            <div class="text-center q-mt-lg">
-                                                <div class="text-weight-bold">JANYLENE A. PALERMO, MM</div>
-                                                <div>City Human Resource Management Officer</div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </q-tab-panel>
@@ -702,26 +904,22 @@
                             <div class="report-content" id="print-section-smpr">
                                 <!-- Header with Logo -->
                                 <div class="header-container">
-                                    <div class="green-line">
-                                        <div class="line"></div>
-                                    </div>
-                                    <div class="city-logo">
-                                        <img class="logo" alt="City of Tagum Logo"
-                                            src="https://phshirt.com/wp-content/uploads/2021/11/City-of-Tagum-Logo.png" />
-                                    </div>
                                     <div class="header-text">
-                                        <div class="text-green-9 text-caption padded-text">REPUBLIC OF THE PHILIPPINES
+                                        <div class="padded-text">Republic of the Philippinees
                                         </div>
-                                        <div class="text-green-9 text-caption padded-text">PROVINCE OF DAVAO DEL NORTE
+                                        <div class="padded-text">Province of Davao del Norte
                                         </div>
-                                        <div class="text-green-9 text-h5 text-weight-bold padded-text">CITY OF TAGUM
+                                        <div class="text-weight-bold padded-text">CITY OF TAGUM
                                         </div>
 
-                                        <div class="green-banner">
-                                            <div class="padded-text">SUMMARY MONTHLY PERFORMANCE REPORT</div>
+                                        <div
+                                            style="border: 3px double black; text-align: center; color: black; width: auto; padding: 5px;">
+                                            <div class="text-weight-bold padded-text">SUMMARY MONTHLY PERFORMANCE OUTPUT
+                                                REPORT</div>
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <!-- Main Content -->
                                 <div class="q-mt-md">
@@ -731,10 +929,6 @@
                                                 <td><strong>Employee:</strong> {{ employee?.name }}</td>
                                                 <td><strong>Period:</strong> January - June 2025</td>
                                             </tr>
-                                            <tr>
-                                                <td><strong>Position:</strong> {{ employee?.position }}</td>
-                                                <td><strong>Division:</strong> {{ employee?.division }}</td>
-                                            </tr>
                                         </tbody>
                                     </table>
 
@@ -743,96 +937,175 @@
                                         <table class="full-width main-table">
                                             <thead class="no-repeat-header">
                                                 <tr>
-                                                    <th rowspan="2" class="text-center">MONTH</th>
-                                                    <th colspan="3" class="text-center">AVERAGE ACCOMPLISHMENT PER
-                                                        FUNCTION</th>
-                                                    <th rowspan="2" class="text-center">OVERALL RATING</th>
-                                                    <th rowspan="2" class="text-center">REMARKS</th>
+                                                    <th rowspan="3" class="text-center">MAJOR FINAL OUTPUT</th>
+                                                    <th colspan="24" class="text-center">ACCOMPLISHMENT</th>
                                                 </tr>
                                                 <tr>
-                                                    <th class="text-center">Strategic (20%)</th>
-                                                    <th class="text-center">Core (60%)</th>
-                                                    <th class="text-center">Support (20%)</th>
+                                                    <th colspan="8" class="text-center">QUANTITY</th>
+                                                    <th colspan="8" class="text-center">EFFECTIVENESS</th>
+                                                    <th colspan="8" class="text-center">TIMELINESS</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>Jan</th>
+                                                    <th>Feb</th>
+                                                    <th>March</th>
+                                                    <th>Apr</th>
+                                                    <th>May</th>
+                                                    <th>June</th>
+                                                    <th>TOTAL</th>
+                                                    <th>RATING</th>
+                                                    <th>Jan</th>
+                                                    <th>Feb</th>
+                                                    <th>March</th>
+                                                    <th>Apr</th>
+                                                    <th>May</th>
+                                                    <th>June</th>
+                                                    <th>TOTAL</th>
+                                                    <th>RATING</th>
+                                                    <th>Jan</th>
+                                                    <th>Feb</th>
+                                                    <th>March</th>
+                                                    <th>Apr</th>
+                                                    <th>May</th>
+                                                    <th>June</th>
+                                                    <th>TOTAL</th>
+                                                    <th>RATING</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td>January</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">105%</td>
-                                                    <td class="text-center">105%</td>
-                                                    <td class="text-center">104%</td>
-                                                    <td>Exceeded targets</td>
+                                                    <td colspan="25">B. CORE FUNCTION</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>February</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">102%</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">101%</td>
-                                                    <td>Met targets</td>
+                                                    <td>Computer Program Report Templates</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
                                                 </tr>
                                                 <tr>
+                                                    <td>Computer Program Report Templates</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <!-- Summary -->
+                                                <tr>
+                                                    <td colspan="18"></td>
+                                                    <td>Jan</td>
+                                                    <td>Feb</td>
                                                     <td>March</td>
-                                                    <td class="text-center">95%</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">102%</td>
-                                                    <td class="text-center">99%</td>
-                                                    <td>Met targets</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>April</td>
-                                                    <td class="text-center">105%</td>
-                                                    <td class="text-center">103%</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">103%</td>
-                                                    <td>Exceeded targets</td>
-                                                </tr>
-                                                <tr>
+                                                    <td>Apr</td>
                                                     <td>May</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">105%</td>
-                                                    <td class="text-center">101%</td>
-                                                    <td>Met targets</td>
-                                                </tr>
-                                                <tr>
                                                     <td>June</td>
-                                                    <td class="text-center">102%</td>
-                                                    <td class="text-center">104%</td>
-                                                    <td class="text-center">100%</td>
-                                                    <td class="text-center">103%</td>
-                                                    <td>Exceeded targets</td>
+                                                    <td>TOTAL</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="text-weight-bold">Semi-Annual Average</td>
-                                                    <td class="text-center text-weight-bold">100%</td>
-                                                    <td class="text-center text-weight-bold">102%</td>
-                                                    <td class="text-center text-weight-bold">102%</td>
-                                                    <td class="text-center text-weight-bold">102%</td>
-                                                    <td class="text-weight-bold">Very Satisfactory</td>
+                                                    <td colspan="18">MAN DAY(S) LOST THRU ABSENCE</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="18">MAN HRS./MINUTES LOST THRU TARDINESS/UNDERTIME</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                    <td>0</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="25">OBSERVATIONS/REMARKS: <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="7">Aboved entries are true and correct:</td>
+                                                    <td colspan="2">Date:</td>
+                                                    <td colspan="6">Confirmed:</td>
+                                                    <td colspan="2">Date:</td>
+                                                    <td colspan="6">Approved for Final Rating:</td>
+                                                    <td colspan="2">Date:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="7">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="6">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="6">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <div style="height: 50px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
 
-                                    <!-- Signature Section -->
-                                    <div class="q-mt-xl row">
-                                        <div class="col-6">
-                                            <div class="text-center">Prepared by:</div>
-                                            <div class="text-center q-mt-lg">
-                                                <div class="text-weight-bold">REIL R. IGONA, MM, CHRA</div>
-                                                <div>Acting SAO / HRMO III</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="text-center">Approved by:</div>
-                                            <div class="text-center q-mt-lg">
-                                                <div class="text-weight-bold">JANYLENE A. PALERMO, MM</div>
-                                                <div>City Human Resource Management Officer</div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </q-tab-panel>
@@ -985,7 +1258,7 @@ const directPrint = () => {
                 display: none !important;
             }
             * {
-                color-adjust: exact !important;
+                print-color-adjust: exact !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -1343,7 +1616,8 @@ const downloadPdf = async () => {
         page-break-after: avoid !important;
     }
 
-    th, td {
+    th,
+    td {
         border: 1px solid #000 !important;
         padding: 8px !important;
     }
@@ -1353,7 +1627,7 @@ const downloadPdf = async () => {
         page-break-inside: avoid !important;
     }
 
-    .no-print, 
+    .no-print,
     .q-dialog__backdrop,
     .q-tabs,
     .report-header,
@@ -1363,7 +1637,7 @@ const downloadPdf = async () => {
     }
 
     * {
-        color-adjust: exact !important;
+        color-scheme: exact !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }

@@ -79,7 +79,7 @@
             </div>
 
             <!-- Third Column: Success Indicator -->
-            <div class="col-md-2 col-sm-12">
+            <div class="col-md-4 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">Success Indicator</div>
 
               <q-input filled v-model="mergedSuccessIndicator" type="textarea" dense autogrow
@@ -87,7 +87,7 @@
             </div>
 
             <!-- Fourth Column: Required Output -->
-            <div class="col-md-2 col-sm-12">
+            <div class="col-md-4 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">Required Output</div>
               <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow
                 class="auto-expand-textarea" />
