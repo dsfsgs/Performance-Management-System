@@ -144,46 +144,45 @@
           <q-btn icon="close" flat round dense v-close-popup @click="closeModal" />
         </q-card-section>
 
-        <q-card-section class="q-pt-md">
-          <!-- Category Display -->
-          <div v-if="form.category" class="q-mb-md">
-            <div class="text-caption text-grey-6">Category</div>
-            <div class="text-body1 text-weight-medium">{{ form.category.name }}</div>
-          </div>
+        <!-- Scrollable content -->
+        <div class="modal-scrollable-content">
+          <q-card-section class="q-pt-md">
+            <!-- Category Display -->
+            <div v-if="form.category" class="q-mb-md">
+              <div class="text-caption text-grey-6">Category</div>
+              <div class="text-body1 text-weight-medium">{{ form.category.name }}</div>
+            </div>
 
-          <!-- Single input for edit mode -->
-          <template v-if="modal.mode === 'edit'">
-            <q-input v-model="form.items[0].name"
-              :label="form.isOutput ? 'Output Name' : (isSupportCategory ? 'Support Output Name' : 'MFO Name')"
-              class="q-mt-sm modern-input" :class="{ 'shake-animation': errors.name }" outlined dense
-              :rules="[val => !!val || (form.isOutput ? 'Output name is required' : (isSupportCategory ? 'Support output name is required' : 'MFO name is required'))]"
-              :error="errors.name" error-message="This field is required" ref="nameInput"
-              @blur="validateField('name')" />
-          </template>
+            <!-- Single input for edit mode -->
+            <template v-if="modal.mode === 'edit'">
+              <q-input v-model="form.items[0].name"
+                :label="form.isOutput ? 'Output Name' : (isSupportCategory ? 'Support Output Name' : 'MFO Name')"
+                class="q-mt-sm modern-input" :class="{ 'shake-animation': errors.name }" outlined dense
+                :rules="[val => !!val || (form.isOutput ? 'Output name is required' : (isSupportCategory ? 'Support output name is required' : 'MFO name is required'))]"
+                :error="errors.name" error-message="This field is required" ref="nameInput"
+                @blur="validateField('name')" />
+            </template>
 
-          <!-- Dynamic inputs for add mode -->
-          <template v-else>
-            <div v-for="(item, index) in form.items" :key="index" class="q-mb-md">
-              <div class="row items-center">
-                <q-input v-model="item.name" :label="getInputLabel(index)" class="col-grow q-mr-sm modern-input"
-                  :class="{ 'shake-animation': errors[`item_${index}`] }" outlined dense
-                  :rules="[val => !!val || getRequiredMessage(index)]" :error="errors[`item_${index}`]"
-                  error-message="This field is required" :ref="`itemInput_${index}`"
-                  @blur="validateField(`item_${index}`)" />
-                <q-btn v-if="index > 0 || form.items.length > 1" icon="remove" flat round dense color="negative"
-                  @click="removeItem(index)" class="q-ml-sm" />
+            <!-- Dynamic inputs for add mode -->
+            <template v-else>
+              <div v-for="(item, index) in form.items" :key="index" class="q-mb-md">
+                <div class="row items-center">
+                  <q-input v-model="item.name" :label="getInputLabel(index)" class="col-grow q-mr-sm modern-input"
+                    :class="{ 'shake-animation': errors[`item_${index}`] }" outlined dense
+                    :rules="[val => !!val || getRequiredMessage(index)]" :error="errors[`item_${index}`]"
+                    error-message="This field is required" :ref="`itemInput_${index}`"
+                    @blur="validateField(`item_${index}`)" />
+                  <q-btn v-if="index > 0 || form.items.length > 1" icon="remove" flat round dense color="negative"
+                    @click="removeItem(index)" class="q-ml-sm" />
+                </div>
               </div>
-            </div>
+            </template>
+          </q-card-section>
+        </div>
 
-            <!-- Add Another Button -->
-            <div class="flex justify-end">
-              <q-btn icon="add" label="Add Another" flat dense color="primary" @click="addNewItem" class="q-mt-sm" />
-            </div>
-          </template>
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-pa-md">
-          <q-btn label="Cancel" color="grey-7" flat @click="closeModal" class="q-mr-sm" />
+        <!-- Fixed actions at the bottom -->
+        <q-card-actions align="right" class="q-pa-md modal-fixed-actions">
+          <q-btn icon="add" label="Add Another" flat dense color="primary" @click="addNewItem" class="q-mr-sm" />
           <q-btn label="Save" color="primary" @click="saveEntry" :loading="modal.loading" />
         </q-card-actions>
       </q-card>
@@ -869,6 +868,20 @@ export default {
 .modal-card {
   border-radius: 8px;
   overflow: hidden;
+}
+
+.modal-scrollable-content {
+  max-height: 400px;
+  /* Adjust height as needed */
+  overflow-y: auto;
+}
+
+.modal-fixed-actions {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  z-index: 1;
+  border-top: 1px solid #e0e0e0;
 }
 
 /* Input styling with validation */
