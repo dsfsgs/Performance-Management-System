@@ -169,6 +169,8 @@ export default {
       return [
         { value: 'Employee', label: 'Employee' },
         { value: 'Supervisor', label: 'Supervisor' },
+        { value: 'Rank-in-File', label: 'Rank-in-File' },
+        { value: 'Managerial', label: 'Managerial' },
         {
           value: 'Head',
           label: 'Head',

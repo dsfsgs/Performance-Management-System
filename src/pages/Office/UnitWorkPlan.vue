@@ -26,9 +26,10 @@
 </template>
 
 <script>
-import UnitWorkPlanForm from 'src/components/office/UnitWorkPlanForm.vue';
+import UnitWorkPlanForm from 'src/components/unitworkplan/UnitWorkPlanForm.vue';
 import DivisionEmployee from 'src/components/office/DivisionEmployee.vue';
 import MainTable from 'src/components/office/MainTable.vue';
+import { useUnitWorkPlanStore } from 'src/stores/office/unit_work_plantStore';
 
 export default {
   components: {
@@ -44,57 +45,41 @@ export default {
       selectedEmployeeData: null,
       latestEmployeeAdded: null,
       prefilledFormData: null,
-      rows: [
-        {
-          id: 1,
-          division: "Recruitment, Selection and Records Management Division",
-          targetPeriod: "January - June 2025",
-          dateCreated: "December 3, 2024",
-          status: "Pending"
-        },
-        {
-          id: 2,
-          division: "Performance, Management, Incentives, Rewards and Recognition Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "December 3, 2024",
-          status: "Approved"
-        },
-        {
-          id: 3,
-          division: "Employees Compensation, Welfare and Benefits Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "December 3, 2024",
-          status: "Pending"
-        },
-        {
-          id: 4,
-          division: "Human Resource Development Division",
-          targetPeriod: "July - December 2023",
-          dateCreated: "December 3, 2024",
-          status: "Approved"
-        },
-        {
-          id: 5,
-          division: "Recruitment, Selection and Records Management Division",
-          targetPeriod: "January - June 2023",
-          dateCreated: "June 3, 2024",
-          status: "Pending"
-        },
-        {
-          id: 6,
-          division: "Performance, Management, Incentives, Rewards and Recognition Division",
-          targetPeriod: "July - December 2022",
-          dateCreated: "June 3, 2024",
-          status: "Approved"
-        }
-      ]
+      rows: []
     };
   },
+  async created() {
+    await this.fetchDivisionStatus();
+  },
   methods: {
+
+    async fetchDivisionStatus() {
+      const store = useUnitWorkPlanStore();
+      try {
+        await store.fetchDivisionsWithStatus();
+        this.rows = store.divisions.map(division => ({
+          id: division.id,
+          division: division.division,
+          targetPeriod: division.target_period,
+          dateCreated: new Date(division.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          status: division.status
+        }));
+      } catch (error) {
+        console.error('Error fetching division status:', error);
+        this.$q.notify({
+          message: 'Failed to load division data',
+          color: 'negative',
+          icon: 'error'
+        });
+      }
+    },
     onDivisionClick(row) {
       this.selectedDivision = row.division;
-      this.selectedRow = row; // Store the complete row data
-      // If we have a latest employee added for this division, select it
+      this.selectedRow = row;
       if (this.latestEmployeeAdded && this.latestEmployeeAdded.division === row.division) {
         this.selectedEmployeeData = this.latestEmployeeAdded;
       } else {
@@ -102,13 +87,10 @@ export default {
       }
     },
     openUnitWorkPlanForm(data) {
-      // Setup prefilled data for the UnitWorkPlanForm
       this.prefilledFormData = {
         division: data.division,
         targetPeriod: data.targetPeriod
       };
-
-      // Show the UWP form
       this.showUWP = true;
     },
     handleBack() {
@@ -116,10 +98,8 @@ export default {
       this.selectedRow = null;
     },
     onFormSaved(formData) {
-      // Close the UWP form
       this.showUWP = false;
 
-      // Create a new row for the table if this is a new division/period combination
       const existingRowIndex = this.rows.findIndex(
         row => row.division === formData.division && row.targetPeriod === formData.targetPeriod
       );
@@ -129,19 +109,19 @@ export default {
           id: this.rows.length + 1,
           division: formData.division,
           targetPeriod: formData.targetPeriod,
-          dateCreated: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          dateCreated: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
           status: "Pending"
         };
-
-        // Add to rows
         this.rows.unshift(newRow);
         this.selectedRow = newRow;
       } else {
-        // Use existing row
         this.selectedRow = this.rows[existingRowIndex];
       }
 
-      // Store the employee data for potential display in DivisionEmployee
       this.latestEmployeeAdded = {
         division: formData.division,
         employeeName: formData.employeeName,
@@ -150,11 +130,9 @@ export default {
         performanceStandards: formData.performanceStandards
       };
 
-      // Set the division and employee data to view in DivisionEmployee component
       this.selectedDivision = formData.division;
       this.selectedEmployeeData = this.latestEmployeeAdded;
 
-      // Show notification
       this.$q.notify({
         message: 'Work plan saved successfully',
         color: 'positive',
@@ -162,8 +140,20 @@ export default {
         position: 'top-right'
       });
     },
-    generateUnitWorkPlan() {
-      // Implementation remains the same
+    async generateUnitWorkPlan() {
+      try {
+        const divisions = await this.store.fetchDivisionsWithWorkPlans(this.targetPeriodFilter);
+        if (divisions.length > 0) {
+          await this.selectDivision(divisions[0].division, divisions[0].target_period);
+        }
+        this.showUnitWorkPlanModal = true;
+      } catch (error) {
+        console.error('Error generating unit work plan:', error);
+        this.$q.notify({
+          type: 'negative',
+          message: 'Failed to generate unit work plan. Please try again.'
+        });
+      }
     }
   }
 };

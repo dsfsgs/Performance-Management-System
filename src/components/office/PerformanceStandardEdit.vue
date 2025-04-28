@@ -1,5 +1,6 @@
+<!--performance-standard-edit-->
 <template>
-  <div class="performance-standard-edit">
+ <div class="performance-standard-edit">
     <!-- Main Row - Horizontally aligned sections -->
     <div class="row q-col-gutter-md q-mb-md">
       <!-- MFO Section - 3 columns -->
@@ -7,15 +8,15 @@
         <div class="section-block">
           <div class="card-title">MFO Details</div>
           <div class="q-mb-sm">
-            <q-select v-model="localMfo1" :options="categoryOptions" label="Category" outlined dense emit-value
-              map-options class="q-mb-xs" />
+            <q-select v-model="localCategory" :options="categoryOptions" label="Category" outlined dense emit-value
+              map-options class="q-mb-xs" @update:model-value="fetchMfos" />
           </div>
           <div class="q-mb-sm">
-            <q-select v-model="localMfo2" :options="mfoOptions" label="MFO" outlined dense emit-value map-options
-              :disable="!localMfo1" class="q-mb-xs" />
+            <q-select v-model="localMfo" :options="mfoOptions" label="MFO" outlined dense emit-value map-options
+              :disable="!localCategory" class="q-mb-xs" @update:model-value="fetchOutputs" />
           </div>
-          <q-select v-model="localMfo3" :options="outputOptions" label="Output" outlined dense emit-value map-options
-            :disable="!localMfo2" />
+          <q-select v-model="localOutput" :options="outputOptions" label="Output" outlined dense emit-value map-options
+            :disable="!localMfo" />
         </div>
       </div>
 
@@ -28,7 +29,7 @@
             <div class="col-4">
               <div class="competency-subblock">
                 <div class="competency-subtitle">Core</div>
-                <q-input v-model="localCoreCompetency" dense outlined hide-bottom-space />
+                <q-input v-model="localCoreCompetency" dense outlined hide-bottom-space readonly />
               </div>
             </div>
 
@@ -36,7 +37,7 @@
             <div class="col-4">
               <div class="competency-subblock">
                 <div class="competency-subtitle">Technical</div>
-                <q-input v-model="localTechnicalCompetency" dense outlined hide-bottom-space />
+                <q-input v-model="localTechnicalCompetency" dense outlined hide-bottom-space readonly />
               </div>
             </div>
 
@@ -44,7 +45,7 @@
             <div class="col-4">
               <div class="competency-subblock">
                 <div class="competency-subtitle">Leadership</div>
-                <q-input v-model="localLeadershipCompetency" dense outlined hide-bottom-space />
+                <q-input v-model="localLeadershipCompetency" dense outlined hide-bottom-space readonly />
               </div>
             </div>
           </div>
@@ -55,8 +56,7 @@
       <div class="col-md-2 col-sm-12">
         <div class="section-block">
           <div class="card-title">Success Indicator</div>
-          <q-input v-model="localSuccessIndicator" type="textarea" outlined dense autogrow
-            class="full-height-textarea" />
+          <q-input v-model="localSuccessIndicator" type="textarea" outlined dense autogrow />
         </div>
       </div>
 
@@ -71,7 +71,6 @@
 
     <!-- Standard Outcome Section -->
     <div class="standard-outcome-section">
-      <!-- Updated title section to match your design -->
       <div class="text-h7 q-mb-md">Standard Outcome</div>
       <div class="q-pa-md">
         <q-table :rows="localStandardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom
@@ -143,37 +142,39 @@
 </template>
 
 <script>
+import { useMfoStore } from 'src/stores/office/mfoStore';
+
 export default {
   props: {
+    category: {
+      type: String,
+      default: ''
+    },
+    mfo: {
+      type: String,
+      default: ''
+    },
+    output: {
+      type: String,
+      default: ''
+    },
     coreCompetency: {
       type: String,
-      default: 'DSE-4'
+      default: ''
     },
     leadershipCompetency: {
       type: String,
-      default: 'TSC-4'
+      default: ''
     },
     technicalCompetency: {
       type: String,
-      default: 'RM-3'
+      default: ''
     },
     successIndicator: {
       type: String,
       default: ''
     },
     requiredOutput: {
-      type: String,
-      default: ''
-    },
-    mfo1: {
-      type: String,
-      default: ''
-    },
-    mfo2: {
-      type: String,
-      default: ''
-    },
-    mfo3: {
       type: String,
       default: ''
     },
@@ -189,26 +190,26 @@ export default {
     }
   },
   emits: [
+    'update:category',
+    'update:mfo',
+    'update:output',
     'update:coreCompetency',
     'update:leadershipCompetency',
     'update:technicalCompetency',
     'update:successIndicator',
     'update:requiredOutput',
-    'update:mfo1',
-    'update:mfo2',
-    'update:mfo3',
     'update:standardOutcomeRows'
   ],
   data() {
     return {
+      localCategory: this.category,
+      localMfo: this.mfo,
+      localOutput: this.output,
       localCoreCompetency: this.coreCompetency,
       localLeadershipCompetency: this.leadershipCompetency,
       localTechnicalCompetency: this.technicalCompetency,
       localSuccessIndicator: this.successIndicator,
       localRequiredOutput: this.requiredOutput,
-      localMfo1: this.mfo1,
-      localMfo2: this.mfo2,
-      localMfo3: this.mfo3,
       localStandardOutcomeRows: JSON.parse(JSON.stringify(this.standardOutcomeRows)),
 
       showTargetModal: false,
@@ -217,27 +218,18 @@ export default {
       timelinessType: 'conditional',
       effectivenessType: 'conditional',
 
-      categoryOptions: [
-        { label: 'A. Strategic Function', value: 'A' },
-        { label: 'B. Core Function', value: 'B' },
-        { label: 'C. Support Function', value: 'C' }
-      ],
-      mfoOptions: [
-        { label: 'MFO 1', value: 'M1' },
-        { label: 'MFO 2', value: 'M2' },
-        { label: 'MFO 3', value: 'M3' }
-      ],
-      outputOptions: [
-        { label: 'Output 1', value: 'O1' },
-        { label: 'Output 2', value: 'O2' },
-        { label: 'Output 3', value: 'O3' }
-      ],
+      categoryOptions: [],
+      mfoOptions: [],
+      outputOptions: [],
       quantityIndicator: [
         { label: 'Quantity (A. Custom target)', value: 'numeric' },
         { label: 'Quantity (B. Can exceed 100%)', value: 'B' },
         { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
       ]
     };
+  },
+  created() {
+    this.fetchCategories();
   },
   computed: {
     standardOutcomeColumns() {
@@ -251,6 +243,15 @@ export default {
   },
   watch: {
     // Props watchers to keep local state in sync
+    category(val) {
+      this.localCategory = val;
+    },
+    mfo(val) {
+      this.localMfo = val;
+    },
+    output(val) {
+      this.localOutput = val;
+    },
     coreCompetency(val) {
       this.localCoreCompetency = val;
     },
@@ -266,15 +267,6 @@ export default {
     requiredOutput(val) {
       this.localRequiredOutput = val;
     },
-    mfo1(val) {
-      this.localMfo1 = val;
-    },
-    mfo2(val) {
-      this.localMfo2 = val;
-    },
-    mfo3(val) {
-      this.localMfo3 = val;
-    },
     standardOutcomeRows: {
       handler(val) {
         this.localStandardOutcomeRows = JSON.parse(JSON.stringify(val));
@@ -283,6 +275,15 @@ export default {
     },
 
     // Local state watchers to emit updates
+    localCategory(val) {
+      this.$emit('update:category', val);
+    },
+    localMfo(val) {
+      this.$emit('update:mfo', val);
+    },
+    localOutput(val) {
+      this.$emit('update:output', val);
+    },
     localCoreCompetency(val) {
       this.$emit('update:coreCompetency', val);
     },
@@ -297,15 +298,6 @@ export default {
     },
     localRequiredOutput(val) {
       this.$emit('update:requiredOutput', val);
-    },
-    localMfo1(val) {
-      this.$emit('update:mfo1', val);
-    },
-    localMfo2(val) {
-      this.$emit('update:mfo2', val);
-    },
-    localMfo3(val) {
-      this.$emit('update:mfo3', val);
     },
     localStandardOutcomeRows: {
       handler(val) {
@@ -325,25 +317,64 @@ export default {
     }
   },
   methods: {
+    async fetchCategories() {
+      const mfoStore = useMfoStore();
+      try {
+        await mfoStore.fetchCategories();
+        this.categoryOptions = mfoStore.categories.map(cat => ({
+          label: cat.name,
+          value: cat.id.toString()
+        }));
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+    async fetchMfos() {
+      if (!this.localCategory) return;
+
+      const mfoStore = useMfoStore();
+      try {
+        await mfoStore.fetchMfosByCategory(this.localCategory);
+        this.mfoOptions = mfoStore.mfos.map(mfo => ({
+          label: mfo.name,
+          value: mfo.id.toString()
+        }));
+        this.outputOptions = [];
+        this.localMfo = '';
+        this.localOutput = '';
+      } catch (error) {
+        console.error('Error fetching MFOs:', error);
+      }
+    },
+    async fetchOutputs() {
+      if (!this.localMfo) return;
+
+      const mfoStore = useMfoStore();
+      try {
+        await mfoStore.fetchOutputsByMfo(this.localMfo);
+        this.outputOptions = mfoStore.outputs.map(output => ({
+          label: output.name,
+          value: output.id.toString()
+        }));
+        this.localOutput = '';
+      } catch (error) {
+        console.error('Error fetching outputs:', error);
+      }
+    },
     validateStrictNumeric(val) {
       return !val || /^\d+$/.test(val) || 'Numbers only';
     },
-
     blockInvalidChars(event) {
-      // Allow only numeric inputs
       if (!/^\d$/.test(event.key) &&
         !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(event.key)) {
         event.preventDefault();
       }
     },
-
     sanitizeNumericInput(row, field) {
-      // Ensure the value is numeric
       if (row[field] && !/^\d+$/.test(row[field])) {
         row[field] = row[field].replace(/[^\d]/g, '');
       }
     },
-
     computeQuantities() {
       if ((this.quantityIndicatorType === 'B') && (!this.targetValue || isNaN(this.targetValue))) {
         this.$q.notify({
@@ -360,13 +391,12 @@ export default {
       });
 
       if (this.quantityIndicatorType === 'B') {
-        // Type B: Can exceed 100% (requires target input)
         const base = Number(this.targetValue);
-        this.localStandardOutcomeRows[0].quantity = `${Math.ceil(base * 1.3)} and above`;       // 130%
-        this.localStandardOutcomeRows[1].quantity = `${Math.ceil(base * 1.15)}-${Math.floor(base * 1.3) - 1}`; // 115%
-        this.localStandardOutcomeRows[2].quantity = `${base}-${Math.floor(base * 1.15) - 1}`;  // 100%
-        this.localStandardOutcomeRows[3].quantity = `${Math.ceil(base * 0.51)}-${Math.floor(base * 0.99)}`;    // 51%
-        this.localStandardOutcomeRows[4].quantity = `${Math.floor(base * 0.5)} and below`;      // 50%
+        this.localStandardOutcomeRows[0].quantity = `${Math.ceil(base * 1.3)} and above`;
+        this.localStandardOutcomeRows[1].quantity = `${Math.ceil(base * 1.15)}-${Math.floor(base * 1.3) - 1}`;
+        this.localStandardOutcomeRows[2].quantity = `${base}-${Math.floor(base * 1.15) - 1}`;
+        this.localStandardOutcomeRows[3].quantity = `${Math.ceil(base * 0.51)}-${Math.floor(base * 0.99)}`;
+        this.localStandardOutcomeRows[4].quantity = `${Math.floor(base * 0.5)} and below`;
 
         this.$q.notify({
           message: 'Quantities calculated successfully',
@@ -375,7 +405,6 @@ export default {
         });
       }
       else if (this.quantityIndicatorType === 'C') {
-        // Type C: Cannot exceed 100% (auto percentages)
         this.localStandardOutcomeRows[0].quantity = '100% and above';
         this.localStandardOutcomeRows[1].quantity = '88%-99%';
         this.localStandardOutcomeRows[2].quantity = '77%-87%';

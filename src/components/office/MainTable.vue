@@ -4,24 +4,16 @@
     <div class="row items-center justify-between q-mb-md">
       <div class="col-12" :class="getFilterColumnClass">
         <div class="row q-col-gutter-md">
-          <!-- Target Period Filter -->
-          <div v-if="showTargetPeriodFilter" class="col-12" :class="filterColumnWidth">
-            <q-select 
-              v-model="targetPeriodFilter" 
-              :options="targetPeriodOptions" 
-              label="Filter by Target Period"
-              outlined 
-              dense 
-              clearable 
-              emit-value 
-              map-options
-              behavior="menu"
-              dropdown-icon="arrow_drop_down"
-              popup-content-class="dropdown-popup"
-              :menu-anchor="'bottom start'" 
-              :menu-self="'top start'"
-              class="full-width"
-            />
+          <!-- Combined Target Period Filter -->
+          <div v-if="showTargetPeriodFilter" class="col-12 col-md-6">
+            <q-select v-model="targetPeriodFilter" :options="targetPeriodOptions" label="Target Period" outlined dense
+              clearable emit-value map-options />
+          </div>
+
+          <!-- Office Filter -->
+          <div v-if="showOfficeFilter" class="col-12" :class="filterColumnWidth">
+            <q-select v-model="officeFilter" :options="officeOptions" label="Filter by Office" outlined dense clearable
+              emit-value map-options />
           </div>
         </div>
       </div>
@@ -71,18 +63,17 @@
 
     <!-- Unit Work Plan Report Modal -->
     <q-dialog v-model="showUnitWorkPlanModal" full-width>
-      <UnitWorkPlanReport 
-  :targetPeriod="targetPeriodFilter" 
-  @close="showUnitWorkPlanModal = false" 
-  :showApprovedButton="isUnitWorkPlanPage"
-/>
+      <UnitWorkPlanReport :targetPeriod="targetPeriodFilter" :filteredDivisions="filteredRows"
+        @close="showUnitWorkPlanModal = false" />
     </q-dialog>
+
   </div>
 </template>
 
 <script>
 import GenerateOPCR from './GenerateOPCR.vue';
 import UnitWorkPlanReport from './UnitWorkPlanReport.vue';
+
 
 export default {
   components: {
@@ -119,9 +110,9 @@ export default {
       default: false
     },
     isUnitWorkPlanPage: {
-    type: Boolean,
-    default: false
-  }
+      type: Boolean,
+      default: false
+    }
   },
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
   data() {
@@ -131,13 +122,15 @@ export default {
       showGenerateModal: false,
       showUnitWorkPlanModal: false,
       allColumns: [
-        { name: "division", label: "Division", field: "division", align: "left", showIf: function() { return !this.hideDivisionColumn; } },
-        { name: "office", label: "Office", field: "office", align: "left", showIf: function() { return this.showOfficeColumn; } },
+        { name: "division", label: "Division", field: "division", align: "left", showIf: function () { return !this.hideDivisionColumn; } },
+        { name: "office", label: "Office", field: "office", align: "left", showIf: function () { return this.showOfficeColumn; } },
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
         { name: "status", label: "Status", field: "status", align: "left" }
       ],
-      generateOPCRRef: null
+      generateOPCRRef: null,
+      periodOptions: ['January - June', 'July - December'],
+      yearOptions: Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() + i - 5).toString()) // 5 years before and after current year
     }
   },
   computed: {
@@ -153,6 +146,7 @@ export default {
       });
     },
     targetPeriodOptions() {
+      // Get unique target periods from rows
       const uniquePeriods = [...new Set(this.rows.map(row => row.targetPeriod))];
       return uniquePeriods.map(period => ({
         label: period,
@@ -168,8 +162,9 @@ export default {
     },
     filteredRows() {
       return this.rows.filter(row => {
-        return (!this.targetPeriodFilter || row.targetPeriod === this.targetPeriodFilter) 
-          && (!this.officeFilter || row.office === this.officeFilter);
+        const matchesPeriod = !this.targetPeriodFilter || row.targetPeriod === this.targetPeriodFilter;
+        const matchesOffice = !this.officeFilter || row.office === this.officeFilter;
+        return matchesPeriod && matchesOffice;
       });
     },
     getFilterColumnClass() {
@@ -215,21 +210,18 @@ export default {
     getLatestTargetPeriod() {
       if (this.rows.length === 0) return null;
 
-      // Extract all target periods and parse them to Date objects
       const periodsWithDates = this.rows.map(row => {
         const period = row.targetPeriod;
-        // Assuming format is "Month Year" (e.g., "January 2023")
-        const [month, year] = period.split(' ');
-        const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+        const [monthRange, year] = period.split(' ');
+        const [startMonth] = monthRange.split(' - ');
+        const monthIndex = new Date(`${startMonth} 1, ${year}`).getMonth();
         return {
           period,
           date: new Date(year, monthIndex)
         };
       });
 
-      // Sort by date descending
       periodsWithDates.sort((a, b) => b.date - a.date);
-
       return periodsWithDates[0].period;
     }
   },
@@ -245,10 +237,3 @@ export default {
   }
 }
 </script>
-
-<style>
-.dropdown-popup {
-  min-width: fit-content !important;
-  width: auto !important;
-}
-</style>

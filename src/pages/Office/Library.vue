@@ -115,7 +115,7 @@
                 <li v-for="(output, index) in supportOutputs" :key="output.id" class="mfo-item">
                   <div class="mfo-content">
                     <div class="mfo-title">
-                      <span class="output-text">{{ `SUPPORT OUTPUT ${index + 1}. ${output.name}` }}</span>
+                      <span class="output-text">{{ `OUTPUT ${index + 1}. ${output.name}` }}</span>
                     </div>
                     <div class="mfo-actions">
                       <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editSupport(output)" />
@@ -432,6 +432,7 @@ export default {
       };
       this.firstInvalidFieldFocused = false;
     },
+
     openAddModal(categoryType) {
       this.resetForm();
 
@@ -478,20 +479,7 @@ export default {
       this.form.isOutput = true;
     },
 
-    // editMfo(mfo, categoryType) {
-    //   this.resetForm();
-    //   this.modal = {
-    //     show: true,
-    //     title: "Edit MFO",
-    //     mode: "edit",
-    //     loading: false,
-    //     context: { categoryType }
-    //   };
 
-    //   this.form.category = mfo.category || this.findCategoryByType(categoryType);
-    //   this.form.items = [{ name: mfo.name }];
-    //   this.form.isOutput = false;
-    // },
 
     editMfo(mfo, categoryType) {
       this.resetForm();
@@ -616,25 +604,6 @@ export default {
       }
     },
 
-    // async saveMfos() {
-    //   if (this.modal.mode === 'add') {
-    //     const promises = this.form.items.map(item => {
-    //       return api.post('/add_mfo', {
-    //         office_id: this.user.office_id,
-    //         name: item.name,
-    //         f_category_id: this.form.category.id
-    //       });
-    //     });
-    //     await Promise.all(promises);
-    //   } else {
-    //     await api.post(`/mfos/${this.modal.context.mfo.id}`, {
-    //       office_id: this.user.office_id,
-    //       name: this.form.items[0].name,
-    //       f_category_id: this.form.category.id
-    //     });
-    //   }
-    // },
-
     async saveMfos() {
       try {
         if (this.modal.mode === 'add') {
@@ -711,56 +680,7 @@ export default {
       }
     },
 
-    // async saveOutputs() {
-    //   try {
-    //     this.modal.loading = true;
 
-    //     if (this.modal.mode === 'add') {
-    //       const promises = this.form.items.map(item => {
-    //         const payload = {
-    //           name: item.name,
-    //           f_category_id: this.form.category.id,
-    //           office_id: this.user.office_id
-    //         };
-
-    //         // Only add mfo_id for non-support outputs
-    //         if (!this.isSupportCategory && this.form.parentMfo) {
-    //           payload.mfo_id = this.form.parentMfo.id;
-    //         }
-
-    //         return api.post('/add_output', payload);
-    //       });
-
-    //       await Promise.all(promises);
-    //     } else {
-    //       const payload = {
-    //         name: this.form.items[0].name,
-    //         f_category_id: this.form.category.id,
-    //         office_id: this.user.office_id
-    //       };
-
-    //       // Only add mfo_id for non-support outputs
-    //       if (!this.isSupportCategory && this.form.parentMfo) {
-    //         payload.mfo_id = this.form.parentMfo.id;
-    //       }
-
-    //       await api.post(`/outputs/${this.modal.context.output.id}`, payload);
-    //     }
-
-    //     // Notification is now handled in saveEntry to avoid duplicates
-    //     await this.fetchData();
-    //     this.closeModal();
-    //   } catch (error) {
-    //     console.error('Error saving outputs:', error);
-    //     this.$q.notify({
-    //       type: 'negative',
-    //       message: error.response?.data?.message || 'Failed to save outputs',
-    //       position: 'top'
-    //     });
-    //   } finally {
-    //     this.modal.loading = false;
-    //   }
-    // },
 
     confirmDelete(mfo) {
       this.$q.dialog({

@@ -1,3 +1,4 @@
+<!-- eslint-disable no-dupe-keys -->
 <!-- performance standard -->
 <template>
   <div class="performance-standard-container">
@@ -11,6 +12,7 @@
             <!-- First Column: MFO Details -->
             <div class="col-md-3 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">MFO Details</div>
+
               <q-select filled v-model="rows[0].category" label="Select Category" :options="categoryOptions" dense
                 outlined map-options @update:model-value="clearDependentFields(1)" class="q-mb-sm" />
 
@@ -21,77 +23,74 @@
               <q-select filled v-model="rows[2].output" label="Select Output" :options="filteredOutputOptions" dense
                 outlined map-options :disable="(!rows[1].mfo && !skipMfo) || !rows[0].category" />
             </div>
+            <!-- -->
+            <!-- Competencies Section -->
+            <div class="row q-col-gutter-xs q-mb-md">
+              <!-- Core -->
+              <div class="col-md-4 col-sm-12">
+                <q-card flat bordered class="competency-card">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-subtitle2 text-center">Core</div>
+                    <div class="competency-list">
+                      <template v-if="mergedCoreCompetency && Object.keys(mergedCoreCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedCoreCompetency" :key="'core-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+                      <div v-else class="text-grey-6">No core competencies</div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </div>
 
-            <!-- Second Column: Competencies Section (Increased to 5 columns) -->
-            <div class="col-md-5 col-sm-12">
-              <div class="text-subtitle2 q-mb-sm text-center">Competencies</div>
-              <div class="row q-col-gutter-xs">
-                <!-- Core -->
-                <div class="col-4">
-                  <q-card flat bordered class="competency-card">
-                    <q-card-section class="q-pa-sm">
-                      <div class="text-subtitle2 text-center">Core</div>
-                      <div class="competency-list">
-                        <template v-if="mergedCoreCompetency && Object.keys(mergedCoreCompetency).length > 0">
-                          <div v-for="(comp, name) in mergedCoreCompetency" :key="'core-' + name">
-                            {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
-                          </div>
-                        </template>
-                        <div v-else class="text-grey-6">No core competencies</div>
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </div>
+              <!-- Technical -->
+              <div class="col-md-4 col-sm-12">
+                <q-card flat bordered class="competency-card">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-subtitle2 text-center">Technical</div>
+                    <div class="competency-list">
+                      <template v-if="mergedTechnicalCompetency && Object.keys(mergedTechnicalCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedTechnicalCompetency" :key="'tech-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+                      <div v-else class="text-grey-6">No technical competencies</div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </div>
 
-                <!-- Technical -->
-                <div class="col-4">
-                  <q-card flat bordered class="competency-card">
-                    <q-card-section class="q-pa-sm">
-                      <div class="text-subtitle2 text-center">Technical</div>
-                      <div class="competency-list">
-                        <template v-if="mergedTechnicalCompetency && Object.keys(mergedTechnicalCompetency).length > 0">
-                          <div v-for="(comp, name) in mergedTechnicalCompetency" :key="'tech-' + name">
-                            {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
-                          </div>
-                        </template>
-                        <div v-else class="text-grey-6">No technical competencies</div>
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </div>
-
-                <!-- Leadership -->
-                <div class="col-4">
-                  <q-card flat bordered class="competency-card">
-                    <q-card-section class="q-pa-sm">
-                      <div class="text-subtitle2 text-center">Leadership</div>
-                      <div class="competency-list">
-                        <template
-                          v-if="mergedLeadershipCompetency && Object.keys(mergedLeadershipCompetency).length > 0">
-                          <div v-for="(comp, name) in mergedLeadershipCompetency" :key="'leader-' + name">
-                            {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
-                          </div>
-                        </template>
-                        <div v-else class="text-grey-6">No leadership competencies</div>
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </div>
+              <!-- Leadership -->
+              <div class="col-md-4 col-sm-12">
+                <q-card flat bordered class="competency-card">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-subtitle2 text-center">Leadership</div>
+                    <div class="competency-list">
+                      <template v-if="mergedLeadershipCompetency && Object.keys(mergedLeadershipCompetency).length > 0">
+                        <div v-for="(comp, name) in mergedLeadershipCompetency" :key="'leader-' + name">
+                          {{ comp.code }}-{{ comp.value }} ({{ comp.legend }})
+                        </div>
+                      </template>
+                      <div v-else class="text-grey-6">No leadership competencies</div>
+                    </div>
+                  </q-card-section>
+                </q-card>
               </div>
             </div>
 
-            <!-- Third Column: Success Indicator (Reduced to col-2) -->
+            <!-- Third Column: Success Indicator -->
             <div class="col-md-2 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">Success Indicator</div>
+
               <q-input filled v-model="mergedSuccessIndicator" type="textarea" dense autogrow
-                class="auto-expand-textarea" style="height: 100%" />
+                class="auto-expand-textarea" />
             </div>
 
-            <!-- Fourth Column: Required Output (Reduced to col-2) -->
+            <!-- Fourth Column: Required Output -->
             <div class="col-md-2 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">Required Output</div>
-              <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow class="auto-expand-textarea"
-                style="height: 100%" />
+              <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow
+                class="auto-expand-textarea" />
             </div>
           </div>
         </q-card-section>
@@ -103,7 +102,7 @@
       <!-- Standard Outcome Section -->
       <div class="standard-outcome-section">
         <div class="text-h7 q-mb-md">Standard Outcome</div>
-        <div class="q-pa-md">
+        <div class="q-pa-md" style="max-width: 100%;">
           <q-table :rows="standardOutcomeRows" :columns="standardOutcomeColumns" row-key="rating" hide-bottom bordered
             flat dense class="standard-outcome-table">
             <!-- Header with dropdown only for quantity -->
@@ -180,21 +179,10 @@ import { computed } from 'vue'
 
 
 export default {
-  // props: {
-  //     initialCoreCompetencies: {
-  //         type: Array,
-  //         default: () => ['SP - 4', 'DM - 4', 'PM - 4']
-  //     },
-  //     initialTechnicalCompetencies: {
-  //         type: Array,
-  //         default: () => ['SPP - 4', 'M&E - 4', 'RM - 4']
-  //     },
-  //     initialLeadershipCompetencies: {
-  //         type: Array,
-  //         default: () => ['LDP - 4', 'CDP - 4', 'TPM - 4']
-  //     }
-  // },
+
+
   props: {
+
     employeeCompetencies: {
       type: Object,
       default: () => ({
@@ -202,8 +190,44 @@ export default {
         technical: {},
         leadership: {}
       })
+    },
+
+    initialSuccessIndicator: {
+      type: String,
+      default: ''
+    },
+
+    initialRequiredOutput: {
+      type: String,
+      default: ''
+    },
+
+    initialRows: {
+      type: Array,
+      default: () => [
+        { id: 1, category: null, mfo: null, output: null },
+        { id: 2, category: null, mfo: null, output: null },
+        { id: 3, category: null, mfo: null, output: null }
+      ]
+    },
+
+    initialStandardOutcomeRows: {
+      type: Array,
+      default: () => [
+        { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+        { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+        { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+        { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+        { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+      ]
+    },
+    initialQuantityIndicatorType: {
+      type: String,
+      default: 'numeric'
     }
   },
+
+
 
   setup(props) {
 
@@ -273,6 +297,7 @@ export default {
       3: 'Advanced',
       4: 'Superior'
     }
+
     return {
       mergedCoreCompetency,
       mergedTechnicalCompetency,
@@ -286,11 +311,20 @@ export default {
       loading: computed(() => mfoStore.loading)
     }
 
-
   },
+  // emits: ['update:successIndicator', 'update:requiredOutput'],
+  // Add these emits
+  emits: [
+    'update:successIndicator',
+    'update:requiredOutput',
+    'update:rows',
+    'update:standardOutcomeRows',
+    'update:quantityIndicatorType'
+  ],
 
   data() {
     return {
+
       columns: [
         { name: 'mfo', label: 'MFO', field: 'mfo', align: 'left' },
         { name: 'core', label: 'Core', field: 'core', align: 'left' },
@@ -335,19 +369,26 @@ export default {
         { label: 'Quantity (C. Cannot exceed 100%)', value: 'C' }
       ],
 
-      quantityIndicatorType: 'numeric',
+      // quantityIndicatorType: 'numeric',
       showTargetModal: false,
       targetValue: null,
 
+      // mergedSuccessIndicator: '',
+      // mergedRequiredOutput: ''
+      mergedSuccessIndicator: this.initialSuccessIndicator,
+      mergedRequiredOutput: this.initialRequiredOutput,
+
+      // eslint-disable-next-line no-dupe-keys, vue/no-dupe-keys
+      rows: JSON.parse(JSON.stringify(this.initialRows)),
+      // eslint-disable-next-line no-dupe-keys, vue/no-dupe-keys
+      standardOutcomeRows: JSON.parse(JSON.stringify(this.initialStandardOutcomeRows)),
+      quantityIndicatorType: this.initialQuantityIndicatorType
 
 
-      mergedSuccessIndicator: '',
-      mergedRequiredOutput: ''
     }
   },
 
   computed: {
-
 
 
     categoryOptions() {
@@ -356,44 +397,108 @@ export default {
         value: Number(cat.id) // Ensure this is a number
       })) || []
     },
+    // filteredMfoOptions() {
+    //   if (!this.rows[0].category) return []
+    //   return this.mfos?.map(mfo => ({
+    //     label: mfo.name,
+    //     value: mfo.id
+    //   })) || []
+    // },
     filteredMfoOptions() {
       if (!this.rows[0].category) return []
-      return this.mfos?.map(mfo => ({
-        label: mfo.name,
+      return this.mfos?.map((mfo, index) => ({
+        label: `MFO ${index + 1}. ${mfo.name}`, // Add numbering here
         value: mfo.id
       })) || []
     },
+
+    // filteredOutputOptions() {
+    //   if (!this.rows[0].category) return []
+
+    //   // For support functions - use the support outputs directly
+    //   if (this.skipMfo) {
+    //     return this.supportOutputs?.map(output => ({
+    //       label: output.name,
+    //       value: output.id
+    //     })) || []
+    //   }
+
+    //   // For other categories (like Strategic Functions)
+    //   // Use outputs from the selected MFO
+    //   if (!this.rows[1].mfo) return []
+
+    //   // Get the outputs that were already fetched for this MFO
+    //   const selectedMfo = this.mfos?.find(m =>
+    //     m.id === (this.rows[1].mfo?.value || this.rows[1].mfo)
+    //   )
+
+    //   return selectedMfo?.outputs?.map(output => ({
+    //     label: output.name,
+    //     value: output.id
+    //   })) || []
+    // }
 
     filteredOutputOptions() {
       if (!this.rows[0].category) return []
 
       // For support functions - use the support outputs directly
       if (this.skipMfo) {
-        return this.supportOutputs?.map(output => ({
-          label: output.name,
+        return this.supportOutputs?.map((output, index) => ({
+          label: `OUTPUT ${index + 1}. ${output.name}`, // Add numbering here
           value: output.id
         })) || []
       }
 
       // For other categories (like Strategic Functions)
-      // Use outputs from the selected MFO
       if (!this.rows[1].mfo) return []
 
-      // Get the outputs that were already fetched for this MFO
       const selectedMfo = this.mfos?.find(m =>
         m.id === (this.rows[1].mfo?.value || this.rows[1].mfo)
       )
 
-      return selectedMfo?.outputs?.map(output => ({
-        label: output.name,
+      return selectedMfo?.outputs?.map((output, index) => ({
+        label: `OUTPUT ${index + 1}. ${output.name}`, // Add numbering here
         value: output.id
       })) || []
     }
-
   },
   methods: {
 
+    getFormData() {
+      const formatCompetency = (compObj) => {
+        if (!compObj) return null;
+        return Object.entries(compObj).reduce((acc, [key, value]) => {
+          acc[key] = value.value;
+          return acc;
+        }, {});
+      };
 
+      // Extract string values from the rows array
+      const getStringValue = (field) => {
+        if (!field) return null;
+        return typeof field === 'object' ? field.label || field.value || field.name || null : field;
+      };
+
+      return {
+        rows: this.rows.map(row => ({
+          category: getStringValue(row.category),
+          mfo: getStringValue(row.mfo),
+          output: getStringValue(row.output)
+        })),
+        standardOutcomeRows: this.standardOutcomeRows.map(row => ({
+          rating: row.rating,
+          quantity: row.quantity,
+          effectiveness: row.effectiveness,
+          timeliness: row.timeliness
+        })),
+        successIndicator: this.mergedSuccessIndicator,
+        requiredOutput: this.mergedRequiredOutput,
+        quantityIndicatorType: this.quantityIndicatorType,
+        coreCompetency: formatCompetency(this.mergedCoreCompetency),
+        technicalCompetency: formatCompetency(this.mergedTechnicalCompetency),
+        leadershipCompetency: formatCompetency(this.mergedLeadershipCompetency)
+      };
+    },
     clearDependentFields(level) {
       // Clear dependent fields when parent selection changes
       if (level <= 1) {
@@ -417,6 +522,7 @@ export default {
         }
       }
     },
+
     blockInvalidChars(e) {
       const allowedKeys = [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
@@ -505,15 +611,7 @@ export default {
       this.showTargetModal = false;
     },
 
-    getFormData() {
-      return {
 
-        mergedSuccessIndicator: this.mergedSuccessIndicator,
-        mergedRequiredOutput: this.mergedRequiredOutput,
-        rows: this.rows,
-        standardOutcomeRows: this.standardOutcomeRows
-      };
-    },
 
     resetComponentData() {
 
@@ -542,7 +640,64 @@ export default {
   },
 
   watch: {
+    mergedSuccessIndicator(newVal) {
+      if (newVal !== this.initialSuccessIndicator) {
+        this.$emit('update:successIndicator', newVal);
+      }
+    },
+    mergedRequiredOutput(newVal) {
+      if (newVal !== this.initialRequiredOutput) {
+        this.$emit('update:requiredOutput', newVal);
+      }
+    },
+    standardOutcomeRows: {
+      deep: true,
+      handler(newVal) {
+        if (JSON.stringify(newVal) !== JSON.stringify(this.initialStandardOutcomeRows)) {
+          this.$emit('update:standardOutcomeRows', newVal);
+        }
+      }
+    },
+    quantityIndicatorType(newVal) {
+      if (newVal !== this.initialQuantityIndicatorType) {
+        this.$emit('update:quantityIndicatorType', newVal);
+      }
+    },
+    // Watchers for initial props
+    initialSuccessIndicator(newVal) {
+      this.mergedSuccessIndicator = newVal;
+    },
+    initialRequiredOutput(newVal) {
+      this.mergedRequiredOutput = newVal;
+    },
+    initialRows: {
+      deep: true,
+      handler(newVal) {
+        this.rows = JSON.parse(JSON.stringify(newVal));
+      }
+    },
+    initialStandardOutcomeRows: {
+      deep: true,
+      handler(newVal) {
+        this.standardOutcomeRows = JSON.parse(JSON.stringify(newVal));
+      }
+    },
+    initialQuantityIndicatorType(newVal) {
+      this.quantityIndicatorType = newVal;
+    },
 
+
+    rows: {
+      deep: true,
+      handler(newVal) {
+        if (JSON.stringify(newVal) !== JSON.stringify(this.initialRows)) {
+          this.$emit('update:rows', newVal);
+        }
+      }
+    },
+
+
+    // eslint-disable-next-line no-dupe-keys
     quantityIndicatorType(val) {
       if (val === 'B') {
         this.targetValue = null;
@@ -554,12 +709,12 @@ export default {
           row.quantity = '';
         });
       }
-    }
+    },
+
   },
 
   async created() {
     // Initialize competency arrays from props
-
     await this.mfoStore.fetchCategories();
   }
 }

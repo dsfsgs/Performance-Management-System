@@ -1,7 +1,9 @@
+<!--Division Employee-->
 <template>
   <div>
     <div class="row items-center justify-between">
       <div class="text-h7">{{ division }}</div>
+      <!-- <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div> -->
       <q-btn flat icon="arrow_back" label="Back" color="grey-8" class="q-ml-auto" @click="$emit('back')" />
     </div>
     <q-separator class="q-mb-md" />
@@ -16,12 +18,13 @@
       </div>
 
       <div class="row q-gutter-sm">
-        <q-btn v-if="showAdd" :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee" @click="handleAddEmployee"
-          text-color="white" icon-color="white" unelevated no-caps />
+        <q-btn v-if="showAdd" :style="{ backgroundColor: '#077A37' }" icon="add" label="Add Employee"
+          @click="handleAddEmployee" text-color="white" icon-color="white" unelevated no-caps />
       </div>
     </div>
 
     <!-- Employee Table -->
+    <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div>
     <q-card flat bordered>
       <q-table :rows="filteredEmployees" :columns="columns" row-key="id" :pagination="{ rowsPerPage: 10 }"
         :loading="loading" :filter="search" binary-state-sort>
@@ -45,8 +48,10 @@
           <q-td :props="props">
             <div class="row items-center justify-center q-gutter-x-sm">
               <q-btn flat round size="sm" color="info" icon="visibility" @click="viewEmployee(props.row)" />
-              <q-btn v-if="showEdit" flat round size="sm" color="primary" icon="edit" @click="editEmployee(props.row)" />
-              <q-btn v-if="showDelete" flat round size="sm" color="negative" icon="delete" @click="deleteEmployee(props.row)" />
+              <q-btn v-if="showEdit" flat round size="sm" color="primary" icon="edit"
+                @click="editEmployee(props.row)" />
+              <q-btn v-if="showDelete" flat round size="sm" color="negative" icon="delete"
+                @click="deleteEmployee(props.row)" />
             </div>
           </q-td>
         </template>
@@ -66,6 +71,8 @@
 <script>
 import EmployeeViewModal from './EmployeeViewModal.vue';
 import EmployeeEditModal from './EmployeeEditModal.vue';
+import { useUnitWorkPlanStore } from 'src/stores/office/unit_work_plantStore';
+import { api } from 'src/boot/axios'
 
 export default {
   components: {
@@ -77,7 +84,7 @@ export default {
       type: String,
       required: true
     },
-    targetPeriod: {  
+    targetPeriod: {
       type: String,
       default: ""
     },
@@ -106,6 +113,7 @@ export default {
       columns: [
         { name: 'name', label: 'Employee Name', field: 'name', align: 'left', sortable: true },
         { name: 'position', label: 'Position', field: 'position', align: 'left', sortable: true },
+        { name: 'status', label: 'Status', field: 'status', align: 'left', sortable: true },
         { name: 'actions', label: 'Actions', field: 'actions', align: 'center' }
       ],
       employees: [],
@@ -115,6 +123,7 @@ export default {
     };
   },
   computed: {
+
     filteredEmployees() {
       let allEmployees = [...this.employees];
 
@@ -130,6 +139,7 @@ export default {
             name: this.employeeData.employeeName,
             position: this.employeeData.position,
             rank: this.employeeData.rank,
+            status: 'Pending',
             performanceStandards: this.employeeData.performanceStandards || []
           });
         }
@@ -146,112 +156,47 @@ export default {
     }
   },
   methods: {
-    fetchEmployees() {
+
+    async fetchEmployees() {
       this.loading = true;
-      setTimeout(() => {
-        const data = {
-          "Recruitment, Selection and Records Management Division": [
-            {
-              id: 1,
-              name: "Alice Santos",
-              position: "HR Officer",
-              rank: "SG-18",
-              performanceStandards: [
-                {
-                  coreCompetency: "DSE-4",
-                  leadershipCompetency: "TSC-4",
-                  technicalCompetency: "RM-3",
-                  successIndicator: "100% of HR reports submitted on time",
-                  requiredOutput: "Monthly HR reports",
-                  mfo1: "A",
-                  mfo2: "M1",
-                  mfo3: "O1",
-                  standardOutcomeRows: [
-                    { rating: '5', quantity: '100%', timeliness: 'Before deadline', effectiveness: 'Excellent' },
-                    { rating: '4', quantity: '90-99%', timeliness: 'On time', effectiveness: 'Very good' },
-                    { rating: '3', quantity: '80-89%', timeliness: '1 day late', effectiveness: 'Good' },
-                    { rating: '2', quantity: '70-79%', timeliness: '2 days late', effectiveness: 'Fair' },
-                    { rating: '1', quantity: 'Below 70%', timeliness: '3+ days late', effectiveness: 'Poor' }
-                  ]
-                }
-              ]
-            },
-            {
-              id: 2,
-              name: "Miguel Cruz",
-              position: "Records Specialist",
-              rank: "SG-12",
-              performanceStandards: []
-            },
-            {
-              id: 3,
-              name: "Sofia Reyes",
-              position: "Recruitment Specialist",
-              rank: "SG-14",
-              performanceStandards: []
-            }
-          ],
-          "Performance, Management, Incentives, Rewards and Recognition Division": [
-            {
-              id: 4,
-              name: "Juan Dela Cruz",
-              position: "Performance Manager",
-              rank: "SG-21",
-              performanceStandards: []
-            },
-            {
-              id: 5,
-              name: "Maria Garcia",
-              position: "Rewards Specialist",
-              rank: "SG-14",
-              performanceStandards: []
-            }
-          ],
-          "Employees Compensation, Welfare and Benefits Division": [
-            {
-              id: 6,
-              name: "Pedro Reyes",
-              position: "Benefits Coordinator",
-              rank: "SG-17",
-              performanceStandards: []
-            },
-            {
-              id: 7,
-              name: "Linda Lim",
-              position: "Compensation Analyst",
-              rank: "SG-15",
-              performanceStandards: []
-            }
-          ],
-          "Human Resource Development Division": [
-            {
-              id: 8,
-              name: "Roberto Tan",
-              position: "Training Manager",
-              rank: "SG-20",
-              performanceStandards: []
-            },
-            {
-              id: 9,
-              name: "Ana Gomez",
-              position: "Development Specialist",
-              rank: "SG-14",
-              performanceStandards: []
-            }
-          ]
-        };
-        this.employees = data[this.division] || [];
+      try {
+        const store = useUnitWorkPlanStore();
+        await store.fetchEmployeesByDivision(this.division, this.targetPeriod);
+
+        // Map the API response to our expected format
+        this.employees = store.employeesWithWorkPlans.map(emp => ({
+          id: emp.id,
+          name: emp.employee_name,
+          position: emp.position,
+          category: emp.category,
+          mfo: emp.mfo,
+          output: emp.output,
+          rank: emp.rank,
+          status: emp.status || 'Pending',
+          performanceStandards: emp.performance_standards || []
+        }));
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+        this.$q.notify({
+          message: 'Failed to fetch employees',
+          color: 'negative',
+          icon: 'error'
+        });
+      } finally {
         this.loading = false;
-      }, 500);
+      }
     },
+
     viewEmployee(employee) {
       this.selectedEmployee = { ...employee };
       this.showViewModal = true;
     },
+
     editEmployee(employee) {
       this.selectedEmployee = { ...employee };
       this.showEditModal = true;
     },
+
     deleteEmployee(employee) {
       this.$q.dialog({
         title: 'Confirm Deletion',
@@ -260,11 +205,9 @@ export default {
         persistent: true
       }).onOk(() => {
         this.employees = this.employees.filter(emp => emp.id !== employee.id);
-
         if (this.selectedEmployee && this.selectedEmployee.id === employee.id) {
           this.selectedEmployee = null;
         }
-
         this.$q.notify({
           message: `Employee ${employee.name} deleted`,
           color: 'negative',
@@ -273,37 +216,66 @@ export default {
         });
       });
     },
-    handleSaveEmployee(data) {
+
+
+    async handleSaveEmployee(data) {
       const { employee, performanceStandards } = data;
+      // eslint-disable-next-line no-unused-vars
+      const store = useUnitWorkPlanStore();
 
-      const index = this.employees.findIndex(emp => emp.id === employee.id);
+      try {
+        this.loading = true;
 
-      if (index !== -1) {
-        this.employees[index] = {
-          ...this.employees[index],
-          name: employee.name,
-          position: employee.position,
+        // Prepare the payload for the update
+        const payload = {
+          employee_id: employee.id,
           rank: employee.rank,
-          performanceStandards: performanceStandards
-        };
-      } else {
-        const newEmployee = {
-          id: `emp-${Date.now()}`,
-          name: employee.name,
           position: employee.position,
-          rank: employee.rank,
-          performanceStandards: performanceStandards
+          category: employee.category,
+          mfo: employee.mfo,
+          output: employee.output,
+          performance_standards: performanceStandards.map(standard => ({
+            success_indicator: standard.successIndicator,
+            required_output: standard.requiredOutput,
+            standard_outcomes: standard.standardOutcomeRows,
+            core_competency: standard.coreCompetency,
+            technical_competency: standard.technicalCompetency,
+            leadership_competency: standard.leadershipCompetency
+          }))
         };
 
-        this.employees.push(newEmployee);
+        // Call the API to update the employee
+        // eslint-disable-next-line no-unused-vars
+        const response = await api.post(`/employee/${employee.id}/update/unitworkplan`, payload);
+
+        // Update local state if API call is successful
+        const index = this.employees.findIndex(emp => emp.id === employee.id);
+        if (index !== -1) {
+          this.employees[index] = {
+            ...this.employees[index],
+            ...employee,
+            performanceStandards: performanceStandards
+          };
+        }
+
+        this.$q.notify({
+          message: `Employee ${employee.name} successfully updated`,
+          color: 'positive',
+          icon: 'check_circle',
+          position: 'top-right'
+        });
+
+        this.showEditModal = false;
+      } catch (error) {
+        console.error('Error updating employee:', error);
+        this.$q.notify({
+          message: 'Failed to update employee',
+          color: 'negative',
+          icon: 'error'
+        });
+      } finally {
+        this.loading = false;
       }
-
-      this.$q.notify({
-        message: `Employee ${employee.name} successfully saved`,
-        color: 'positive',
-        icon: 'check_circle',
-        position: 'top-right'
-      });
     },
     handleAddEmployee() {
       this.$emit('add-employee', {
@@ -319,13 +291,15 @@ export default {
     employeeData: {
       handler(newVal) {
         if (newVal && newVal.employeeName) {
-          const newEmployee = this.filteredEmployees.find(
-            emp => emp.name === newVal.employeeName && emp.position === newVal.position
-          );
-          if (newEmployee) {
-            this.selectedEmployee = newEmployee;
-            this.showViewModal = true;
-          }
+          this.$nextTick(() => {
+            const newEmployee = this.filteredEmployees.find(
+              emp => emp.name === newVal.employeeName && emp.position === newVal.position
+            );
+            if (newEmployee) {
+              this.selectedEmployee = newEmployee;
+              this.showViewModal = true;
+            }
+          });
         }
       },
       deep: true
