@@ -1,4 +1,4 @@
-<!--EmployeeEditModal-->
+<!--EmployeeEditModal.vue-->
 <template>
 <q-dialog v-model="showModal">
     <q-card class="minimalist-card">

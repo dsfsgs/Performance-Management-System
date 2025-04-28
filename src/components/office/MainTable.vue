@@ -1,3 +1,4 @@
+<!--Maintable.vue-->
 <template>
   <div>
     <!-- Filter and Buttons -->
@@ -80,7 +81,7 @@
 
 <script>
 import GenerateOPCR from './GenerateOPCR.vue';
-import UnitWorkPlanReport from './UnitWorkPlanReport.vue';
+import UnitWorkPlanReport from '../unitworkplan/UnitWorkPlanReport.vue';
 
 export default {
   components: {

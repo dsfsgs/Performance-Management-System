@@ -1,201 +1,303 @@
+<!--Account.vue-->
 <template>
   <div class="account-container">
-    <div class="details-card">
-      <h2>Employee Details</h2>
-      <div class="details-grid">
-        <div class="details-column">
-          <strong>Employee Assign</strong>
-          <p>Mahusay, Jograd M.</p>
-          <strong>Position</strong>
-          <p>IS Analysts III</p>
+    <!-- Employee Details Card -->
+    <q-card class="details-card elevated-card">
+      <q-card-section>
+        <div class="card-header">
+          <h2 class="card-title">Employee Details1</h2>
+          <q-icon name="person" class="card-icon" />
         </div>
-        <div class="details-column">
-          <strong>Office</strong>
-          <p>CICTMO</p>
-        </div>
-      </div>
-    </div>
 
-    <div class="details-card">
-      <div class="account-header">
-        <h2>Account Details</h2>
-        <button class="edit-btn" @click="openModal">Edit</button>
-      </div>
-      <div class="details-grid">
-        <div class="details-column">
-          <strong>Username</strong>
-          <p>{{ account.username }}</p>
+        <div class="details-grid q-mt-md">
+          <div class="details-column">
+            <div class="detail-item">
+              <strong class="detail-label">Employee Name</strong>
+              <p class="detail-value">{{ userStore.user?.name || "N/A" }}</p>
+            </div>
+            <div class="detail-item">
+              <strong class="detail-label">Position</strong>
+              <p class="detail-value">{{ userStore.user?.designation || "N/A" }}</p>
+            </div>
+          </div>
+          <div class="details-column">
+            <div class="detail-item">
+              <strong class="detail-label">Office</strong>
+              <p class="detail-value">{{ userStore.officeName }}</p>
+            </div>
+          </div>
         </div>
-        <div class="details-column">
-          <strong>Password</strong>
-          <p>********</p>
-        </div>
-      </div>
-      <div class="last-updated">
-        Last updated: {{ lastUpdated }}
-      </div>
-    </div>
+      </q-card-section>
+    </q-card>
 
-    <ModalComponent v-model:isOpen="isModalOpen" :username="account.username" @save="handleSave" />
+    <!-- Account Details Card -->
+    <q-card class="details-card elevated-card">
+      <q-card-section>
+        <div class="card-header">
+          <h2 class="card-title">Account Details</h2>
+          <q-btn class="edit-btn" icon="edit" label="Edit" @click="openEditModal" outline color="primary" />
+        </div>
+
+        <div class="details-grid q-mt-md">
+          <div class="details-column">
+            <div class="detail-item">
+              <strong class="detail-label">Username</strong>
+              <p class="detail-value">{{ userStore.user?.name }}</p>
+            </div>
+          </div>
+          <div class="details-column">
+            <div class="detail-item">
+              <strong class="detail-label">Password</strong>
+              <p class="detail-value">••••••••</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="last-updated q-mt-md">
+          <q-icon name="schedule" size="sm" />
+          <span>Last updated: {{ lastUpdated }}</span>
+        </div>
+      </q-card-section>
+    </q-card>
+
+    <!-- Edit Modal -->
+    <q-dialog v-model="isModalOpen">
+      <q-card class="edit-modal">
+        <q-card-section class="modal-header">
+          <div class="text-h6">Edit Account</div>
+        </q-card-section>
+
+        <q-card-section class="modal-body">
+          <q-input v-model="formData.username" label="Username" outlined dense class="q-mb-md" readonly />
+
+          <q-input v-model="formData.oldPassword" label="Old Password" :type="showOldPassword ? 'text' : 'password'"
+            outlined dense class="q-mb-md" :rules="[val => !!val || 'Old password is required']">
+            <template v-slot:append>
+              <q-icon :name="showOldPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                @click="showOldPassword = !showOldPassword" />
+            </template>
+          </q-input>
+
+          <q-input v-model="formData.newPassword" label="New Password" :type="showNewPassword ? 'text' : 'password'"
+            outlined dense class="q-mb-md" :rules="[
+              val => !val || val.length >= 6 || 'Password must be at least 6 characters',
+              val => !val || val !== formData.oldPassword || 'New password must be different from old password'
+            ]">
+            <template v-slot:append>
+              <q-icon :name="showNewPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                @click="showNewPassword = !showNewPassword" />
+            </template>
+          </q-input>
+
+          <q-input v-model="formData.confirmPassword" label="Confirm New Password"
+            :type="showConfirmPassword ? 'text' : 'password'" outlined dense :rules="[
+              val => !formData.newPassword || val === formData.newPassword || 'Passwords do not match'
+            ]">
+            <template v-slot:append>
+              <q-icon :name="showConfirmPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                @click="showConfirmPassword = !showConfirmPassword" />
+            </template>
+          </q-input>
+        </q-card-section>
+
+        <q-card-actions align="right" class="modal-footer">
+          <q-btn flat label="Cancel" v-close-popup class="q-mr-sm" />
+          <q-btn color="primary" label="Save Changes" @click="saveChanges" :loading="isSaving" :disable="!formData.oldPassword ||
+            (formData.newPassword && formData.newPassword !== formData.confirmPassword)" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
+
 <script>
-import ModalComponent from "./EditAccountModal.vue";
+import { ref, onMounted } from "vue";
+import { useQuasar } from "quasar";
+import { useUserStore } from "src/stores/userStore";
 
 export default {
-  components: {
-    ModalComponent,
-  },
-  data() {
-    return {
-      isModalOpen: false,
-      account: {
-        username: "jmahusay",
-      },
-      lastUpdated: new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+  name: "UserAccount",
+
+  setup() {
+    const $q = useQuasar();
+    const isModalOpen = ref(false);
+    const isSaving = ref(false);
+    const userStore = useUserStore();
+    const showOldPassword = ref(false);
+    const showNewPassword = ref(false);
+    const showConfirmPassword = ref(false);
+
+    const formData = ref({
+      username: userStore.user?.name || "",
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+
+    const lastUpdated = ref(new Date().toLocaleString());
+
+    onMounted(() => {
+      userStore.loadUserData();
+    });
+
+    const openEditModal = () => {
+      formData.value = {
+        username: userStore.user?.name || "",
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      };
+      // Reset visibility toggles when opening modal
+      showOldPassword.value = false;
+      showNewPassword.value = false;
+      showConfirmPassword.value = false;
+      isModalOpen.value = true;
     };
-  },
-  methods: {
-    openModal() {
-      this.isModalOpen = true;
-    },
-    handleSave(updatedData) {
-      this.account.username = updatedData.username;
-      this.lastUpdated = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      this.$q.notify({ type: "positive", message: "Account details updated successfully!" });
-      this.isModalOpen = false;
-    },
+
+    const saveChanges = async () => {
+      isSaving.value = true;
+      try {
+        // Only send password fields if new password is provided
+        const updateData = {
+          oldPassword: formData.value.oldPassword,
+          ...(formData.value.newPassword && { newPassword: formData.value.newPassword })
+        };
+
+        await userStore.updateUserCredentials(updateData);
+        lastUpdated.value = new Date().toLocaleString();
+        $q.notify({
+          type: "positive",
+          message: "Password updated successfully!",
+          position: "top",
+          timeout: 2000
+        });
+        isModalOpen.value = false;
+      } catch (error) {
+        $q.notify({
+          type: "negative",
+          message: error.message || "Failed to update password!",
+          position: "top",
+          timeout: 2000
+        });
+      } finally {
+        isSaving.value = false;
+      }
+    };
+
+    return {
+      isModalOpen,
+      isSaving,
+      userStore,
+      formData,
+      lastUpdated,
+      showOldPassword,
+      showNewPassword,
+      showConfirmPassword,
+      openEditModal,
+      saveChanges,
+    };
   },
 };
 </script>
 
+
 <style scoped>
 .account-container {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 25px;
-  background: #f8f9fa;
-  padding: 30px 20px;
-  box-sizing: border-box;
-  overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.details-card {
-  width: 80%;
-  background: white;
-  padding: 25px;
+.elevated-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  position: relative;
+  margin-bottom: 24px;
+  border: none;
 }
 
-.account-header {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
 }
 
-h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #2c3e50;
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  color: #666;
 }
 
 .details-grid {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
 }
 
-.details-column {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 48%;
+.detail-item {
+  margin-bottom: 16px;
 }
 
-strong {
-  font-size: 1rem;
-  color: #34495e;
+.detail-label {
   display: block;
-  margin-bottom: 5px;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 4px;
 }
 
-p {
-  font-size: 1.1rem;
-  color: #2c3e50;
+.detail-value {
+  font-size: 1rem;
+  color: #333;
   margin: 0;
-  padding: 6px 0;
-  border-bottom: 1px solid #ecf0f1;
-}
-
-.edit-btn {
-  background: #3498db;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.edit-btn:hover {
-  background: #2980b9;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
 .last-updated {
-  margin-top: 20px;
-  font-size: 0.8rem;
-  color: #7f8c8d;
-  text-align: right;
-  font-style: italic;
+  font-size: 0.75rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-@media (max-width: 768px) {
-  .account-container {
-    padding: 20px 15px;
-  }
+.edit-btn {
+  font-weight: 500;
+}
 
-  .details-grid {
-    flex-direction: column;
-  }
+.edit-modal {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 12px;
+}
 
-  .details-column {
-    width: 100%;
-  }
+.modal-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
 
-  h2 {
-    font-size: 1.4rem;
-  }
+.modal-body {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
 
-  .details-card {
-    width: 90%;
-    padding: 20px;
-  }
+.modal-footer {
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
 
-  .last-updated {
-    text-align: left;
-    margin-top: 15px;
-  }
+.password-hint {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 </style>

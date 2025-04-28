@@ -397,13 +397,7 @@ export default {
         value: Number(cat.id) // Ensure this is a number
       })) || []
     },
-    // filteredMfoOptions() {
-    //   if (!this.rows[0].category) return []
-    //   return this.mfos?.map(mfo => ({
-    //     label: mfo.name,
-    //     value: mfo.id
-    //   })) || []
-    // },
+
     filteredMfoOptions() {
       if (!this.rows[0].category) return []
       return this.mfos?.map((mfo, index) => ({
@@ -411,32 +405,6 @@ export default {
         value: mfo.id
       })) || []
     },
-
-    // filteredOutputOptions() {
-    //   if (!this.rows[0].category) return []
-
-    //   // For support functions - use the support outputs directly
-    //   if (this.skipMfo) {
-    //     return this.supportOutputs?.map(output => ({
-    //       label: output.name,
-    //       value: output.id
-    //     })) || []
-    //   }
-
-    //   // For other categories (like Strategic Functions)
-    //   // Use outputs from the selected MFO
-    //   if (!this.rows[1].mfo) return []
-
-    //   // Get the outputs that were already fetched for this MFO
-    //   const selectedMfo = this.mfos?.find(m =>
-    //     m.id === (this.rows[1].mfo?.value || this.rows[1].mfo)
-    //   )
-
-    //   return selectedMfo?.outputs?.map(output => ({
-    //     label: output.name,
-    //     value: output.id
-    //   })) || []
-    // }
 
     filteredOutputOptions() {
       if (!this.rows[0].category) return []
