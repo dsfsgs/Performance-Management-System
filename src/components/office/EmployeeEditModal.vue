@@ -1,5 +1,6 @@
+<!--EmployeeEditModal-->
 <template>
-  <q-dialog v-model="showModal">
+<q-dialog v-model="showModal">
     <q-card class="minimalist-card">
       <q-card-section class="header-section">
         <div class="text-h6">Edit Employee Performance Standards</div>
@@ -32,7 +33,6 @@
       <q-separator />
 
       <q-card-section>
-
         <div v-for="(standard, index) in editedStandards" :key="index" class="q-mb-lg">
           <q-card bordered class="standard-card">
             <q-card-section class="standard-header">
@@ -44,13 +44,16 @@
             </q-card-section>
 
             <q-card-section class="standard-content">
-              <!-- New Horizontal Performance Standard Component -->
-              <performance-standard-edit v-model:core-competency="standard.coreCompetency"
-                v-model:leadership-competency="standard.leadershipCompetency"
-                v-model:technical-competency="standard.technicalCompetency"
-                v-model:success-indicator="standard.successIndicator" v-model:required-output="standard.requiredOutput"
-                v-model:mfo1="standard.mfo1" v-model:mfo2="standard.mfo2" v-model:mfo3="standard.mfo3"
-                v-model:standard-outcome-rows="standard.standardOutcomeRows" />
+              <performance-standard-edit
+                v-model:category="standard.category"
+                v-model:mfo="standard.mfo"
+                v-model:output="standard.output"
+                v-model:core-competency="standard.core_competency"
+                v-model:leadership-competency="standard.leadership_competency"
+                v-model:technical-competency="standard.technical_competency"
+                v-model:success-indicator="standard.success_indicator"
+                v-model:required-output="standard.required_output"
+                v-model:standard-outcome-rows="standard.standard_outcomes" />
             </q-card-section>
           </q-card>
         </div>
@@ -93,7 +96,6 @@ export default {
   emits: ['update:modelValue', 'save'],
   data() {
     return {
-      editedEmployee: {},
       editedStandards: []
     };
   },
@@ -116,25 +118,33 @@ export default {
   },
   methods: {
     initializeForm() {
-      // Create deep copies to avoid mutation of props
-      this.editedEmployee = { ...this.employee };
-
-      // Deep copy of performance standards
-      this.editedStandards = this.performanceStandards?.length
-        ? JSON.parse(JSON.stringify(this.performanceStandards))
-        : [this.createEmptyStandard()];
+      // Initialize standards from props or create empty one
+      if (this.performanceStandards?.length > 0) {
+        this.editedStandards = this.performanceStandards.map(standard => ({
+          ...standard,
+          standard_outcomes: standard.standard_outcomes || [
+            { rating: '5', quantity: '', timeliness: '', effectiveness: '' },
+            { rating: '4', quantity: '', timeliness: '', effectiveness: '' },
+            { rating: '3', quantity: '', timeliness: '', effectiveness: '' },
+            { rating: '2', quantity: '', timeliness: '', effectiveness: '' },
+            { rating: '1', quantity: '', timeliness: '', effectiveness: '' }
+          ]
+        }));
+      } else {
+        this.editedStandards = [this.createEmptyStandard()];
+      }
     },
     createEmptyStandard() {
       return {
-        coreCompetency: 'DSE-4',
-        leadershipCompetency: 'TSC-4',
-        technicalCompetency: 'RM-3',
-        successIndicator: '',
-        requiredOutput: '',
-        mfo1: '',
-        mfo2: '',
-        mfo3: '',
-        standardOutcomeRows: [
+        category: '',
+        mfo: '',
+        output: '',
+        core_competency: '',
+        leadership_competency: '',
+        technical_competency: '',
+        success_indicator: '',
+        required_output: '',
+        standard_outcomes: [
           { rating: '5', quantity: '', timeliness: '', effectiveness: '' },
           { rating: '4', quantity: '', timeliness: '', effectiveness: '' },
           { rating: '3', quantity: '', timeliness: '', effectiveness: '' },
@@ -157,19 +167,9 @@ export default {
       });
     },
     saveChanges() {
-      // Validate data
-      if (!this.editedEmployee.name || !this.editedEmployee.position) {
-        this.$q.notify({
-          message: 'Please fill all required fields',
-          color: 'negative',
-          icon: 'warning'
-        });
-        return;
-      }
-
       // Emit save event with edited data
       this.$emit('save', {
-        employee: this.editedEmployee,
+        employee: this.employee,
         performanceStandards: this.editedStandards
       });
 

@@ -11,7 +11,7 @@
       <q-card-section class="common-fields-section">
         <div class="row q-col-gutter-md">
           <div class="col-md-4 col-sm-12">
-            <q-select filled v-model="selectedDivision" :options="divisionOptions" label="Division" stack-label
+            <q-select filled v-model="selectedDivision" :options="divisionOptions" label="Division/Section" stack-label
               @update:model-value="fetchEmployees" class="no-bottom-margin"
               :rules="[val => !!val || 'Field is required']" />
           </div>
@@ -69,11 +69,18 @@
                   @click="removePerformanceStandard(empIndex, stdIndex)" class="q-ml-sm" />
               </div>
 
+
               <performance-standards :ref="`perfStd_${empIndex}_${stdIndex}`"
                 :employee-competencies="employeeWorkPlans[empIndex].competencies"
-                :initialMergedCoreCompetency="standard.coreCompetency"
-                :initialMergedLeadershipCompetency="standard.leadershipCompetency"
-                :initialMergedTechnicalCompetency="standard.technicalCompetency" />
+                :initial-success-indicator="standard.successIndicator"
+                :initial-required-output="standard.requiredOutput" :initial-rows="standard.rows"
+                :initial-standard-outcome-rows="standard.standardOutcomeRows"
+                :initial-quantity-indicator-type="standard.quantityIndicatorType"
+                @update:successIndicator="val => standard.successIndicator = val"
+                @update:requiredOutput="val => standard.requiredOutput = val" @update:rows="val => standard.rows = val"
+                @update:standardOutcomeRows="val => standard.standardOutcomeRows = val"
+                @update:quantityIndicatorType="val => standard.quantityIndicatorType = val" />
+
             </div>
 
             <q-separator v-if="stdIndex < workPlan.performanceStandards.length - 1" />
@@ -112,7 +119,7 @@
 </template>
 
 <script>
-import PerformanceStandards from "../office/PerformanceStandard.vue";
+import PerformanceStandards from "./PerformanceStandard.vue";
 import { useUserStore } from 'src/stores/userStore';
 import { useUnitWorkPlanStore } from 'src/stores/office/unit_work_plantStore';
 import { storeToRefs } from 'pinia';
@@ -121,6 +128,7 @@ import { ref, computed } from 'vue';
 export default {
   components: {
     PerformanceStandards
+
   },
   props: {
     prefilledData: {
@@ -136,14 +144,42 @@ export default {
     // Active tab tracker
     const activeTab = ref('emp-0');
 
-    // Array to store employee work plans (employee + their performance standards)
+
+
+    // In your setup() function, modify the employeeWorkPlans initialization:
     const employeeWorkPlans = ref([
       {
         employeeId: null,
         employeeName: '',
         rank: '',
         position: '',
-        performanceStandards: [{}]
+        competencies: {
+          core: {},
+          technical: {},
+          leadership: {}
+        },
+        performanceStandards: [
+          {
+            coreCompetency: null,
+            leadershipCompetency: null,
+            technicalCompetency: null,
+            successIndicator: '',
+            requiredOutput: '',
+            rows: [
+              { id: 1, category: null, mfo: null, output: null },
+              { id: 2, category: null, mfo: null, output: null },
+              { id: 3, category: null, mfo: null, output: null }
+            ],
+            standardOutcomeRows: [
+              { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+            ],
+            quantityIndicatorType: 'numeric'
+          }
+        ]
       }
     ]);
 
@@ -168,8 +204,8 @@ export default {
 
       // Count available unselected employees
       const availableEmployees = employeeOptions.value.filter(emp => !selectedIds.includes(emp.id));
-
       return availableEmployees.length > 0;
+
     });
 
     // Destructure actions
@@ -209,8 +245,28 @@ export default {
   },
 
   methods: {
+
     clearEmployeeData(empIndex) {
-      this.employeeWorkPlans[empIndex].performanceStandards = [{}];
+      this.employeeWorkPlans[empIndex].performanceStandards = [{
+        coreCompetency: null,
+        leadershipCompetency: null,
+        technicalCompetency: null,
+        successIndicator: '',
+        requiredOutput: '',
+        rows: [
+          { id: 1, category: null, mfo: null, output: null },
+          { id: 2, category: null, mfo: null, output: null },
+          { id: 3, category: null, mfo: null, output: null }
+        ],
+        standardOutcomeRows: [
+          { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+        ],
+        quantityIndicatorType: 'numeric'
+      }];
       this.employeeWorkPlans[empIndex].competencies = {
         core: {},
         technical: {},
@@ -229,7 +285,7 @@ export default {
       return this.employeeOptions.filter(emp => !selectedIds.includes(emp.id));
     },
 
-    // Add a new employee with initial performance standard
+
     addEmployee() {
       // Check if we can add more employees
       if (!this.canAddMoreEmployees) {
@@ -248,12 +304,35 @@ export default {
         employeeName: '',
         rank: '',
         position: '',
-        performanceStandards: [{}]
+        competencies: {
+          core: {},
+          technical: {},
+          leadership: {}
+        },
+        performanceStandards: [{
+          coreCompetency: null,
+          leadershipCompetency: null,
+          technicalCompetency: null,
+          successIndicator: '',
+          requiredOutput: '',
+          rows: [
+            { id: 1, category: null, mfo: null, output: null },
+            { id: 2, category: null, mfo: null, output: null },
+            { id: 3, category: null, mfo: null, output: null }
+          ],
+          standardOutcomeRows: [
+            { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+          ],
+          quantityIndicatorType: 'numeric'
+        }]
       });
 
       // Switch to the new employee tab
       this.activeTab = 'emp-' + newIndex;
-
       this.$q.notify({
         message: 'New employee added',
         color: 'secondary',
@@ -261,7 +340,6 @@ export default {
         position: 'top-right'
       });
     },
-
     // Remove an employee
     removeEmployee(index) {
       this.$q.dialog({
@@ -282,19 +360,44 @@ export default {
       });
     },
 
-    // Add a performance standard to an employee
+
     addPerformanceStandard(employeeIndex) {
+      const employee = this.employeeWorkPlans[employeeIndex];
       this.employeeWorkPlans[employeeIndex].performanceStandards.push({
-        coreCompetency: null,
-        leadershipCompetency: null,
-        technicalCompetency: null
+        coreCompetency: employee.competencies?.core || {},
+        technicalCompetency: employee.competencies?.technical || {},
+        leadershipCompetency: employee.competencies?.leadership || {},
+        successIndicator: '',
+        requiredOutput: '',
+        rows: [
+          { id: 1, category: null, mfo: null, output: null },
+          { id: 2, category: null, mfo: null, output: null },
+          { id: 3, category: null, mfo: null, output: null }
+        ],
+        standardOutcomeRows: [
+          { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+          { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+        ],
+        quantityIndicatorType: 'numeric',
+        mergedSuccessIndicator: '',
+        mergedRequiredOutput: ''
+      });
+
+      // Wait for the next tick to ensure the component is rendered before accessing it
+      this.$nextTick(() => {
+        const newStandardIndex = this.employeeWorkPlans[employeeIndex].performanceStandards.length - 1;
+        const refName = `perfStd_${employeeIndex}_${newStandardIndex}`;
+        console.log(`Added new performance standard with ref: ${refName}`);
       });
     },
-
     // Remove a performance standard from an employee
     removePerformanceStandard(employeeIndex, standardIndex) {
       this.employeeWorkPlans[employeeIndex].performanceStandards.splice(standardIndex, 1);
     },
+
 
     async fillEmployeeDetails(employeeId, empIndex) {
       const store = useUnitWorkPlanStore(); // Get store instance
@@ -323,6 +426,7 @@ export default {
       }
     },
 
+
     async saveForm() {
       try {
         // Validate that at least one employee is selected
@@ -342,31 +446,55 @@ export default {
 
         for (let empIndex = 0; empIndex < this.employeeWorkPlans.length; empIndex++) {
           const plan = this.employeeWorkPlans[empIndex];
-
-          // Skip empty employee selections
           if (!plan.employeeId) continue;
 
           const employeeData = {
             employeeId: plan.employeeId,
+            rank: plan.rank,
+            position: plan.position,
             performanceData: []
           };
 
-          // Get performance standards data for this employee
           for (let stdIndex = 0; stdIndex < plan.performanceStandards.length; stdIndex++) {
             const refName = `perfStd_${empIndex}_${stdIndex}`;
             const compRef = this.$refs[refName];
-            if (compRef && compRef[0]) {
-              const standardData = compRef[0].getFormData();
-              if (standardData) {
-                employeeData.performanceData.push(standardData);
+
+            // Handle both single and multiple performance standards
+            const component = Array.isArray(compRef) ? compRef[0] : compRef;
+
+            if (component && component.getFormData) {
+              const standardData = component.getFormData();
+
+              // Validate required fields
+              if (!standardData.successIndicator || !standardData.requiredOutput) {
+                this.$q.notify({
+                  message: `Please fill all required fields for Employee ${empIndex + 1}, Standard ${stdIndex + 1}`,
+                  color: 'negative',
+                  position: 'top-right'
+                });
+                return;
               }
+
+              employeeData.performanceData.push(standardData);
             }
           }
 
-          allWorkPlans.push(employeeData);
+          if (employeeData.performanceData.length > 0) {
+            allWorkPlans.push(employeeData);
+          }
         }
 
-        // Save all employee work plans
+        if (allWorkPlans.length === 0) {
+          this.$q.notify({
+            message: 'No valid performance standards to save',
+            color: 'negative',
+            icon: 'warning',
+            position: 'top-right'
+          });
+          return;
+        }
+
+        console.log('Final Payload:', JSON.stringify(allWorkPlans, null, 2));
         await this.saveWorkPlan(allWorkPlans);
 
         this.$q.notify({
@@ -387,7 +515,6 @@ export default {
         });
       }
     },
-
     confirmReset() {
       this.$q.dialog({
         title: 'Confirm Reset',
@@ -406,26 +533,43 @@ export default {
       });
     },
 
-    resetFormData() {
+
+resetFormData() {
       // Reset the store form data
       this.resetForm();
 
       // Reset employee work plans
-      this.employeeWorkPlans = [
-        {
-          employeeId: null,
-          employeeName: '',
-          rank: '',
-          position: '',
-          performanceStandards: [
-            {
-              coreCompetency: null,
-              leadershipCompetency: null,
-              technicalCompetency: null
-            }
-          ]
-        }
-      ];
+      this.employeeWorkPlans = [{
+        employeeId: null,
+        employeeName: '',
+        rank: '',
+        position: '',
+        competencies: {
+          core: {},
+          technical: {},
+          leadership: {}
+        },
+        performanceStandards: [{
+          coreCompetency: null,
+          leadershipCompetency: null,
+          technicalCompetency: null,
+          successIndicator: '',
+          requiredOutput: '',
+          rows: [
+            { id: 1, category: null, mfo: null, output: null },
+            { id: 2, category: null, mfo: null, output: null },
+            { id: 3, category: null, mfo: null, output: null }
+          ],
+          standardOutcomeRows: [
+            { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+            { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+          ],
+          quantityIndicatorType: 'numeric'
+        }]
+      }];
 
       // Reset active tab
       this.activeTab = 'emp-0';

@@ -163,37 +163,7 @@
         }
       },
 
-      // async addEmployees(payload) {
-      //   this.loading = true;
-      //   this.error = null;
-
-      //   try {
-
-      //     const token = localStorage.getItem('token');
-      //     const response = await api.post(
-      //       '/add/employee',
-      //       { employees: payload.employees },
-      //       { headers: { Authorization: `Bearer ${token}` } }
-      //     );
-
-      //     if (response.data.success) {
-      //       if (this.currentNode) {
-      //         await this.fetchEmployeesByNode(this.currentNode);
-      //       } else {
-      //         await this.fetchUnassignedEmployees();
-      //       }
-      //       await this.fetchEmployeeCounts(this.currentOfficeId || useUserStore().user?.office_id);
-      //       return response.data;
-      //     }
-      //     throw new Error(response.data.message || 'Failed to add employees');
-      //   } catch (error) {
-      //     console.error('Failed to add employees:', error);
-      //     this.error = error.message || 'Failed to add employees';
-      //     throw error;
-      //   } finally {
-      //     this.loading = false;
-      //   }
-      // },
+  
 
       // In your employeeStore.js
   async addEmployees(payload) {
