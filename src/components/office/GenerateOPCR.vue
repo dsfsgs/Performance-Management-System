@@ -16,8 +16,9 @@
         <div class="text-h6">OPCR</div>
         <div>
           <!-- Updated Buttons -->
-          <q-btn label="Input" icon="edit" color="green-9" unelevated class="action-btn q-mr-sm"
-            @click="showInputModal = true" />
+          <!-- <q-btn label="Input" icon="edit" color="green-9" unelevated class="action-btn q-mr-sm"
+            @click="showInputModal = true" /> -->
+
           <q-btn label="Print" icon="print" color="green-9" unelevated class="action-btn q-mr-sm" @click="printOPCR" />
           <q-btn label="Download PDF" icon="download" color="green-9" unelevated class="action-btn"
             @click="exportToPDF" />

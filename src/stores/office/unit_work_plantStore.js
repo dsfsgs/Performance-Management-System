@@ -226,6 +226,7 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
                   mfo: standard.rows[1]?.mfo || null,
                   output: standard.rows[2]?.output || null,
                   success_indicator: standard.successIndicator || '',
+                  mode: standard.mode || '',
                   required_output: standard.requiredOutput || '',
                   standard_outcomes: standard.standardOutcomeRows.map(outcome => ({
                     rating: outcome.rating,
@@ -265,32 +266,34 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
     },
 
     async fetchEmployees() {
-      const userStore = useUserStore();
-      if (!userStore.officeId || !this.selectedDivision) return;
+  const userStore = useUserStore();
+  if (!userStore.officeId || !this.selectedDivision) return;
 
-      try {
-        const response = await api.get('/employees', {
-          params: {
-            office_id: userStore.officeId,
-            division: this.selectedDivision
-          }
-        });
-
-        this.employeeOptions = response.data.map(emp => ({
-          id: emp.id,
-          name: emp.name,
-          position: emp.position,
-          positionId: emp.position_id,
-          rank: emp.rank
-        }));
-
-        this.resetEmployeeSelection();
-      } catch (error) {
-        console.error('Error fetching employees:', error);
-        throw error;
+  try {
+    const response = await api.get('/employees', {
+      params: {
+        office_id: userStore.officeId,
+        division: this.selectedDivision
       }
-    },
+    });
 
+    this.employeeOptions = response.data.map(emp => ({
+      id: emp.id,
+      name: emp.name,
+      position: emp.position,
+      positionId: emp.position_id,
+      rank: emp.rank,
+      // Add a flag to identify office-head employees
+      isOfficeHead: emp.rank.toLowerCase().includes('office-head')
+
+    }));
+
+    this.resetEmployeeSelection();
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    throw error;
+  }
+},
     async fetchEmployeeCompetencies(employeeId) {
       try {
         const response = await api.get(`/employee/${employeeId}/competencies`);

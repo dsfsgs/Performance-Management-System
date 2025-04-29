@@ -30,6 +30,7 @@
                 <td class="text-center">
                   Enhanced Competency of Workforce
                 </td>
+
                 <td class="text-center">
                   DSE (S)<br>
                   EI (S)<br>
@@ -45,6 +46,7 @@
                 <td class="text-center">
                   BCIWR (S)
                 </td>
+                
                 <td class="text-center">
                   <q-input dense outlined v-model="strategicBudget" placeholder="Enter budget"
                     class="full-width modern-input" :class="{ 'shake-animation': errors.strategicBudget }"

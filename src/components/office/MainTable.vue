@@ -1,4 +1,4 @@
-<!--Maintable.vue-->
+<!-- In MainTable.vue -->
 <template>
   <div>
     <!-- Filter and Buttons -->
@@ -6,7 +6,6 @@
       <div class="col-12" :class="getFilterColumnClass">
         <div class="row q-col-gutter-md">
           <!-- Combined Target Period Filter -->
-          <!-- filepath: c:\xampp\htdocs\PMS-2025\Performance-Management-System\src\components\office\MainTable.vue -->
           <div v-if="showTargetPeriodFilter" class="col-12 col-md-6">
             <q-select v-model="targetPeriodFilter" :options="targetPeriodOptions" label="Target Period" outlined dense
               clearable emit-value map-options style="min-width: 250px;" />
@@ -24,12 +23,17 @@
         <q-btn v-if="!hideCreateButton" elevated rounded :style="{ backgroundColor: '#077A37' }"
           label="Create Unit Work Plan" @click="$emit('create')" icon="person_add" text-color="white"
           icon-color="white" />
+
+        <q-btn v-if="!hideOPCRButton"  label="Input" icon="edit" color="green-9" elevated rounded class="action-btn"
+          @click="$emit('input-click')" />
+
         <q-btn v-if="!hideOPCRButton" elevated rounded color="primary" label="Generate OPCR" icon="print"
           @click="showGenerateModal = true" :disable="!targetPeriodFilter">
           <q-tooltip v-if="!targetPeriodFilter">
             Please select a target period first
           </q-tooltip>
         </q-btn>
+
         <q-btn v-if="!hideUnitWorkPlanButton" elevated rounded color="primary" label="Generate Unit Work Plan"
           icon="print" @click="showUnitWorkPlanModal = true" :disable="!targetPeriodFilter">
           <q-tooltip v-if="!targetPeriodFilter">
@@ -38,6 +42,7 @@
         </q-btn>
       </div>
     </div>
+
 
     <!-- Main Table -->
     <q-table :rows="displayRows" :columns="visibleColumns" row-key="id" @row-click="onRowClick">
@@ -59,7 +64,6 @@
         </q-td>
       </template>
 
-      <!-- This will use Quasar's default empty table styling -->
       <template v-slot:no-data>
         <div class="full-width row flex-center q-pa-md text-grey-6">
           No data available
@@ -134,7 +138,7 @@ export default {
         { name: "office", label: "Office", field: "office", align: "left", showIf: function () { return this.showOfficeColumn; } },
         { name: "targetPeriod", label: "Target Period", field: "targetPeriod", align: "left" },
         { name: "dateCreated", label: "Date Created", field: "dateCreated", align: "left" },
-        { name: "status", label: "Status", field: "status", align: "left" }
+        { name: "status", label: "Status", field: "status", align: "left", showIf: function () { return this.isUnitWorkPlanPage; } }
       ],
       generateOPCRRef: null,
       periodOptions: ['January - June', 'July - December'],

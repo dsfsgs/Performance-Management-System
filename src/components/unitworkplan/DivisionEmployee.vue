@@ -2,7 +2,7 @@
 <template>
   <div>
     <div class="row items-center justify-between">
-      <div class="text-h7">{{ division }}</div>
+      <div class="text-h7">{{ division }} {{ targetPeriod }}</div>
       <!-- <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div> -->
       <q-btn flat icon="arrow_back" label="Back" color="grey-8" class="q-ml-auto" @click="$emit('back')" />
     </div>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Employee Table -->
-    <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div>
+    <!-- <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div> -->
     <q-card flat bordered>
       <q-table :rows="filteredEmployees" :columns="columns" row-key="id" :pagination="{ rowsPerPage: 10 }"
         :loading="loading" :filter="search" binary-state-sort>
@@ -277,12 +277,22 @@ export default {
         this.loading = false;
       }
     },
+    // handleAddEmployee() {
+    //   this.$emit('add-employee', {
+    //     division: this.division,
+    //     targetPeriod: this.targetPeriod
+    //   });
+    // }
     handleAddEmployee() {
+      // Remove the year if it's included
+      let cleanedTargetPeriod = this.targetPeriod.replace(/\s\d{4}$/, '');
+
       this.$emit('add-employee', {
         division: this.division,
-        targetPeriod: this.targetPeriod
+        targetPeriod: cleanedTargetPeriod
       });
     }
+
   },
   mounted() {
     this.fetchEmployees();

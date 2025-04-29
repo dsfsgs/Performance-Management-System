@@ -1,119 +1,61 @@
+<!-- In OPCR.vue -->
 <template>
   <q-page padding>
     <div class="q-mb-md">
       <h6 class="text-h6 q-mb-xs">OPCR</h6>
     </div>
 
-    <MainTable :rows="rows" @create="showGenerateModal = true" @update-status="updateStatus" :hideCreateButton="true"
-      :hideUnitWorkPlanButton="true" />
+    <MainTable :rows="opcrStore.divisions" :hideCreateButton="true" :hideUnitWorkPlanButton="true"
+      @input-click="showInputModal = true" />
 
-    <GenerateOPCR v-model="showGenerateModal" @save="handleSave" />
+    <GenerateOPCR v-model="opcrStore.showGenerateModal" @save="handleSave" />
+
+    <!-- Add InputModal component here -->
+    <q-dialog v-model="showInputModal" persistent>
+      <InputModal @save="handleInputSave" @close="showInputModal = false" />
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
-import MainTable from 'src/components/office/MainTable.vue';
-import GenerateOPCR from 'src/components/office/GenerateOPCR.vue';
+import { useOpcrStore } from 'src/stores/office/opcrStore'
+import { onMounted, ref } from 'vue'
+import MainTable from 'src/components/office/MainTable.vue'
+import GenerateOPCR from 'src/components/office/GenerateOPCR.vue'
+import InputModal from 'src/components/office/InputPage.vue' // Import the InputModal component
+
 export default {
   components: {
     MainTable,
-    GenerateOPCR
+    GenerateOPCR,
+    InputModal // Register the InputModal component
+  },
 
-  },
-  data() {
+  setup() {
+    const opcrStore = useOpcrStore()
+    const showInputModal = ref(false) // Add this ref to control the InputModal visibility
+
+    onMounted(() => {
+      opcrStore.fetchDivisions()
+    })
+
+    const handleSave = (data) => {
+      console.log('Saved data:', data)
+      // Handle OPCR save logic here
+    }
+
+    const handleInputSave = (inputData) => {
+      console.log('Input data saved:', inputData)
+      // Handle input data save logic here
+      showInputModal.value = false
+    }
+
     return {
-      showGenerateModal: false,
-      rows: [
-        {
-          id: 1,
-          division: "Recruitment, Selection and Records Management Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "December 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 2,
-          division: "Performance, Management, Incentives, Rewards and Recognition Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "December 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 3,
-          division: "Employees Compensation, Welfare and Benefits Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "December 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 4,
-          division: "Human Resource Development Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "December 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 5,
-          division: "Recruitment, Selection and Records Management Division",
-          targetPeriod: "January - June 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 6,
-          division: "Performance, Management, Incentives, Rewards and Recognition Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 7,
-          division: "Employees Compensation, Welfare and Benefits Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 8,
-          division: "Human Resource Development Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 9,
-          division: "Recruitment, Selection and Records Management Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        },
-        {
-          id: 10,
-          division: "Performance, Management, Incentives, Rewards and Recognition Division",
-          targetPeriod: "July - December 2024",
-          dateCreated: "June 3, 2023",
-          status: "Draft"
-        }
-      ]
-    };
-  },
-  methods: {
-    updateStatus(targetPeriod, newStatus) {
-      this.rows = this.rows.map(row => {
-        if (row.targetPeriod === targetPeriod) {
-          return { ...row, status: newStatus };
-        }
-        return row;
-      });
-    },
-    handleSave(data) {
-      console.log('Saved data:', data);
-      this.$q.notify({
-        message: 'OPCR saved successfully!',
-        color: 'positive',
-        icon: 'check_circle'
-      });
+      opcrStore,
+      showInputModal,
+      handleSave,
+      handleInputSave
     }
   }
-};
+}
 </script>

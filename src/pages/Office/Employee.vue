@@ -156,28 +156,83 @@ export default {
       loading: false,
       officeExpanded: false,
       divisions: [],
+  //     columns: [
+  //       { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
+  //       { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
+  //       { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
+  //       { name: 'actions', label: 'Actions', align: 'center', sortable: false }
+  //     ],
+
+  //   };
+  // },
       columns: [
         { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
         { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
         { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
         { name: 'actions', label: 'Actions', align: 'center', sortable: false }
       ],
-
     };
   },
   computed: {
+    // rankOptions() {
+    //   return [
+    //     { value: 'Employee', label: 'Employee' },
+    //     { value: 'Supervisor', label: 'Supervisor' },
+    //     { value: 'Rank-in-File', label: 'Rank-in-File' },
+    //     { value: 'Managerial', label: 'Managerial' },
+    //     {
+    //       value: 'Office-Head',
+    //       label: 'Office-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     },
+    //       {
+    //       value: 'Division-Head',
+    //         label: 'Division-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     },
+    //     {
+    //       value: 'Section-Head',
+    //       label: 'Section-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     }
+    //   ];
+    // },
     rankOptions() {
-      return [
+      const baseOptions = [
         { value: 'Employee', label: 'Employee' },
         { value: 'Supervisor', label: 'Supervisor' },
         { value: 'Rank-in-File', label: 'Rank-in-File' },
-        { value: 'Managerial', label: 'Managerial' },
-        {
-          value: 'Head',
-          label: 'Head',
-          disable: (employee) => this.isHeadOptionDisabled(employee)
-        }
+        { value: 'Managerial', label: 'Managerial' }
       ];
+
+      // Add head options based on selected node type
+      if (this.selectedNode) {
+        switch (this.selectedNode.type) {
+          case 'office':
+            baseOptions.push({
+              value: 'Office-Head',
+              label: 'Office-Head',
+              disable: (employee) => this.isHeadOptionDisabled(employee, 'Office-Head')
+            });
+            break;
+          case 'division':
+            baseOptions.push({
+              value: 'Division-Head',
+              label: 'Division-Head',
+              disable: (employee) => this.isHeadOptionDisabled(employee, 'Division-Head')
+            });
+            break;
+          case 'section':
+            baseOptions.push({
+              value: 'Section-Head',
+              label: 'Section-Head',
+              disable: (employee) => this.isHeadOptionDisabled(employee, 'Section-Head')
+            });
+            break;
+        }
+      }
+
+      return baseOptions;
     },
     filteredEmployees() {
       if (!this.selectedNode) return [];
@@ -206,6 +261,20 @@ export default {
     await this.fetchOrganizationStructure();
   },
   methods: {
+    isHeadOptionDisabled(employee, headType) {
+      if (!this.selectedNode) return false;
+
+      // Check if there's already a head of this type in the same organizational unit
+      return this.filteredEmployees.some(emp => {
+        if (emp.id === employee.id) return false;
+
+        // Check if the employee is the current head of this type
+        if (emp.rank !== headType) return false;
+
+        // Check if they're in the same organizational unit
+        return this.isSameOrganizationalUnit(emp, employee);
+      });
+    },
     openAddModal() {
       this.showAddModal = true;
       this.employeeStore.fetchUnassignedEmployees();
@@ -559,17 +628,17 @@ export default {
       });
     },
 
-    isHeadOptionDisabled(employee) {
-      // If no node is selected, allow Head selection
-      if (!this.selectedNode) return false;
+    // isHeadOptionDisabled(employee) {
+    //   // If no node is selected, allow Head selection
+    //   if (!this.selectedNode) return false;
 
-      // Check if there's already a Head in the same organizational unit
-      return this.filteredEmployees.some(emp =>
-        emp.id !== employee.id &&
-        emp.rank === 'Head' &&
-        this.isSameOrganizationalUnit(emp, employee)
-      );
-    },
+    //   // Check if there's already a Head in the same organizational unit
+    //   return this.filteredEmployees.some(emp =>
+    //     emp.id !== employee.id &&
+    //     emp.rank === 'Head' &&
+    //     this.isSameOrganizationalUnit(emp, employee)
+    //   );
+    // },
     isSameOrganizationalUnit(emp1, emp2) {
       // For office-level comparison
       if (this.selectedNode?.type === 'office') {

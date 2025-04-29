@@ -476,7 +476,7 @@ export default {
         })),
         successIndicator: this.mergedSuccessIndicator,
         requiredOutput: this.mergedRequiredOutput,
-        mVerification: this.mergedMVerification,
+        mode: this.mergedMVerification,
         quantityIndicatorType: this.quantityIndicatorType,
         coreCompetency: formatCompetency(this.mergedCoreCompetency),
         technicalCompetency: formatCompetency(this.mergedTechnicalCompetency),
