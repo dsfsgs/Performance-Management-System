@@ -14,10 +14,13 @@
     </div>
 
     <!-- Combined Filter and Table Component -->
+    <!-- <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
+      :showOfficeFilter="false" :showOfficeColumn="false" :hideOPCRButton="true" :hideUnitWorkPlanButton="false"
+      :showTargetPeriodFilter="true" @generate-uwp="generateUnitWorkPlan" /> -->
     <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
       :showOfficeFilter="false" :showOfficeColumn="false" :hideOPCRButton="true" :hideUnitWorkPlanButton="false"
-      :showTargetPeriodFilter="true" @generate-uwp="generateUnitWorkPlan" />
-
+      :showTargetPeriodFilter="true" :isUnitWorkPlanPage="true" @generate-uwp="generateUnitWorkPlan" />
+      
     <!-- Division Detail -->
     <div v-if="selectedDivision && !showUWP" class="division-employee-container">
       <DivisionEmployee :division="selectedDivision" :targetPeriod="selectedRow ? selectedRow.targetPeriod : ''"
