@@ -116,7 +116,7 @@
                                             <div style="display: flex; justify-content: flex-end; padding-right: 80px;">
                                                 <div style="padding-bottom: 10px; text-align: center;">
                                                     <div style="padding-top: 30px;"><strong><u>{{ employee?.name
-                                                    }}</u></strong></div>
+                                                                }}</u></strong></div>
                                                     <div>{{ employee?.position }}</div>
                                                     <div>Date:<strong><u>01/21/2025</u></strong></div>
                                                 </div>

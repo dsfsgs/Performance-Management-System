@@ -10,7 +10,7 @@
         <q-card-section>
           <div class="row q-col-gutter-md">
             <!-- First Column: MFO Details -->
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
               <div class="text-subtitle2 q-mb-sm text-center">MFO Details</div>
 
               <q-select filled v-model="rows[0].category" label="Select Category" :options="categoryOptions" dense
@@ -92,6 +92,13 @@
               <q-input filled v-model="mergedRequiredOutput" type="textarea" dense autogrow
                 class="auto-expand-textarea" />
             </div>
+
+            <div class="col-md-4 col-sm-12">
+              <div class="text-subtitle2 q-mb-sm text-center">Mode of Verification</div>
+              <q-input filled v-model="mergedMVerification" type="textarea" dense autogrow
+                class="auto-expand-textarea" />
+            </div>
+
           </div>
         </q-card-section>
       </q-card>
@@ -198,6 +205,11 @@ export default {
     },
 
     initialRequiredOutput: {
+      type: String,
+      default: ''
+    },
+
+    initialMVerification: {
       type: String,
       default: ''
     },
@@ -317,6 +329,7 @@ export default {
   emits: [
     'update:successIndicator',
     'update:requiredOutput',
+    'update:mVerification',
     'update:rows',
     'update:standardOutcomeRows',
     'update:quantityIndicatorType'
@@ -331,7 +344,8 @@ export default {
         { name: 'leadership', label: 'Leadership', field: 'leadership', align: 'left' },
         { name: 'technical', label: 'Technical', field: 'technical', align: 'left' },
         { name: 'successIndicator', label: 'Success Indicator', field: 'successIndicator', align: 'left' },
-        { name: 'requiredOutput', label: 'Required Output', field: 'requiredOutput', align: 'left' }
+        { name: 'requiredOutput', label: 'Required Output', field: 'requiredOutput', align: 'left' },
+        { name: 'mVerification', label: 'Mode of Verification', field: 'mVerification', align: 'left' }
       ],
 
       competencyColumns: [
@@ -353,7 +367,7 @@ export default {
         { id: 3, category: null, mfo: null, output: null }
       ],
 
-      mergedRow: { id: 'merged', core: '', leadership: '', technical: '', successIndicator: '', requiredOutput: '' },
+      mergedRow: { id: 'merged', core: '', leadership: '', technical: '', successIndicator: '', requiredOutput: '', mVerification: '' },
 
       standardOutcomeRows: [
         { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
@@ -377,6 +391,7 @@ export default {
       // mergedRequiredOutput: ''
       mergedSuccessIndicator: this.initialSuccessIndicator,
       mergedRequiredOutput: this.initialRequiredOutput,
+      mergedMVerification: this.initialMVerification,
 
       // eslint-disable-next-line no-dupe-keys, vue/no-dupe-keys
       rows: JSON.parse(JSON.stringify(this.initialRows)),
@@ -461,6 +476,7 @@ export default {
         })),
         successIndicator: this.mergedSuccessIndicator,
         requiredOutput: this.mergedRequiredOutput,
+        mVerification: this.mergedMVerification,
         quantityIndicatorType: this.quantityIndicatorType,
         coreCompetency: formatCompetency(this.mergedCoreCompetency),
         technicalCompetency: formatCompetency(this.mergedTechnicalCompetency),
@@ -586,6 +602,7 @@ export default {
 
       this.mergedSuccessIndicator = '';
       this.mergedRequiredOutput = '';
+      this.mergedMVerification = '';
 
       this.standardOutcomeRows.forEach(row => {
         row.quantity = '';
@@ -618,6 +635,11 @@ export default {
         this.$emit('update:requiredOutput', newVal);
       }
     },
+    mergedMVerification(newVal) {
+      if (newVal !== this.initialMVerification) {
+        this.$emit('update:mVerification', newVal);
+      }
+    },
     standardOutcomeRows: {
       deep: true,
       handler(newVal) {
@@ -637,6 +659,9 @@ export default {
     },
     initialRequiredOutput(newVal) {
       this.mergedRequiredOutput = newVal;
+    },
+    initialMVerification(newVal) {
+      this.MVerification = newVal;
     },
     initialRows: {
       deep: true,
