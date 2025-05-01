@@ -125,6 +125,10 @@ export default {
     hideInputButton: {
       type: Boolean,
       default: false
+    },
+    showOfficeFilter: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status', 'input-click'],

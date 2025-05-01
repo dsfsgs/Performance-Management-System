@@ -63,7 +63,7 @@
                 <q-btn color="green-9" icon="print" label="Print" @click="directPrint" :loading="isPrinting" />
                 <q-btn color="green-9" icon="download" label="Download PDF" @click="downloadPdf"
                   :loading="isGeneratingPdf" />
-                <q-tooltip>Download as PDF</q-tooltip>
+                <q-tooltip>Download</q-tooltip>
               </div>
             </div>
           </div>

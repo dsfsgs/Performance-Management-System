@@ -69,7 +69,7 @@
                         <div class="flex justify-end q-gutter-sm">
                             <q-btn color="green-9" icon="print" label="Print" @click="directPrint"
                                 :loading="isPrinting" />
-                            <q-btn color="green-9" icon="download" label="Download PDF" @click="downloadPdf"
+                            <q-btn color="green-9" icon="download" label="Download" @click="downloadPdf"
                                 :loading="isGeneratingPdf" />
                             <q-tooltip>Download as PDF</q-tooltip>
                         </div>
@@ -77,7 +77,7 @@
                 </div>
 
                 <!-- Tabs for different report types -->
-                <q-tabs v-model="activeTab" dense class="text-grey" active-color="primary" indicator-color="primary"
+                <q-tabs v-model="activeTab" dense class="text-grey" active-color="green-8" indicator-color="green-8"
                     align="justify" narrow-indicator>
                     <q-tab name="ipcr" label="IPCR" />
                     <q-tab name="ps" label="Performance Standard" />
@@ -160,14 +160,14 @@
                                             <!-- First Stamp -->
                                             <div
                                                 style="border: 3px double navy; text-align: center; color: navy; width: 250px;">
-                                                <div style="font-size: 13px;">LOCAL GOVERNMENT OF
+                                                <div style="font-size: 10px; font-weight: bold;">LOCAL GOVERNMENT OF
                                                     TAGUM CITY</div>
                                                 <div style="font-size: 13px;">{{
                                                     employee?.division }}</div>
                                                 <div style="font-size: 13px;">
                                                     IPCR Accomplishment
                                                 </div>
-                                                <div>RECEIVED</div>
+                                                <div style="font-size: 13px; font-weight: bold;">RECEIVED</div>
                                                 <div style="text-align: left; padding-left: 10px;">
                                                     By: <span
                                                         style="border-bottom: 1px solid #000; display: inline-block; width: 190px;"></span>
@@ -180,14 +180,14 @@
 
                                             <div
                                                 style="border: 3px double navy; text-align: center; color: navy; width: 250px;">
-                                                <div style="font-size: 13px;">LOCAL GOVERNMENT OF
+                                                <div style="font-size: 10px; font-weight: bold;">LOCAL GOVERNMENT OF
                                                     TAGUM CITY</div>
                                                 <div style="font-size: 13px;">{{
                                                     employee?.division }}</div>
                                                 <div style="font-size: 13px;">
                                                     IPCR Accomplishment
                                                 </div>
-                                                <div>RECEIVED</div>
+                                                <div style="font-size: 13px; font-weight: bold;">RECEIVED</div>
                                                 <div style="text-align: left; padding-left: 10px;">
                                                     By: <span
                                                         style="border-bottom: 1px solid #000; display: inline-block; width: 190px;"></span>

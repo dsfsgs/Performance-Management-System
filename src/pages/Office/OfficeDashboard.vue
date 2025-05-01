@@ -1,10 +1,10 @@
 <template>
-  <q-page class="q-pa-md bg-grey-1 full-width">
+  <q-page padding>
     <!-- Header with Target Period -->
     <div class="row items-center q-mb-lg">
       <div class="col">
-        <div class="text-h4 text-weight-bold text-green">Performance Dashboard</div>
-        <div class="text-subtitle1 text-grey-8">
+        <h6 class="text-h6 q-mb-xs text-green text-weight-bold">Performance Dashboard</h6>
+        <div class="text-subtitle3 text-grey-8">
           Current Target Period: <strong>{{ currentTargetPeriod }}</strong>
         </div>
       </div>

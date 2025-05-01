@@ -172,7 +172,7 @@
 
         <q-card-actions align="right" class="modal-actions">
           <q-btn flat label="Cancel" color="grey-7" v-close-popup @click="cancelTargetInput" />
-          <q-btn label="Calculate" color="primary" unelevated @click="computeQuantities" />
+          <q-btn label="Calculate" color="green" unelevated @click="computeQuantities" />
         </q-card-actions>
       </q-card>
     </q-dialog>
