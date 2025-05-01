@@ -31,7 +31,7 @@
 
       <q-separator />
 
-      <q-tabs v-model="activeTab" class="text-primary" align="left" narrow-indicator>
+      <q-tabs v-model="activeTab" class="text-green-8" align="left" narrow-indicator>
         <q-tab v-for="(workPlan, index) in employeeWorkPlans" :key="index" :name="'emp-' + index"
           :label="`Employee ${index + 1}${workPlan.employeeName ? ': ' + workPlan.employeeName : ''}`" />
       </q-tabs>
@@ -44,12 +44,6 @@
           <div class="row q-col-gutter-md">
 
             <div class="col-md-4 col-sm-12">
-              <!-- <q-select filled v-model="workPlan.employeeId" :options="getFilteredEmployeeOptions(empIndex)"
-                label="Employee Name" stack-label option-label="name" option-value="id" emit-value map-options
-                @update:model-value="(val) => {
-                  clearEmployeeData(empIndex);
-                  fillEmployeeDetails(val, empIndex);
-                }" class="q-mb-sm" :rules="[val => !!val || 'Field is required']" /> -->
               <q-select filled v-model="workPlan.employeeId" :options="getFilteredEmployeeOptions(empIndex)"
                 label="Employee Name" stack-label option-label="name" option-value="id" emit-value map-options
                 @update:model-value="(val) => {
@@ -86,28 +80,41 @@
 
           <!-- Performance Standards for this employee -->
           <div v-for="(standard, stdIndex) in workPlan.performanceStandards" :key="'std-' + empIndex + '-' + stdIndex">
-            <div class="performance-standard-container q-pa-md" :class="{ 'bg-grey-1': stdIndex % 2 === 0 }">
-              <div class="standard-header row items-center justify-between q-mb-md">
-                <div class="text-h7 text-weight-medium">Performance Standard {{ stdIndex + 1 }}</div>
-                <q-btn v-if="stdIndex > 0" icon="delete" color="negative" flat round dense
-                  @click="removePerformanceStandard(empIndex, stdIndex)" class="q-ml-sm" />
-              </div>
+            <q-expansion-item
+              expand-separator
+              :label="`Performance Standard ${stdIndex + 1}`"
+              header-class="text-weight-medium"
+              class="performance-standard-container q-mb-sm"
+              :class="{ 'bg-grey-1': stdIndex % 2 === 0 }"
+              :model-value="getExpansionState(empIndex, stdIndex)"
+              @update:model-value="setExpansionState(empIndex, stdIndex, $event)"
+              transition="slide-down"
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  <q-item-label>Performance Standard {{ stdIndex + 1 }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-btn v-if="stdIndex > 0" icon="delete" color="negative" flat round dense
+                    @click.stop="removePerformanceStandard(empIndex, stdIndex)" class="q-ml-sm" />
+                </q-item-section>
+              </template>
 
-
-              <performance-standards :ref="`perfStd_${empIndex}_${stdIndex}`"
-                :employee-competencies="employeeWorkPlans[empIndex].competencies"
-                :initial-success-indicator="standard.successIndicator"
-                :initial-required-output="standard.requiredOutput" :initial-rows="standard.rows"
-                :initial-standard-outcome-rows="standard.standardOutcomeRows"
-                :initial-quantity-indicator-type="standard.quantityIndicatorType"
-                @update:successIndicator="val => standard.successIndicator = val"
-                @update:requiredOutput="val => standard.requiredOutput = val" @update:rows="val => standard.rows = val"
-                @update:standardOutcomeRows="val => standard.standardOutcomeRows = val"
-                @update:quantityIndicatorType="val => standard.quantityIndicatorType = val" />
-
-            </div>
-
-            <q-separator v-if="stdIndex < workPlan.performanceStandards.length - 1" />
+              <q-card>
+                <q-card-section>
+                  <performance-standards :ref="`perfStd_${empIndex}_${stdIndex}`"
+                    :employee-competencies="employeeWorkPlans[empIndex].competencies"
+                    :initial-success-indicator="standard.successIndicator"
+                    :initial-required-output="standard.requiredOutput" :initial-rows="standard.rows"
+                    :initial-standard-outcome-rows="standard.standardOutcomeRows"
+                    :initial-quantity-indicator-type="standard.quantityIndicatorType"
+                    @update:successIndicator="val => standard.successIndicator = val"
+                    @update:requiredOutput="val => standard.requiredOutput = val" @update:rows="val => standard.rows = val"
+                    @update:standardOutcomeRows="val => standard.standardOutcomeRows = val"
+                    @update:quantityIndicatorType="val => standard.quantityIndicatorType = val" />
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
           </div>
 
           <!-- Add performance standard button -->
@@ -134,7 +141,7 @@
           </div>
           <div>
             <q-btn label="Reset" color="grey-7" flat @click="confirmReset" class="q-mr-sm" />
-            <q-btn icon="save" label="Save" color="primary" unelevated @click="saveForm" />
+            <q-btn icon="save" label="Save" color="green" unelevated @click="saveForm" />
           </div>
         </div>
       </q-card-actions>
@@ -167,8 +174,6 @@ export default {
 
     // Active tab tracker
     const activeTab = ref('emp-0');
-
-
 
     // In your setup() function, modify the employeeWorkPlans initialization:
     const employeeWorkPlans = ref([
@@ -242,6 +247,128 @@ export default {
       filterYears
     } = unitWorkPlanStore;
 
+    // Add a ref to track expansion state
+    const expansionStates = ref({});
+
+    // Get expansion state for a specific standard
+    const getExpansionState = (empIndex, stdIndex) => {
+      return expansionStates.value[`${empIndex}-${stdIndex}`] ?? true;
+    };
+
+    // Set expansion state for a specific standard
+    const setExpansionState = (empIndex, stdIndex, value) => {
+      expansionStates.value = {
+        ...expansionStates.value,
+        [`${empIndex}-${stdIndex}`]: value
+      };
+    };
+
+    // Initialize expansion states when component loads
+    const initializeExpansionStates = () => {
+      employeeWorkPlans.value.forEach((employee, empIndex) => {
+        employee.performanceStandards.forEach((_, stdIndex) => {
+          // Start with all standards expanded
+          setExpansionState(empIndex, stdIndex, true);
+        });
+      });
+    };
+
+    // Function to collapse all standards
+    const collapseAllStandards = (empIndex) => {
+      const employee = employeeWorkPlans.value[empIndex];
+      if (employee) {
+        console.log('Collapsing standards for employee:', empIndex);
+        
+        // First update all states to true (expanded)
+        employee.performanceStandards.forEach((standard, stdIndex) => {
+          setExpansionState(empIndex, stdIndex, true);
+        });
+
+        // Wait a frame for the DOM to update
+        requestAnimationFrame(() => {
+          employee.performanceStandards.forEach((standard, stdIndex) => {
+            const hasAnyValue = standard.successIndicator ||
+              standard.requiredOutput ||
+              standard.mode ||
+              standard.quantityIndicatorType !== 'numeric' ||
+              standard.mergedSuccessIndicator ||
+              standard.mergedRequiredOutput ||
+              standard.rows.some(row => row.category || row.mfo || row.output) ||
+              standard.standardOutcomeRows.some(row => 
+                row.quantity || 
+                row.effectiveness || 
+                row.timeliness
+              );
+            
+            console.log(`Standard ${stdIndex} has value:`, hasAnyValue);
+            
+            // Collapse if it has any value
+            if (hasAnyValue) {
+              console.log(`Collapsing standard ${stdIndex}`);
+              setExpansionState(empIndex, stdIndex, false);
+            } else {
+              console.log(`Standard ${stdIndex} is empty, keeping expanded`);
+            }
+          });
+        });
+      }
+    };
+
+    // Update addPerformanceStandard function
+    const addPerformanceStandard = (employeeIndex) => {
+      console.log('Adding new performance standard for employee:', employeeIndex);
+      const employee = employeeWorkPlans.value[employeeIndex];
+      if (employee) {
+        // First collapse all existing standards
+        console.log('Calling collapseAllStandards before adding new standard');
+        collapseAllStandards(employeeIndex);
+
+        // Wait a frame for the collapse animations to complete
+        requestAnimationFrame(() => {
+          // Then add the new standard
+          const newStandard = {
+            coreCompetency: employee.competencies?.core || {},
+            technicalCompetency: employee.competencies?.technical || {},
+            leadershipCompetency: employee.competencies?.leadership || {},
+            successIndicator: '',
+            requiredOutput: '',
+            mode: '',
+            rows: [
+              { id: 1, category: null, mfo: null, output: null },
+              { id: 2, category: null, mfo: null, output: null },
+              { id: 3, category: null, mfo: null, output: null }
+            ],
+            standardOutcomeRows: [
+              { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
+              { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
+            ],
+            quantityIndicatorType: 'numeric',
+            mergedSuccessIndicator: '',
+            mergedRequiredOutput: ''
+          };
+
+          console.log('Adding new standard:', newStandard);
+          employee.performanceStandards.push(newStandard);
+
+          // Initialize the expansion state for the new standard
+          setExpansionState(employeeIndex, employee.performanceStandards.length - 1, true);
+        });
+      }
+    };
+
+    // Remove a performance standard from an employee
+    const removePerformanceStandard = (employeeIndex, standardIndex) => {
+      const employee = employeeWorkPlans.value[employeeIndex];
+      if (employee && employee.performanceStandards.length > 1) {
+        employee.performanceStandards.splice(standardIndex, 1);
+        // Update expansion states after removal
+        initializeExpansionStates();
+      }
+    };
+
     return {
       selectedDivision,
       divisionOptions,
@@ -258,7 +385,12 @@ export default {
       fetchEmployees,
       saveWorkPlan,
       resetForm,
-      filterYears
+      filterYears,
+      expansionStates,
+      getExpansionState,
+      setExpansionState,
+      addPerformanceStandard,
+      removePerformanceStandard
     };
   },
 
@@ -333,7 +465,7 @@ export default {
         competencies: {
           core: {},
           technical: {},
-          leadership: {}
+          leadership: {},
         },
         performanceStandards: [{
           coreCompetency: null,
@@ -341,7 +473,7 @@ export default {
           technicalCompetency: null,
           successIndicator: '',
           requiredOutput: '',
-          mode: '',
+           mode: '',
           rows: [
             { id: 1, category: null, mfo: null, output: null },
             { id: 2, category: null, mfo: null, output: null },
@@ -385,45 +517,6 @@ export default {
           position: 'top-right'
         });
       });
-    },
-
-
-    addPerformanceStandard(employeeIndex) {
-      const employee = this.employeeWorkPlans[employeeIndex];
-      this.employeeWorkPlans[employeeIndex].performanceStandards.push({
-        coreCompetency: employee.competencies?.core || {},
-        technicalCompetency: employee.competencies?.technical || {},
-        leadershipCompetency: employee.competencies?.leadership || {},
-        successIndicator: '',
-        requiredOutput: '',
-        mode: '',
-        rows: [
-          { id: 1, category: null, mfo: null, output: null },
-          { id: 2, category: null, mfo: null, output: null },
-          { id: 3, category: null, mfo: null, output: null }
-        ],
-        standardOutcomeRows: [
-          { rating: '5', quantity: '', effectiveness: '', timeliness: '' },
-          { rating: '4', quantity: '', effectiveness: '', timeliness: '' },
-          { rating: '3', quantity: '', effectiveness: '', timeliness: '' },
-          { rating: '2', quantity: '', effectiveness: '', timeliness: '' },
-          { rating: '1', quantity: '', effectiveness: '', timeliness: '' }
-        ],
-        quantityIndicatorType: 'numeric',
-        mergedSuccessIndicator: '',
-        mergedRequiredOutput: ''
-      });
-
-      // Wait for the next tick to ensure the component is rendered before accessing it
-      this.$nextTick(() => {
-        const newStandardIndex = this.employeeWorkPlans[employeeIndex].performanceStandards.length - 1;
-        const refName = `perfStd_${employeeIndex}_${newStandardIndex}`;
-        console.log(`Added new performance standard with ref: ${refName}`);
-      });
-    },
-    // Remove a performance standard from an employee
-    removePerformanceStandard(employeeIndex, standardIndex) {
-      this.employeeWorkPlans[employeeIndex].performanceStandards.splice(standardIndex, 1);
     },
 
 
@@ -562,7 +655,7 @@ export default {
     },
 
 
-resetFormData() {
+    resetFormData() {
       // Reset the store form data
       this.resetForm();
 
