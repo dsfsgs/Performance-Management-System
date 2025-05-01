@@ -10,10 +10,11 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- filepath: c:\xampp\htdocs\PMS-2025\Performance-Management-System\src\pages\Office\OfficeDashboard.vue -->
     <div class="row q-col-gutter-md q-mb-lg">
+      <!-- Employee Card -->
       <div class="col-xs-12 col-sm-6 col-md-3">
-        <q-card class="bg-white shadow-3 full-height">
+        <q-card class="bg-white shadow-3 full-height clickable-card" @click="$router.push('/office/employee')">
           <q-card-section class="q-pa-md">
             <div class="row items-center">
               <q-icon name="people" color="primary" size="md" class="q-mr-sm" />
@@ -38,8 +39,9 @@
         </q-card>
       </div>
 
+      <!-- OPCR Card -->
       <div class="col-xs-12 col-sm-6 col-md-3">
-        <q-card class="bg-white shadow-3 full-height">
+        <q-card class="bg-white shadow-3 full-height clickable-card" @click="$router.push('/office/opcr')">
           <q-card-section class="q-pa-md">
             <div class="row items-center">
               <q-icon name="assessment" color="primary" size="md" class="q-mr-sm" />
@@ -64,8 +66,9 @@
         </q-card>
       </div>
 
+      <!-- IPCR Card -->
       <div class="col-xs-12 col-sm-6 col-md-3">
-        <q-card class="bg-white shadow-3 full-height">
+        <q-card class="bg-white shadow-3 full-height clickable-card" @click="$router.push('/office/ipcr')">
           <q-card-section class="q-pa-md">
             <div class="row items-center">
               <q-icon name="assignment_ind" color="primary" size="md" class="q-mr-sm" />
@@ -90,8 +93,9 @@
         </q-card>
       </div>
 
+      <!-- Unit Work Plan Card -->
       <div class="col-xs-12 col-sm-6 col-md-3">
-        <q-card class="bg-white shadow-3 full-height">
+        <q-card class="bg-white shadow-3 full-height clickable-card" @click="$router.push('/office/unit-work-plan')">
           <q-card-section class="q-pa-md">
             <div class="row items-center">
               <q-icon name="domain" color="primary" size="md" class="q-mr-sm" />
@@ -104,9 +108,13 @@
               <q-linear-progress size="xs" :value="6 / 10" color="positive" />
               <span class="text-caption">Approved: <strong class="text-positive">6</strong></span>
             </div>
+            <div class="q-mb-sm">
+              <q-linear-progress size="xs" :value="3 / 10" color="warning" />
+              <span class="text-caption">Pending: <strong class="text-warning">3</strong></span>
+            </div>
             <div>
-              <q-linear-progress size="xs" :value="4 / 10" color="warning" />
-              <span class="text-caption">Pending: <strong class="text-warning">4</strong></span>
+              <q-linear-progress size="xs" :value="1 / 10" color="grey" />
+              <span class="text-caption">Draft: <strong class="text-grey">1</strong></span>
             </div>
           </q-card-section>
         </q-card>
@@ -172,7 +180,8 @@
               <q-tab-panel name="workplan" class="q-pa-none">
                 <div class="row q-gutter-sm justify-center">
                   <q-badge color="positive" class="q-pa-xs">Approved: 6</q-badge>
-                  <q-badge color="warning" class="q-pa-xs">Pending: 4</q-badge>
+                  <q-badge color="warning" class="q-pa-xs">Pending: 3</q-badge>
+                  <q-badge color="grey" class="q-pa-xs">Draft: 1</q-badge>
                 </div>
               </q-tab-panel>
             </q-tab-panels>
@@ -374,11 +383,11 @@ const ipcrStatusData = {
 
 // Work Plan Status Data
 const workPlanStatusData = {
-  labels: ['Approved', 'Pending'],
+  labels: ['Approved', 'Pending', 'Draft'],
   datasets: [
     {
-      backgroundColor: ['#4CAF50', '#FFC107'],
-      data: [6, 4],
+      backgroundColor: ['#4CAF50', '#FFC107', '#9E9E9E'],
+      data: [6, 3, 1], // Updated values
       borderWidth: 0
     }
   ]
@@ -446,6 +455,16 @@ const activityColumns = [
 </script>
 
 <style scoped>
+.clickable-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .q-page {
   min-height: 100vh;
   width: 100%;

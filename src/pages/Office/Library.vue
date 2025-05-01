@@ -44,29 +44,40 @@
               <ul class="mfo-list">
                 <li v-for="(mfo, index) in strategicMfos" :key="mfo.id" class="mfo-item">
                   <div class="mfo-content">
-                    <div class="mfo-title">
-                      <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    <q-btn size="xs" flat round dense color="grey-7" @click.stop="toggleMfoExpansion(mfo.id)"
+                      :icon="expandedMfos.includes(mfo.id) ? 'expand_less' : 'expand_more'" class="q-mr-xs" />
+                    <div class="mfo-title" @click="toggleMfoExpansion(mfo.id)">
+                      <div class="mfo-number">{{ `MFO ${index + 1}.` }}</div>
+                      <strong class="mfo-name">{{ mfo.name }}</strong>
                     </div>
                     <div class="mfo-actions">
                       <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editMfo(mfo, 'strategic')" />
                       <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
                     </div>
                   </div>
-                  <ul class="output-list">
-                    <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id" class="output-item">
-                      <div class="output-content">
-                        <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
-                        <div class="output-actions">
-                          <q-btn icon="edit" size="xs" flat round dense color="grey-7"
-                            @click="editOutput(output, mfo, 'strategic')" />
-                          <q-btn icon="delete" size="xs" flat round dense color="negative"
-                            @click="confirmDeleteOutput(output)" />
-                        </div>
+                  <q-slide-transition>
+                    <div v-show="expandedMfos.includes(mfo.id)">
+                      <ul class="output-list">
+                        <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id"
+                          class="output-item">
+                          <div class="output-content">
+                            <div class="output-number">{{ `OUTPUT ${outputIndex + 1}.` }}</div>
+                            <strong class="output-name">{{ output.name }}</strong>
+                            <div class="output-actions">
+                              <q-btn icon="edit" size="xs" flat round dense color="grey-7"
+                                @click="editOutput(output, mfo, 'strategic')" />
+                              <q-btn icon="delete" size="xs" flat round dense color="negative"
+                                @click="confirmDeleteOutput(output)" />
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                      <div class="row justify-center q-mt-sm">
+                        <q-btn label="Add Output" size="xs" dense color="primary"
+                          @click="openAddOutputModal(mfo, 'strategic')" class="add-output-btn" />
                       </div>
-                    </li>
-                  </ul>
-                  <q-btn icon="add" label="Add Output" size="xs" flat dense color="primary"
-                    @click="openAddOutputModal(mfo, 'strategic')" class="q-mt-xs full-width" />
+                    </div>
+                  </q-slide-transition>
                 </li>
               </ul>
               <div v-if="strategicMfos.length === 0" class="empty-state">
@@ -79,29 +90,40 @@
               <ul class="mfo-list">
                 <li v-for="(mfo, index) in coreMfos" :key="mfo.id" class="mfo-item">
                   <div class="mfo-content">
-                    <div class="mfo-title">
-                      <strong class="mfo-text">{{ `MFO ${index + 1}. ${mfo.name}` }}</strong>
+                    <q-btn size="xs" flat round dense color="grey-7" @click.stop="toggleMfoExpansion(mfo.id)"
+                      :icon="expandedMfos.includes(mfo.id) ? 'expand_less' : 'expand_more'" class="q-mr-xs" />
+                    <div class="mfo-title" @click="toggleMfoExpansion(mfo.id)">
+                      <div class="mfo-number">{{ `MFO ${index + 1}.` }}</div>
+                      <strong class="mfo-name">{{ mfo.name }}</strong>
                     </div>
                     <div class="mfo-actions">
                       <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editMfo(mfo, 'core')" />
                       <q-btn icon="delete" size="xs" flat round dense color="negative" @click="confirmDelete(mfo)" />
                     </div>
                   </div>
-                  <ul class="output-list">
-                    <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id" class="output-item">
-                      <div class="output-content">
-                        <span class="output-text">{{ `OUTPUT ${outputIndex + 1}. ${output.name}` }}</span>
-                        <div class="output-actions">
-                          <q-btn icon="edit" size="xs" flat round dense color="grey-7"
-                            @click="editOutput(output, mfo, 'core')" />
-                          <q-btn icon="delete" size="xs" flat round dense color="negative"
-                            @click="confirmDeleteOutput(output)" />
-                        </div>
+                  <q-slide-transition>
+                    <div v-show="expandedMfos.includes(mfo.id)">
+                      <ul class="output-list">
+                        <li v-for="(output, outputIndex) in getOutputsForMfo(mfo.id)" :key="output.id"
+                          class="output-item">
+                          <div class="output-content">
+                            <div class="output-number">{{ `OUTPUT ${outputIndex + 1}.` }}</div>
+                            <strong class="output-name">{{ output.name }}</strong>
+                            <div class="output-actions">
+                              <q-btn icon="edit" size="xs" flat round dense color="grey-7"
+                                @click="editOutput(output, mfo, 'core')" />
+                              <q-btn icon="delete" size="xs" flat round dense color="negative"
+                                @click="confirmDeleteOutput(output)" />
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                      <div class="row justify-center q-mt-sm">
+                        <q-btn label="Add Output" size="xs" dense color="primary"
+                          @click="openAddOutputModal(mfo, 'core')" class="add-output-btn" />
                       </div>
-                    </li>
-                  </ul>
-                  <q-btn icon="add" label="Add Output" size="xs" flat dense color="primary"
-                    @click="openAddOutputModal(mfo, 'core')" class="q-mt-xs full-width" />
+                    </div>
+                  </q-slide-transition>
                 </li>
               </ul>
               <div v-if="coreMfos.length === 0" class="empty-state">
@@ -115,7 +137,8 @@
                 <li v-for="(output, index) in supportOutputs" :key="output.id" class="mfo-item">
                   <div class="mfo-content">
                     <div class="mfo-title">
-                      <span class="output-text">{{ `OUTPUT ${index + 1}. ${output.name}` }}</span>
+                      <div class="output-number">{{ `OUTPUT ${index + 1}.` }}</div>
+                      <strong class="output-name">{{ output.name }}</strong>
                     </div>
                     <div class="mfo-actions">
                       <q-btn icon="edit" size="xs" flat round dense color="grey-7" @click="editSupport(output)" />
@@ -138,14 +161,15 @@
     <!-- Add/Edit Modal -->
     <q-dialog v-model="modal.show" persistent>
       <q-card class="modal-card" style="min-width: 500px; max-width: 600px">
-        <q-card-section class="row items-center q-pb-none bg-primary text-white">
-          <div class="text-subtitle1">{{ modal.title }}</div>
+        <q-card-section class="row items-center q-pb-none" style="background-color: #00703C">
+          <div class="text-subtitle1 text-white">{{ modal.title }}</div>
           <q-space />
-          <q-btn icon="close" flat round dense v-close-popup @click="closeModal" />
+          <q-btn icon="close" flat round dense v-close-popup @click="closeModal" class="text-white"
+            style="margin-right: -8px" />
         </q-card-section>
 
         <!-- Scrollable content -->
-        <div class="modal-scrollable-content">
+        <div class="modal-scrollable-content" ref="modalContent">
           <q-card-section class="q-pt-md">
             <!-- Category Display -->
             <div v-if="form.category" class="q-mb-md">
@@ -155,23 +179,21 @@
 
             <!-- Single input for edit mode -->
             <template v-if="modal.mode === 'edit'">
-              <q-input v-model="form.items[0].name"
-                :label="form.isOutput ? 'Output Name' : (isSupportCategory ? 'Support Output Name' : 'MFO Name')"
-                class="q-mt-sm modern-input" :class="{ 'shake-animation': errors.name }" outlined dense
-                :rules="[val => !!val || (form.isOutput ? 'Output name is required' : (isSupportCategory ? 'Support output name is required' : 'MFO name is required'))]"
-                :error="errors.name" error-message="This field is required" ref="nameInput"
-                @blur="validateField('name')" />
+              <div :ref="'itemContainer_0'">
+                <q-input v-model="form.items[0].name"
+                  :label="form.isOutput ? 'Output Name' : (isSupportCategory ? 'Support Output Name' : 'MFO Name')"
+                  class="q-mt-sm modern-input" outlined dense :rules="[]" :error="errors.name"
+                  error-message="This field is required" ref="nameInput" />
+              </div>
             </template>
 
             <!-- Dynamic inputs for add mode -->
             <template v-else>
-              <div v-for="(item, index) in form.items" :key="index" class="q-mb-md">
+              <div v-for="(item, index) in form.items" :key="index" class="q-mb-md" :ref="'itemContainer_' + index">
                 <div class="row items-center">
                   <q-input v-model="item.name" :label="getInputLabel(index)" class="col-grow q-mr-sm modern-input"
-                    :class="{ 'shake-animation': errors[`item_${index}`] }" outlined dense
-                    :rules="[val => !!val || getRequiredMessage(index)]" :error="errors[`item_${index}`]"
-                    error-message="This field is required" :ref="`itemInput_${index}`"
-                    @blur="validateField(`item_${index}`)" />
+                    outlined dense :rules="[]" :error="errors[`item_${index}`]" error-message="This field is required"
+                    :ref="'itemInput_' + index" />
                   <q-btn v-if="index > 0 || form.items.length > 1" icon="remove" flat round dense color="negative"
                     @click="removeItem(index)" class="q-ml-sm" />
                 </div>
@@ -182,8 +204,38 @@
 
         <!-- Fixed actions at the bottom -->
         <q-card-actions align="right" class="q-pa-md modal-fixed-actions">
-          <q-btn icon="add" label="Add Another" flat dense color="primary" @click="addNewItem" class="q-mr-sm" />
-          <q-btn label="Save" color="primary" @click="saveEntry" :loading="modal.loading" />
+          <q-btn v-if="modal.mode === 'add'" label="Add Another" flat dense color="primary" @click="addNewItem"
+            class="q-mr-sm" />
+          <q-btn label="Save" color="primary" @click="confirmSave" :loading="modal.loading" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Confirmation Dialog -->
+    <q-dialog v-model="confirmDialog.show" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Confirm Save</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <p>Are you sure you want to save the following?</p>
+          <ul class="confirmation-list">
+            <li v-for="(item, index) in form.items" :key="index">
+              <strong>{{ form.isOutput ? 'Output' : 'MFO' }} {{ index + 1 }}:</strong> {{ item.name }}
+            </li>
+          </ul>
+          <div v-if="form.parentMfo" class="q-mt-sm">
+            <strong>Parent MFO:</strong> {{ form.parentMfo.name }}
+          </div>
+          <div class="q-mt-sm">
+            <strong>Category:</strong> {{ form.category.name }}
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn flat label="Confirm" color="primary" @click="proceedWithSave" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -203,49 +255,44 @@ export default {
       mfos: [],
       outputs: [],
       categories: [],
-      errors: {
-        name: false,
-        // Dynamic item errors will be added as needed
-      },
+      expandedMfos: [],
+      errors: {},
       firstInvalidFieldFocused: false,
       modal: {
         show: false,
         title: "Add MFO / Output",
-        mode: "add", // 'add' or 'edit'
+        mode: "add",
         loading: false,
-        context: null // stores additional context for edits
+        context: null
+      },
+      confirmDialog: {
+        show: false
       },
       form: {
         category: null,
         items: [{ name: "" }],
         isOutput: false,
         parentMfo: null
-      }
+      },
+      touchedFields: {}
     };
   },
   computed: {
     ...mapState(useUserStore, ['user']),
-
     categoryOptions() {
-      // Make sure we have the three standard categories, even if API doesn't return all
       const standardCategories = [
         { id: 1, name: "A. STRATEGIC FUNCTION", type: "strategic" },
         { id: 2, name: "B. CORE FUNCTION", type: "core" },
         { id: 3, name: "C. SUPPORT FUNCTION", type: "support" }
       ];
 
-      // Use API categories if available, or fallback to standard categories
       if (this.categories && this.categories.length > 0) {
-        // Ensure all standard categories are included
         const existingCategoryNames = this.categories.map(c => c.name);
         const missingCategories = standardCategories.filter(
           sc => !existingCategoryNames.some(name => name.includes(sc.name.split(' ')[0]))
         );
-
         return [...this.categories, ...missingCategories];
       }
-
-      // If no categories from API, use standard ones
       return standardCategories;
     },
     isSupportCategory() {
@@ -267,7 +314,6 @@ export default {
         )
       );
     },
-
     coreMfos() {
       return this.mfos.filter(mfo =>
         mfo.category && (
@@ -276,10 +322,8 @@ export default {
         )
       );
     },
-
     supportOutputs() {
       if (!this.supportCategory) return [];
-
       return this.outputs.filter(output =>
         output.f_category_id === this.supportCategory.id &&
         (!output.mfo_id || output.mfo_id === null)
@@ -290,69 +334,180 @@ export default {
     this.fetchData();
   },
   methods: {
-    validateField(fieldName) {
-      let isValid = false;
+    toggleMfoExpansion(mfoId) {
+      const index = this.expandedMfos.indexOf(mfoId);
+      if (index === -1) {
+        this.expandedMfos.push(mfoId);
+      } else {
+        this.expandedMfos.splice(index, 1);
+      }
+    },
+    validateField(fieldName, force = false) {
+      if (!force && !this.touchedFields[fieldName]) {
+        return true;
+      }
 
+      let isValid = false;
       if (fieldName === 'name') {
         isValid = !!this.form.items[0]?.name?.trim();
       } else if (fieldName.startsWith('item_')) {
         const index = parseInt(fieldName.split('_')[1]);
         isValid = !!this.form.items[index]?.name?.trim();
       }
-
       this.errors[fieldName] = !isValid;
       return isValid;
     },
-
     validateForm() {
+      this.errors = {};
       let isValid = true;
-      this.firstInvalidFieldFocused = false;
+      let firstInvalidIndex = -1;
 
-      // Validate all items
       this.form.items.forEach((item, index) => {
         const fieldName = this.modal.mode === 'edit' && index === 0 ? 'name' : `item_${index}`;
-        if (!this.validateField(fieldName)) {
+        if (!this.validateField(fieldName, true)) {
           isValid = false;
-
-          // Focus the first invalid field
-          if (!this.firstInvalidFieldFocused) {
-            const refName = this.modal.mode === 'edit' && index === 0 ? 'nameInput' : `itemInput_${index}`;
-            if (this.$refs[refName]) {
-              this.$nextTick(() => {
-                this.$refs[refName].focus();
-              });
-              this.firstInvalidFieldFocused = true;
-            }
+          if (firstInvalidIndex === -1) {
+            firstInvalidIndex = index;
           }
         }
       });
 
+      if (!isValid) {
+        this.$nextTick(() => {
+          this.shakeInvalidFields();
+          this.scrollToInvalidField(firstInvalidIndex);
+        });
+      }
+
       return isValid;
     },
+    confirmSave() {
+      if (!this.validateForm()) {
+        return;
+      }
+      this.confirmDialog.show = true;
+    },
+    async proceedWithSave() {
+      this.confirmDialog.show = false;
+      try {
+        this.modal.loading = true;
 
-    shakeAllInvalidFields() {
+        if (this.form.isOutput) {
+          await this.saveOutputs();
+        } else {
+          if (!this.isSupportCategory) {
+            await this.saveMfos();
+          } else {
+            await this.saveOutputs();
+            return;
+          }
+        }
+
+        this.$q.notify({
+          type: 'positive',
+          message: this.modal.mode === 'add'
+            ? (this.form.isOutput
+              ? 'Output saved successfully'
+              : 'MFO saved successfully')
+            : (this.form.isOutput
+              ? 'Output updated successfully'
+              : 'MFO updated successfully'),
+          position: 'top'
+        });
+
+        await this.fetchData();
+        this.closeModal();
+      } catch (error) {
+        console.error('Save error:', error);
+        this.$q.notify({
+          type: 'negative',
+          message: error.response?.data?.message || error.message || 'Failed to save entries',
+          position: 'top'
+        });
+      } finally {
+        this.modal.loading = false;
+      }
+    },
+    shakeInvalidFields() {
       this.$nextTick(() => {
-        Object.keys(this.errors).forEach(field => {
-          if (this.errors[field]) {
-            let refName;
-            if (field === 'name') {
-              refName = 'nameInput';
-            } else if (field.startsWith('item_')) {
-              const index = parseInt(field.split('_')[1]);
-              refName = `itemInput_${index}`;
-            }
-
+        Object.keys(this.errors).forEach(fieldName => {
+          if (this.errors[fieldName]) {
+            const index = fieldName === 'name' ? 0 : parseInt(fieldName.split('_')[1]);
+            const refName = `itemInput_${index}`;
             if (this.$refs[refName]) {
-              const element = this.$refs[refName].$el;
-              element.classList.remove('shake-animation');
-              void element.offsetWidth; // Trigger reflow
-              element.classList.add('shake-animation');
+              const input = Array.isArray(this.$refs[refName]) ?
+                this.$refs[refName][0].$el :
+                this.$refs[refName].$el;
+
+              input.classList.remove('shake-animation');
+              void input.offsetWidth;
+              input.classList.add('shake-animation');
+
+              setTimeout(() => {
+                input.classList.remove('shake-animation');
+              }, 500);
             }
           }
         });
       });
     },
+    scrollToInvalidField(index) {
+      this.$nextTick(() => {
+        const containerRef = `itemContainer_${index}`;
+        if (this.$refs[containerRef]) {
+          const container = Array.isArray(this.$refs[containerRef]) ?
+            this.$refs[containerRef][0] :
+            this.$refs[containerRef];
 
+          if (container && this.$refs.modalContent) {
+            const containerTop = container.offsetTop;
+            const modalHeight = this.$refs.modalContent.offsetHeight;
+            const scrollPosition = Math.min(
+              containerTop - 20,
+              this.$refs.modalContent.scrollHeight - modalHeight
+            );
+
+            this.$refs.modalContent.scrollTo({
+              top: scrollPosition,
+              behavior: 'smooth'
+            });
+          }
+        }
+      });
+    },
+    scrollToNewField() {
+      this.$nextTick(() => {
+        const lastIndex = this.form.items.length - 1;
+        const containerRef = `itemContainer_${lastIndex}`;
+        if (this.$refs[containerRef] && this.$refs.modalContent) {
+          const container = Array.isArray(this.$refs[containerRef]) ?
+            this.$refs[containerRef][0] :
+            this.$refs[containerRef];
+
+          if (container) {
+            const containerTop = container.offsetTop;
+            const modalHeight = this.$refs.modalContent.offsetHeight;
+            const scrollPosition = Math.min(
+              containerTop - 20,
+              this.$refs.modalContent.scrollHeight - modalHeight
+            );
+
+            this.$refs.modalContent.scrollTo({
+              top: scrollPosition,
+              behavior: 'smooth'
+            });
+
+            const inputRef = `itemInput_${lastIndex}`;
+            if (this.$refs[inputRef]) {
+              const input = Array.isArray(this.$refs[inputRef]) ?
+                this.$refs[inputRef][0] :
+                this.$refs[inputRef];
+              input.focus();
+            }
+          }
+        }
+      });
+    },
     async fetchData() {
       this.loading = true;
       try {
@@ -360,11 +515,9 @@ export default {
         await userStore.loadUserData();
         this.mfos = userStore.mfos;
 
-        // Fetch categories
         const categoriesResponse = await api.get('/fetch_f_category');
         this.categories = categoriesResponse.data;
 
-        // Fetch ALL outputs (not just support outputs)
         const outputsResponse = await api.get('/allOutputs', {
           params: {
             office_id: this.user.office_id
@@ -372,7 +525,6 @@ export default {
         });
 
         this.outputs = outputsResponse.data.map(output => {
-          // For all outputs, attach category and mfo if available
           return {
             ...output,
             category: this.categories.find(c => c.id === output.f_category_id),
@@ -390,35 +542,34 @@ export default {
         this.loading = false;
       }
     },
-
     getOutputsForMfo(mfoId) {
       return this.outputs.filter(output => output.mfo_id === mfoId);
     },
-
     getInputLabel(index) {
       if (this.form.isOutput) {
         return this.isSupportCategory ? `Support Output ${index + 1}` : `Output ${index + 1}`;
       }
       return `MFO ${index + 1}`;
     },
-
-    getRequiredMessage(index) {
-      if (this.form.isOutput) {
-        return `Output ${index + 1} is required`;
-      }
-      return this.isSupportCategory ? `Support output ${index + 1} is required` : `MFO ${index + 1} is required`;
-    },
-
     addNewItem() {
       this.form.items.push({ name: "" });
+      this.scrollToNewField();
     },
-
     removeItem(index) {
       if (this.form.items.length > 1) {
         this.form.items.splice(index, 1);
+        this.errors = {};
+        const fieldName = `item_${index}`;
+        delete this.touchedFields[fieldName];
+
+        for (let i = index + 1; i < this.form.items.length + 1; i++) {
+          if (this.touchedFields[`item_${i}`]) {
+            this.touchedFields[`item_${i - 1}`] = this.touchedFields[`item_${i}`];
+            delete this.touchedFields[`item_${i}`];
+          }
+        }
       }
     },
-
     resetForm() {
       this.form = {
         category: null,
@@ -426,16 +577,12 @@ export default {
         isOutput: false,
         parentMfo: null
       };
-      this.errors = {
-        name: false
-      };
+      this.errors = {};
+      this.touchedFields = {};
       this.firstInvalidFieldFocused = false;
     },
-
     openAddModal(categoryType) {
       this.resetForm();
-
-      // Determine if this is for support function
       const isSupport = categoryType === 'support';
 
       this.modal = {
@@ -459,10 +606,9 @@ export default {
       }
 
       this.form.category = categoryForType;
-      this.form.isOutput = isSupport; // Set to true for support functions
-      this.form.parentMfo = null; // Support outputs don't have parent MFO
+      this.form.isOutput = isSupport;
+      this.form.parentMfo = null;
     },
-
     openAddOutputModal(mfo, categoryType) {
       this.resetForm();
       this.modal = {
@@ -477,9 +623,6 @@ export default {
       this.form.parentMfo = mfo;
       this.form.isOutput = true;
     },
-
-
-
     editMfo(mfo, categoryType) {
       this.resetForm();
       this.modal = {
@@ -488,7 +631,7 @@ export default {
         mode: "edit",
         loading: false,
         context: {
-          mfo: { ...mfo }, // Make sure we have the mfo object
+          mfo: { ...mfo },
           categoryType
         }
       };
@@ -497,7 +640,6 @@ export default {
       this.form.items = [{ name: mfo.name }];
       this.form.isOutput = false;
     },
-
     editOutput(output, mfo, categoryType) {
       this.resetForm();
       this.modal = {
@@ -513,7 +655,6 @@ export default {
       this.form.items = [{ name: output.name }];
       this.form.isOutput = true;
     },
-
     editSupport(mfo) {
       this.resetForm();
       this.modal = {
@@ -528,7 +669,6 @@ export default {
       this.form.items = [{ name: mfo.name }];
       this.form.isOutput = true;
     },
-
     findCategoryByType(categoryType) {
       return this.categoryOptions.find(cat => {
         if (categoryType === 'strategic') {
@@ -540,7 +680,6 @@ export default {
         }
       });
     },
-
     getCategoryName(categoryType) {
       switch (categoryType) {
         case 'strategic': return 'Strategic MFO';
@@ -549,60 +688,9 @@ export default {
         default: return 'MFO/Output';
       }
     },
-
     async saveEntry() {
-      try {
-        this.modal.loading = true;
-        this.firstInvalidFieldFocused = false;
-
-        if (!this.validateForm()) {
-          this.$q.notify({
-            type: 'negative',
-            message: 'Please fill all required fields',
-            position: 'top',
-            icon: 'warning'
-          });
-          this.shakeAllInvalidFields();
-          return;
-        }
-
-        if (this.form.isOutput) {
-          await this.saveOutputs();
-        } else {
-          if (!this.isSupportCategory) {
-            await this.saveMfos();
-          } else {
-            await this.saveOutputs();
-            return;
-          }
-        }
-
-        this.$q.notify({
-          type: 'positive',
-          message: this.modal.mode === 'add'
-            ? (this.form.isOutput
-              ? `${this.isSupportCategory ? 'Support outputs' : 'Outputs'} added successfully`
-              : `Added successfully`)
-            : (this.form.isOutput
-              ? 'Output updated successfully'
-              : 'MFO updated successfully'),
-          position: 'top'
-        });
-
-        await this.fetchData();
-        this.closeModal();
-      } catch (error) {
-        console.error('Save error:', error);
-        this.$q.notify({
-          type: 'negative',
-          message: error.response?.data?.message || error.message || 'Failed to save entries',
-          position: 'top'
-        });
-      } finally {
-        this.modal.loading = false;
-      }
+      // This is now handled by confirmSave and proceedWithSave
     },
-
     async saveMfos() {
       try {
         if (this.modal.mode === 'add') {
@@ -615,7 +703,6 @@ export default {
           });
           await Promise.all(promises);
         } else {
-          // Ensure we have the MFO ID from context
           const mfoId = this.modal.context?.mfo?.id;
           if (!mfoId) {
             throw new Error("MFO ID is missing");
@@ -629,10 +716,9 @@ export default {
         }
       } catch (error) {
         console.error('Error saving MFO:', error);
-        throw error; // Re-throw to be caught in saveEntry
+        throw error;
       }
     },
-
     async saveOutputs() {
       try {
         if (this.modal.mode === 'add') {
@@ -652,7 +738,6 @@ export default {
 
           await Promise.all(promises);
         } else {
-          // Handle both regular outputs and support outputs
           const outputId = this.modal.context?.output?.id || this.modal.context?.mfo?.id;
           if (!outputId) {
             throw new Error("Output ID is missing");
@@ -670,17 +755,11 @@ export default {
 
           await api.post(`/outputs/${outputId}`, payload);
         }
-
-        await this.fetchData();
-        this.closeModal();
       } catch (error) {
         console.error('Error saving outputs:', error);
         throw error;
       }
     },
-
-
-
     confirmDelete(mfo) {
       this.$q.dialog({
         title: 'Confirm Delete',
@@ -691,7 +770,6 @@ export default {
         await this.deleteMfo(mfo);
       });
     },
-
     confirmDeleteOutput(output) {
       this.$q.dialog({
         title: 'Confirm Delete',
@@ -702,7 +780,6 @@ export default {
         await this.deleteOutput(output);
       });
     },
-
     async deleteMfo(mfo) {
       try {
         await api.delete(`/mfos/${mfo.id}`);
@@ -721,7 +798,6 @@ export default {
         });
       }
     },
-
     async deleteOutput(output) {
       try {
         await api.delete(`/outputs/${output.id}`);
@@ -740,7 +816,6 @@ export default {
         });
       }
     },
-
     closeModal() {
       this.modal.show = false;
       this.resetForm();
@@ -750,10 +825,10 @@ export default {
 </script>
 
 <style scoped>
-/* Main table styling */
 .mfo-table {
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
 }
 
 .category-column {
@@ -761,6 +836,7 @@ export default {
   background-color: #f8f9fa;
   border-right: 1px solid #e0e0e0;
   vertical-align: top;
+  width: 33.33%;
 }
 
 .category-column:last-child {
@@ -772,13 +848,13 @@ export default {
   vertical-align: top;
   border-right: 1px solid #e0e0e0;
   width: 33.33%;
+  height: 100%;
 }
 
 .category-cell:last-child {
   border-right: none;
 }
 
-/* List styling */
 .mfo-list,
 .output-list {
   list-style: none;
@@ -802,13 +878,11 @@ export default {
 .output-item {
   background-color: #f8f9fa;
   border-radius: 4px;
-  padding: 8px 12px;
-  margin: 6px 0;
+  padding: 10px 12px;
+  margin: 8px 0;
 }
 
-/* Content styling - Updated for uniform alignment */
-.mfo-content,
-.output-content {
+.mfo-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -818,37 +892,54 @@ export default {
   flex-grow: 1;
   padding-right: 12px;
   min-width: 0;
-  /* Allows text truncation */
+  display: flex;
+  align-items: center;
+  min-height: 32px;
 }
 
-.mfo-text,
-.output-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mfo-text {
+.mfo-number {
   font-size: 0.85rem;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.mfo-name {
   font-weight: bold;
+  word-break: break-word;
 }
 
-.output-text {
+.output-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.output-number {
   font-size: 0.8rem;
+  white-space: nowrap;
+  margin-right: 8px;
 }
 
-/* Action buttons - Updated for uniform alignment */
-.mfo-actions,
-.output-actions {
+.output-name {
+  font-weight: bold;
+  word-break: break-word;
+  flex-grow: 1;
+}
+
+.mfo-actions {
   display: flex;
   gap: 4px;
   min-width: 56px;
-  /* Fixed width for action buttons */
   flex-shrink: 0;
-  /* Prevents shrinking */
+  align-items: center;
 }
 
-/* Empty state styling */
+.output-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 .empty-state {
   display: flex;
   align-items: center;
@@ -857,14 +948,12 @@ export default {
   color: #6c757d;
 }
 
-/* Header content */
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Modal styling */
 .modal-card {
   border-radius: 8px;
   overflow: hidden;
@@ -872,7 +961,6 @@ export default {
 
 .modal-scrollable-content {
   max-height: 400px;
-  /* Adjust height as needed */
   overflow-y: auto;
 }
 
@@ -884,7 +972,6 @@ export default {
   border-top: 1px solid #e0e0e0;
 }
 
-/* Input styling with validation */
 .modern-input {
   :deep(.q-field__control) {
     border-radius: 6px;
@@ -914,6 +1001,30 @@ export default {
   animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
+.add-output-btn {
+  background-color: #00703C !important;
+  color: white !important;
+  border-radius: 20px !important;
+  padding: 4px 16px !important;
+  text-transform: none !important;
+  width: auto !important;
+  margin: 8px 0 !important;
+}
+
+.output-list {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.confirmation-list {
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.confirmation-list li {
+  margin-bottom: 4px;
+}
+
 @keyframes shake {
 
   10%,
@@ -938,7 +1049,6 @@ export default {
   }
 }
 
-
 :deep(.q-field--outlined .q-field__control) {
   height: 40px;
   min-height: 40px;
@@ -951,7 +1061,6 @@ export default {
   font-size: 0.75rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1024px) {
   .category-cell {
     padding: 12px;

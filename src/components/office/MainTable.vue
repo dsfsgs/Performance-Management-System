@@ -1,4 +1,3 @@
-<!-- In MainTable.vue -->
 <template>
   <div>
     <!-- Filter and Buttons -->
@@ -24,8 +23,8 @@
           label="Create Unit Work Plan" @click="$emit('create')" icon="person_add" text-color="white"
           icon-color="white" />
 
-        <q-btn v-if="!hideOPCRButton"  label="Input" icon="edit" color="green-9" elevated rounded class="action-btn"
-          @click="$emit('input-click')" />
+        <q-btn v-if="!hideOPCRButton && !hideInputButton" label="Input" icon="edit" color="green-9" elevated rounded
+          class="action-btn" @click="$emit('input-click')" />
 
         <q-btn v-if="!hideOPCRButton" elevated rounded color="primary" label="Generate OPCR" icon="print"
           @click="showGenerateModal = true" :disable="!targetPeriodFilter">
@@ -42,7 +41,6 @@
         </q-btn>
       </div>
     </div>
-
 
     <!-- Main Table -->
     <q-table :rows="displayRows" :columns="visibleColumns" row-key="id" @row-click="onRowClick">
@@ -79,7 +77,6 @@
       <UnitWorkPlanReport :targetPeriod="targetPeriodFilter" :filteredDivisions="filteredRows"
         @close="showUnitWorkPlanModal = false" />
     </q-dialog>
-
   </div>
 </template>
 
@@ -124,9 +121,13 @@ export default {
     isUnitWorkPlanPage: {
       type: Boolean,
       default: false
+    },
+    hideInputButton: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status'],
+  emits: ['create', 'row-click', 'generate-opcr', 'generate-uwp', 'update-status', 'input-click'],
   data() {
     return {
       targetPeriodFilter: null,
@@ -142,7 +143,7 @@ export default {
       ],
       generateOPCRRef: null,
       periodOptions: ['January - June', 'July - December'],
-      yearOptions: Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() + i - 5).toString()) // 5 years before and after current year
+      yearOptions: Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() + i - 5).toString())
     }
   },
   computed: {
@@ -158,7 +159,6 @@ export default {
       });
     },
     targetPeriodOptions() {
-      // Get unique target periods from rows
       const uniquePeriods = [...new Set(this.rows.map(row => row.targetPeriod))];
       return uniquePeriods.map(period => ({
         label: period,
@@ -180,7 +180,6 @@ export default {
       });
     },
     displayRows() {
-      // If target period is not selected, return empty array to trigger "no data" message
       return this.targetPeriodFilter ? this.filteredRows : [];
     },
     getFilterColumnClass() {
