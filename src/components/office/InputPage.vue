@@ -15,9 +15,10 @@
             <thead>
               <tr>
                 <th class="text-center" rowspan="2" width="20%">Function</th>
-                <th class="text-center" colspan="3" width="30%">Required Competency & Proficiency Level</th>
+                <th class="text-center" colspan="3" width="25%">Required Competency & Proficiency Level</th>
                 <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
                 <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
               </tr>
               <tr>
                 <th class="text-center">Core</th>
@@ -46,7 +47,7 @@
                 <td class="text-center">
                   BCIWR (S)
                 </td>
-                
+
                 <td class="text-center">
                   <q-input dense outlined v-model="strategicBudget" placeholder="Enter budget"
                     class="full-width modern-input" :class="{ 'shake-animation': errors.strategicBudget }"
@@ -67,6 +68,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="strategicAccomplishment" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.strategicAccomplishment }"
+                    :error="errors.strategicAccomplishment" error-message="Field is required" lazy-rules
+                    @blur="validateField('strategicAccomplishment')" ref="strategicAccomplishmentRef">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -80,10 +91,11 @@
           <table class="full-width">
             <thead>
               <tr>
-                <th class="text-center" rowspan="2" width="20%">Function</th>
-                <th class="text-center" colspan="3" width="30%">Required Competency & Proficiency Level</th>
-                <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
+                <th class="text-center" rowspan="2" width="15%">Function</th>
+                <th class="text-center" colspan="3" width="25%">Required Competency & Proficiency Level</th>
+                <th class="text-center" rowspan="2" width="10%">Alloted Budget</th>
                 <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
               </tr>
               <tr>
                 <th class="text-center">Core</th>
@@ -132,6 +144,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment1" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment1 }"
+                    :error="errors.coreAccomplishment1" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment1')" ref="coreAccomplishment1Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
 
               <!-- MFO 2 -->
@@ -170,6 +192,16 @@
                     @blur="validateField('coreAccountable2')" ref="coreAccountable2Ref">
                     <template v-slot:prepend>
                       <q-icon name="people" />
+                    </template>
+                  </q-input>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment2" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment2 }"
+                    :error="errors.coreAccomplishment2" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment2')" ref="coreAccomplishment2Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
                     </template>
                   </q-input>
                 </td>
@@ -215,6 +247,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment3" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment3 }"
+                    :error="errors.coreAccomplishment3" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment3')" ref="coreAccomplishment3Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
 
               <!-- MFO 4 -->
@@ -254,6 +296,16 @@
                     @blur="validateField('coreAccountable4')" ref="coreAccountable4Ref">
                     <template v-slot:prepend>
                       <q-icon name="people" />
+                    </template>
+                  </q-input>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment4" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment4 }"
+                    :error="errors.coreAccomplishment4" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment4')" ref="coreAccomplishment4Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
                     </template>
                   </q-input>
                 </td>
@@ -299,6 +351,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment5" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment5 }"
+                    :error="errors.coreAccomplishment5" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment5')" ref="coreAccomplishment5Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
 
               <!-- MFO 6 -->
@@ -341,6 +403,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="coreAccomplishment6" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment6 }"
+                    :error="errors.coreAccomplishment6" error-message="Field is required" lazy-rules
+                    @blur="validateField('coreAccomplishment6')" ref="coreAccomplishment6Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -355,9 +427,10 @@
             <thead>
               <tr>
                 <th class="text-center" rowspan="2" width="20%">Function</th>
-                <th class="text-center" rowspan="2" width="30%">Required Competency & Proficiency Level</th>
+                <th class="text-center" rowspan="2" width="25%">Required Competency & Proficiency Level</th>
                 <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
                 <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
               </tr>
             </thead>
             <tbody>
@@ -386,6 +459,16 @@
                     @blur="validateField('supportAccountable1')" ref="supportAccountable1Ref">
                     <template v-slot:prepend>
                       <q-icon name="people" />
+                    </template>
+                  </q-input>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="supportAccomplishment1" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment1 }"
+                    :error="errors.supportAccomplishment1" error-message="Field is required" lazy-rules
+                    @blur="validateField('supportAccomplishment1')" ref="supportAccomplishment1Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
                     </template>
                   </q-input>
                 </td>
@@ -419,6 +502,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="supportAccomplishment2" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment2 }"
+                    :error="errors.supportAccomplishment2" error-message="Field is required" lazy-rules
+                    @blur="validateField('supportAccomplishment2')" ref="supportAccomplishment2Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
 
               <!-- Monitoring and Coaching -->
@@ -446,6 +539,16 @@
                     @blur="validateField('supportAccountable3')" ref="supportAccountable3Ref">
                     <template v-slot:prepend>
                       <q-icon name="people" />
+                    </template>
+                  </q-input>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="supportAccomplishment3" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment3 }"
+                    :error="errors.supportAccomplishment3" error-message="Field is required" lazy-rules
+                    @blur="validateField('supportAccomplishment3')" ref="supportAccomplishment3Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
                     </template>
                   </q-input>
                 </td>
@@ -479,6 +582,16 @@
                     </template>
                   </q-input>
                 </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="supportAccomplishment4" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment4 }"
+                    :error="errors.supportAccomplishment4" error-message="Field is required" lazy-rules
+                    @blur="validateField('supportAccomplishment4')" ref="supportAccomplishment4Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
+                    </template>
+                  </q-input>
+                </td>
               </tr>
 
               <!-- Personnel Mechanism Meetings -->
@@ -506,6 +619,16 @@
                     @blur="validateField('supportAccountable5')" ref="supportAccountable5Ref">
                     <template v-slot:prepend>
                       <q-icon name="people" />
+                    </template>
+                  </q-input>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="supportAccomplishment5" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment5 }"
+                    :error="errors.supportAccomplishment5" error-message="Field is required" lazy-rules
+                    @blur="validateField('supportAccomplishment5')" ref="supportAccomplishment5Ref">
+                    <template v-slot:prepend>
+                      <q-icon name="description" />
                     </template>
                   </q-input>
                 </td>
@@ -573,32 +696,53 @@ export default {
     // Strategic Function
     const strategicBudget = ref('P 19,101,441.00 (Personal Services)');
     const strategicAccountable = ref('ARPMID');
+    const strategicAccomplishment = ref('36 provision of total workforce were given intervention without lapses as per schedule');
 
     // Core Functions
     const coreBudget1 = ref('P 19,101,441.00 (Personal Services)');
     const coreAccountable1 = ref('ARPMID');
+    const coreAccomplishment1 = ref('9,712 Recruitment, Selection and Selection related documents/activities approved and signed with lapses within the schedule');
+
     const coreBudget2 = ref('P 19,101,441.00 (Personal Services)');
     const coreAccountable2 = ref('ARPMID');
+    const coreAccomplishment2 = ref('1,482 Performance Management related documents/activities monitored without lapses before the schedule');
+
     const coreBudget3 = ref('P 19,101,441.00 (Personal Services)');
     const coreAccountable3 = ref('BHRD, ARPMID');
+    const coreAccomplishment3 = ref('1,239 Employees Compensation and Benefits related documents/activities signed and approved with lapses within the schedule');
+
     const coreBudget4 = ref('P 19,101,441.00 (Personal Services)');
     const coreAccountable4 = ref('ARPMID, ASD, BHRD');
+    const coreAccomplishment4 = ref(''); // Add appropriate value
+
     const coreBudget5 = ref('P 19,101,441.00 (Personal Services)<br>P 565,000.00 (Personal Enhancement Program)<br>P 1,000,000.00 (Burial and/or Financial Assistance to Employees)<br>P 900,000.00 (Holistic Health and Wellness Program)<br>P 999,500.00 (PCSA Celebration and Sports Activities)');
     const coreAccountable5 = ref('BHRD');
+    const coreAccomplishment5 = ref(''); // Add appropriate value
+
     const coreBudget6 = ref('P 270,000.00 (Operationalization of PRAISE Committee)');
     const coreAccountable6 = ref('BHRD');
+    const coreAccomplishment6 = ref(''); // Add appropriate value
 
     // Support Functions
     const supportBudget1 = ref('P 19,750,511.00 (Personal Services)');
     const supportAccountable1 = ref('ASD, ARPMID, BHRDD');
+    const supportAccomplishment1 = ref('24 hours required Health & Wellness activities attended without lapses before scheduled time');
+
     const supportBudget2 = ref('P 19,750,511.00 (Personal Services)');
     const supportAccountable2 = ref('ASD, ARPMID, BHRDD');
+    const supportAccomplishment2 = ref('240 DTRs reviewed without lapses within the 2nd working day of the succeeding month');
+
     const supportBudget3 = ref('P 19,750,511.00 (Personal Services)');
     const supportAccountable3 = ref('ASD, ARPMID, BHRDD');
+    const supportAccomplishment3 = ref('12 Monitoring/ Coaching Journal evaluated and approved without lapses within schedule');
+
     const supportBudget4 = ref('P 19,750,511.00 (Personal Services)');
     const supportAccountable4 = ref('ASD,ARPMID,BHRDD');
+    const supportAccomplishment4 = ref('1 OPCR Accomplishment and 1 OPCR Target reviewed and submitted with 1 revision beyond deadline');
+
     const supportBudget5 = ref('P50,000.00 (Program for Personnel Mechanisms)');
     const supportAccountable5 = ref('CHRMO');
+    const supportAccomplishment5 = ref('10 Personnel Mechanism meetings administered without lapses as scheduled');
 
     // Dialog controls
     const confirmDialogOpen = ref(false);
@@ -607,55 +751,79 @@ export default {
     const errors = ref({
       strategicBudget: false,
       strategicAccountable: false,
+      strategicAccomplishment: false,
       coreBudget1: false,
       coreAccountable1: false,
+      coreAccomplishment1: false,
       coreBudget2: false,
       coreAccountable2: false,
+      coreAccomplishment2: false,
       coreBudget3: false,
       coreAccountable3: false,
+      coreAccomplishment3: false,
       coreBudget4: false,
       coreAccountable4: false,
+      coreAccomplishment4: false,
       coreBudget5: false,
       coreAccountable5: false,
+      coreAccomplishment5: false,
       coreBudget6: false,
       coreAccountable6: false,
+      coreAccomplishment6: false,
       supportBudget1: false,
       supportAccountable1: false,
+      supportAccomplishment1: false,
       supportBudget2: false,
       supportAccountable2: false,
+      supportAccomplishment2: false,
       supportBudget3: false,
       supportAccountable3: false,
+      supportAccomplishment3: false,
       supportBudget4: false,
       supportAccountable4: false,
+      supportAccomplishment4: false,
       supportBudget5: false,
-      supportAccountable5: false
+      supportAccountable5: false,
+      supportAccomplishment5: false
     });
 
     const firstInvalidFieldFocused = ref(false);
     const strategicBudgetRef = ref(null);
     const strategicAccountableRef = ref(null);
+    const strategicAccomplishmentRef = ref(null);
     const coreBudget1Ref = ref(null);
     const coreAccountable1Ref = ref(null);
+    const coreAccomplishment1Ref = ref(null);
     const coreBudget2Ref = ref(null);
     const coreAccountable2Ref = ref(null);
+    const coreAccomplishment2Ref = ref(null);
     const coreBudget3Ref = ref(null);
     const coreAccountable3Ref = ref(null);
+    const coreAccomplishment3Ref = ref(null);
     const coreBudget4Ref = ref(null);
     const coreAccountable4Ref = ref(null);
+    const coreAccomplishment4Ref = ref(null);
     const coreBudget5Ref = ref(null);
     const coreAccountable5Ref = ref(null);
+    const coreAccomplishment5Ref = ref(null);
     const coreBudget6Ref = ref(null);
     const coreAccountable6Ref = ref(null);
+    const coreAccomplishment6Ref = ref(null);
     const supportBudget1Ref = ref(null);
     const supportAccountable1Ref = ref(null);
+    const supportAccomplishment1Ref = ref(null);
     const supportBudget2Ref = ref(null);
     const supportAccountable2Ref = ref(null);
+    const supportAccomplishment2Ref = ref(null);
     const supportBudget3Ref = ref(null);
     const supportAccountable3Ref = ref(null);
+    const supportAccomplishment3Ref = ref(null);
     const supportBudget4Ref = ref(null);
     const supportAccountable4Ref = ref(null);
+    const supportAccomplishment4Ref = ref(null);
     const supportBudget5Ref = ref(null);
     const supportAccountable5Ref = ref(null);
+    const supportAccomplishment5Ref = ref(null);
 
     const validateField = (fieldName) => {
       const isValid = !!eval(fieldName + '.value');
@@ -665,32 +833,37 @@ export default {
 
     const validateForm = () => {
       const requiredFields = [
-        'strategicBudget', 'strategicAccountable',
-        'coreBudget1', 'coreAccountable1',
-        'coreBudget2', 'coreAccountable2',
-        'coreBudget3', 'coreAccountable3',
-        'coreBudget4', 'coreAccountable4',
-        'coreBudget5', 'coreAccountable5',
-        'coreBudget6', 'coreAccountable6',
-        'supportBudget1', 'supportAccountable1',
-        'supportBudget2', 'supportAccountable2',
-        'supportBudget3', 'supportAccountable3',
-        'supportBudget4', 'supportAccountable4',
-        'supportBudget5', 'supportAccountable5'
+        'strategicBudget', 'strategicAccountable', 'strategicAccomplishment',
+        'coreBudget1', 'coreAccountable1', 'coreAccomplishment1',
+        'coreBudget2', 'coreAccountable2', 'coreAccomplishment2',
+        'coreBudget3', 'coreAccountable3', 'coreAccomplishment3',
+        'coreBudget4', 'coreAccountable4', 'coreAccomplishment4',
+        'coreBudget5', 'coreAccountable5', 'coreAccomplishment5',
+        'coreBudget6', 'coreAccountable6', 'coreAccomplishment6',
+        'supportBudget1', 'supportAccountable1', 'supportAccomplishment1',
+        'supportBudget2', 'supportAccountable2', 'supportAccomplishment2',
+        'supportBudget3', 'supportAccountable3', 'supportAccomplishment3',
+        'supportBudget4', 'supportAccountable4', 'supportAccomplishment4',
+        'supportBudget5', 'supportAccountable5', 'supportAccomplishment5'
       ];
 
       let isValid = true;
+      let firstInvalidField = null;
 
       requiredFields.forEach(field => {
         const fieldValid = validateField(field);
         if (!fieldValid) {
           isValid = false;
-          if (eval(field + 'Ref.value') && !firstInvalidFieldFocused.value) {
-            eval(field + 'Ref.value').focus();
-            firstInvalidFieldFocused.value = true;
+          if (!firstInvalidField) {
+            firstInvalidField = eval(field + 'Ref.value');
           }
         }
       });
+
+      if (firstInvalidField) {
+        firstInvalidField.$el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstInvalidField.focus();
+      }
 
       return isValid;
     };
@@ -725,54 +898,66 @@ export default {
       const opcrData = {
         strategic: {
           budget: strategicBudget.value,
-          accountable: strategicAccountable.value
+          accountable: strategicAccountable.value,
+          accomplishment: strategicAccomplishment.value
         },
         core: {
           mfo1: {
             budget: coreBudget1.value,
-            accountable: coreAccountable1.value
+            accountable: coreAccountable1.value,
+            accomplishment: coreAccomplishment1.value
           },
           mfo2: {
             budget: coreBudget2.value,
-            accountable: coreAccountable2.value
+            accountable: coreAccountable2.value,
+            accomplishment: coreAccomplishment2.value
           },
           mfo3: {
             budget: coreBudget3.value,
-            accountable: coreAccountable3.value
+            accountable: coreAccountable3.value,
+            accomplishment: coreAccomplishment3.value
           },
           mfo4: {
             budget: coreBudget4.value,
-            accountable: coreAccountable4.value
+            accountable: coreAccountable4.value,
+            accomplishment: coreAccomplishment4.value
           },
           mfo5: {
             budget: coreBudget5.value,
-            accountable: coreAccountable5.value
+            accountable: coreAccountable5.value,
+            accomplishment: coreAccomplishment5.value
           },
           mfo6: {
             budget: coreBudget6.value,
-            accountable: coreAccountable6.value
+            accountable: coreAccountable6.value,
+            accomplishment: coreAccomplishment6.value
           }
         },
         support: {
           healthWellness: {
             budget: supportBudget1.value,
-            accountable: supportAccountable1.value
+            accountable: supportAccountable1.value,
+            accomplishment: supportAccomplishment1.value
           },
           dtr: {
             budget: supportBudget2.value,
-            accountable: supportAccountable2.value
+            accountable: supportAccountable2.value,
+            accomplishment: supportAccomplishment2.value
           },
           monitoring: {
             budget: supportBudget3.value,
-            accountable: supportAccountable3.value
+            accountable: supportAccountable3.value,
+            accomplishment: supportAccomplishment3.value
           },
           opcr: {
             budget: supportBudget4.value,
-            accountable: supportAccountable4.value
+            accountable: supportAccountable4.value,
+            accomplishment: supportAccomplishment4.value
           },
           personnelMeetings: {
             budget: supportBudget5.value,
-            accountable: supportAccountable5.value
+            accountable: supportAccountable5.value,
+            accomplishment: supportAccomplishment5.value
           }
         }
       };
@@ -795,28 +980,40 @@ export default {
     return {
       strategicBudget,
       strategicAccountable,
+      strategicAccomplishment,
       coreBudget1,
       coreAccountable1,
+      coreAccomplishment1,
       coreBudget2,
       coreAccountable2,
+      coreAccomplishment2,
       coreBudget3,
       coreAccountable3,
+      coreAccomplishment3,
       coreBudget4,
       coreAccountable4,
+      coreAccomplishment4,
       coreBudget5,
       coreAccountable5,
+      coreAccomplishment5,
       coreBudget6,
       coreAccountable6,
+      coreAccomplishment6,
       supportBudget1,
       supportAccountable1,
+      supportAccomplishment1,
       supportBudget2,
       supportAccountable2,
+      supportAccomplishment2,
       supportBudget3,
       supportAccountable3,
+      supportAccomplishment3,
       supportBudget4,
       supportAccountable4,
+      supportAccomplishment4,
       supportBudget5,
       supportAccountable5,
+      supportAccomplishment5,
       errors,
       validateField,
       showConfirmDialog,
@@ -825,28 +1022,40 @@ export default {
       successDialogOpen,
       strategicBudgetRef,
       strategicAccountableRef,
+      strategicAccomplishmentRef,
       coreBudget1Ref,
       coreAccountable1Ref,
+      coreAccomplishment1Ref,
       coreBudget2Ref,
       coreAccountable2Ref,
+      coreAccomplishment2Ref,
       coreBudget3Ref,
       coreAccountable3Ref,
+      coreAccomplishment3Ref,
       coreBudget4Ref,
       coreAccountable4Ref,
+      coreAccomplishment4Ref,
       coreBudget5Ref,
       coreAccountable5Ref,
+      coreAccomplishment5Ref,
       coreBudget6Ref,
       coreAccountable6Ref,
+      coreAccomplishment6Ref,
       supportBudget1Ref,
       supportAccountable1Ref,
+      supportAccomplishment1Ref,
       supportBudget2Ref,
       supportAccountable2Ref,
+      supportAccomplishment2Ref,
       supportBudget3Ref,
       supportAccountable3Ref,
+      supportAccomplishment3Ref,
       supportBudget4Ref,
       supportAccountable4Ref,
+      supportAccomplishment4Ref,
       supportBudget5Ref,
-      supportAccountable5Ref
+      supportAccountable5Ref,
+      supportAccomplishment5Ref
     };
   }
 }
