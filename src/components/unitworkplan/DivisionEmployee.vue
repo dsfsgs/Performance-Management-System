@@ -3,6 +3,7 @@
   <div>
     <div class="row items-center justify-between">
       <div class="text-h7">{{ division }} {{ targetPeriod }}</div>
+      <!-- <div class="text-h7">{{ targetPeriod }}</div> -->
       <!-- <div class="text-caption text-grey-8">Target Period: {{ targetPeriod }}</div> -->
       <q-btn flat icon="arrow_back" label="Back" color="grey-8" class="q-ml-auto" @click="$emit('back')" />
     </div>
@@ -15,6 +16,7 @@
             <q-icon name="search" />
           </template>
         </q-input>
+
       </div>
 
       <div class="row q-gutter-sm">
@@ -156,21 +158,24 @@ export default {
     }
   },
   methods: {
-
     async fetchEmployees() {
       this.loading = true;
       try {
-        const store = useUnitWorkPlanStore();
-        await store.fetchEmployeesByDivision(this.division, this.targetPeriod);
+        // Split targetPeriod into period and year
+        const [period, year] = this.targetPeriod.split(/(?=\d{4}$)/);
 
-        // Map the API response to our expected format
-        this.employees = store.employeesWithWorkPlans.map(emp => ({
-          id: emp.id,
+        const response = await api.get('/division/employee/performance', {
+          params: {
+            division: this.division,
+            target_period: period.trim(),
+            year: parseInt(year.trim()) // Convert year to integer
+          }
+        });
+
+        this.employees = response.data.map(emp => ({
+          id: emp.employee_id,
           name: emp.employee_name,
           position: emp.position,
-          category: emp.category,
-          mfo: emp.mfo,
-          output: emp.output,
           rank: emp.rank,
           status: emp.status || 'Pending',
           performanceStandards: emp.performance_standards || []
@@ -186,6 +191,7 @@ export default {
         this.loading = false;
       }
     },
+
 
     viewEmployee(employee) {
       this.selectedEmployee = { ...employee };

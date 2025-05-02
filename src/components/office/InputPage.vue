@@ -2,13 +2,12 @@
   <q-card style="width: 90vw; max-width: 1200px; border-radius: 12px;">
     <q-card-section class="header-section row items-center justify-between"
       style="background-color: #00703C; height: 50px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-      <div class="text-h6 text-white q-pl-md">Office of the City Mayor</div>
-      <!-- Exit button removed -->
+      <div class="text-h6 text-white q-pl-md">Office Performance Commitment and Review (OPCR)</div>
     </q-card-section>
 
     <q-card-section style="overflow-y: auto; max-height: 70vh; padding: 16px;">
       <!-- 1. STRATEGIC FUNCTION Table -->
-      <div class="section-container q-mb-lg">
+      <div class="section-container q-mb-lg" v-if="strategicFunctions.length > 0">
         <div class="section-title q-mb-sm">A. STRATEGIC FUNCTION</div>
         <div class="competency-table">
           <table class="full-width">
@@ -27,52 +26,59 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="(item, index) in strategicFunctions" :key="'strategic-' + index">
                 <td class="text-center">
-                  Enhanced Competency of Workforce
-                </td>
-
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
+                  {{ item.mfo || 'Strategic Function ' + (index + 1) }}
                 </td>
                 <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  M&E (S)<br>
-                  PM (S)
+                  <span v-if="item.core_competency">
+                    <div v-for="(level, competency) in item.core_competency" :key="'core-' + competency">
+                      {{ getCompetencyCode('core', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
                 </td>
                 <td class="text-center">
-                  BCIWR (S)
+                  <span v-if="item.technical_competency">
+                    <div v-for="(level, competency) in item.technical_competency" :key="'tech-' + competency">
+                      {{ getCompetencyCode('technical', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
                 </td>
-
                 <td class="text-center">
-                  <q-input dense outlined v-model="strategicBudget" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.strategicBudget }"
-                    :error="errors.strategicBudget" error-message="Field is required" lazy-rules
-                    @blur="validateField('strategicBudget')" ref="strategicBudgetRef">
+                  <span v-if="item.leadership_competency">
+                    <div v-for="(level, competency) in item.leadership_competency" :key="'leader-' + competency">
+                      {{ getCompetencyCode('leadership', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <q-input dense outlined v-model="strategicBudget[index]" placeholder="Enter budget"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`strategicBudget${index}`] }"
+                    :error="errors[`strategicBudget${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`strategicBudget${index}`)" :ref="`strategicBudgetRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="attach_money" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="strategicAccountable" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.strategicAccountable }"
-                    :error="errors.strategicAccountable" error-message="Field is required" lazy-rules
-                    @blur="validateField('strategicAccountable')" ref="strategicAccountableRef">
+                  <q-input dense outlined v-model="strategicAccountable[index]" placeholder="Enter division/individual"
+                    class="full-width modern-input"
+                    :class="{ 'shake-animation': errors[`strategicAccountable${index}`] }"
+                    :error="errors[`strategicAccountable${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`strategicAccountable${index}`)" :ref="`strategicAccountableRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="people" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="strategicAccomplishment" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.strategicAccomplishment }"
-                    :error="errors.strategicAccomplishment" error-message="Field is required" lazy-rules
-                    @blur="validateField('strategicAccomplishment')" ref="strategicAccomplishmentRef">
+                  <q-input dense outlined v-model="strategicAccomplishment[index]"
+                    placeholder="Enter actual accomplishment" class="full-width modern-input"
+                    :class="{ 'shake-animation': errors[`strategicAccomplishment${index}`] }"
+                    :error="errors[`strategicAccomplishment${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`strategicAccomplishment${index}`)"
+                    :ref="`strategicAccomplishmentRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="description" />
                     </template>
@@ -85,7 +91,7 @@
       </div>
 
       <!-- 2. CORE FUNCTION Table -->
-      <div class="section-container q-mb-lg">
+      <div class="section-container q-mb-lg" v-if="coreFunctions.length > 0">
         <div class="section-title q-mb-sm">B. CORE FUNCTION</div>
         <div class="competency-table">
           <table class="full-width">
@@ -104,310 +110,56 @@
               </tr>
             </thead>
             <tbody>
-              <!-- MFO 1 -->
-              <tr>
+              <tr v-for="(item, index) in coreFunctions" :key="'core-' + index">
                 <td class="text-center">
-                  MFO 1: Recruitment, Selection and Placement
+                  {{ item.mfo || 'Core Function ' + (index + 1) }}
                 </td>
                 <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
+                  <span v-if="item.core_competency">
+                    <div v-for="(level, competency) in item.core_competency" :key="'core-' + competency">
+                      {{ getCompetencyCode('core', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
                 </td>
                 <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  PM (S)<br>
-                  RM (S)
+                  <span v-if="item.technical_competency">
+                    <div v-for="(level, competency) in item.technical_competency" :key="'tech-' + competency">
+                      {{ getCompetencyCode('technical', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
                 </td>
                 <td class="text-center">
-                  <!-- Empty for this MFO -->
+                  <span v-if="item.leadership_competency">
+                    <div v-for="(level, competency) in item.leadership_competency" :key="'leader-' + competency">
+                      {{ getCompetencyCode('leadership', competency) }} ({{ getProficiencyLevel(level) }})
+                    </div>
+                  </span>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget1" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget1 }"
-                    :error="errors.coreBudget1" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget1')" ref="coreBudget1Ref">
+                  <q-input dense outlined v-model="coreBudget[index]" placeholder="Enter budget"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`coreBudget${index}`] }"
+                    :error="errors[`coreBudget${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`coreBudget${index}`)" :ref="`coreBudgetRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="attach_money" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable1" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable1 }"
-                    :error="errors.coreAccountable1" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable1')" ref="coreAccountable1Ref">
+                  <q-input dense outlined v-model="coreAccountable[index]" placeholder="Enter division/individual"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`coreAccountable${index}`] }"
+                    :error="errors[`coreAccountable${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`coreAccountable${index}`)" :ref="`coreAccountableRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="people" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment1" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment1 }"
-                    :error="errors.coreAccomplishment1" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment1')" ref="coreAccomplishment1Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- MFO 2 -->
-              <tr>
-                <td class="text-center">
-                  MFO 2: Performance Management
-                </td>
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
-                </td>
-                <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  M&E (S)
-                </td>
-                <td class="text-center">
-                  MPCR (S)
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget2" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget2 }"
-                    :error="errors.coreBudget2" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget2')" ref="coreBudget2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable2" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable2 }"
-                    :error="errors.coreAccountable2" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable2')" ref="coreAccountable2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment2" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment2 }"
-                    :error="errors.coreAccomplishment2" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment2')" ref="coreAccomplishment2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- MFO 3 -->
-              <tr>
-                <td class="text-center">
-                  MFO 3: Employees Compensation and Benefits
-                </td>
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
-                </td>
-                <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  PM (S)<br>
-                  RM (S)
-                </td>
-                <td class="text-center">
-                  <!-- Empty for this MFO -->
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget3" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget3 }"
-                    :error="errors.coreBudget3" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget3')" ref="coreBudget3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable3" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable3 }"
-                    :error="errors.coreAccountable3" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable3')" ref="coreAccountable3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment3" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment3 }"
-                    :error="errors.coreAccomplishment3" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment3')" ref="coreAccomplishment3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- MFO 4 -->
-              <tr>
-                <td class="text-center">
-                  MFO 4: Administrative Support Services
-                </td>
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
-                </td>
-                <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  PM (S)<br>
-                  M&E (S)
-                </td>
-                <td class="text-center">
-                  PSDM (S)
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget4" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget4 }"
-                    :error="errors.coreBudget4" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget4')" ref="coreBudget4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable4" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable4 }"
-                    :error="errors.coreAccountable4" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable4')" ref="coreAccountable4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment4" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment4 }"
-                    :error="errors.coreAccomplishment4" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment4')" ref="coreAccomplishment4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- MFO 5 -->
-              <tr>
-                <td class="text-center">
-                  MFO 5: Learning and Development
-                </td>
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
-                </td>
-                <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  M&E (S)
-                </td>
-                <td class="text-center">
-                  TSC (S)<br>
-                  MPCR (S)
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget5" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget5 }"
-                    :error="errors.coreBudget5" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget5')" ref="coreBudget5Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable5" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable5 }"
-                    :error="errors.coreAccountable5" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable5')" ref="coreAccountable5Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment5" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment5 }"
-                    :error="errors.coreAccomplishment5" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment5')" ref="coreAccomplishment5Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- MFO 6 -->
-              <tr>
-                <td class="text-center">
-                  MFO 6: Rewards and Recognition
-                </td>
-                <td class="text-center">
-                  DSE (S)<br>
-                  EI (S)<br>
-                  IS (S)
-                </td>
-                <td class="text-center">
-                  P&O (S)<br>
-                  P&N (S)<br>
-                  AD (S)<br>
-                  M&E (S)<br>
-                  RM (S)
-                </td>
-                <td class="text-center">
-                  <!-- Empty for this MFO -->
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreBudget6" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreBudget6 }"
-                    :error="errors.coreBudget6" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreBudget6')" ref="coreBudget6Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccountable6" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccountable6 }"
-                    :error="errors.coreAccountable6" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccountable6')" ref="coreAccountable6Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="coreAccomplishment6" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.coreAccomplishment6 }"
-                    :error="errors.coreAccomplishment6" error-message="Field is required" lazy-rules
-                    @blur="validateField('coreAccomplishment6')" ref="coreAccomplishment6Ref">
+                  <q-input dense outlined v-model="coreAccomplishment[index]" placeholder="Enter actual accomplishment"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`coreAccomplishment${index}`] }"
+                    :error="errors[`coreAccomplishment${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`coreAccomplishment${index}`)" :ref="`coreAccomplishmentRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="description" />
                     </template>
@@ -420,7 +172,7 @@
       </div>
 
       <!-- 3. SUPPORT FUNCTION Table -->
-      <div class="section-container q-mb-lg">
+      <div class="section-container q-mb-lg" v-if="supportFunctions.length > 0">
         <div class="section-title q-mb-sm">C. SUPPORT FUNCTION</div>
         <div class="competency-table">
           <table class="full-width">
@@ -434,199 +186,39 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Health and Wellness -->
-              <tr>
+              <tr v-for="(item, index) in supportFunctions" :key="'support-' + index">
                 <td class="text-center">
-                  Health and Wellness
+                  {{ item.output || 'Support Function ' + (index + 1) }}
                 </td>
                 <td class="text-center">
                   Not Applicable
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="supportBudget1" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget1 }"
-                    :error="errors.supportBudget1" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportBudget1')" ref="supportBudget1Ref">
+                  <q-input dense outlined v-model="supportBudget[index]" placeholder="Enter budget"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`supportBudget${index}`] }"
+                    :error="errors[`supportBudget${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`supportBudget${index}`)" :ref="`supportBudgetRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="attach_money" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="supportAccountable1" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable1 }"
-                    :error="errors.supportAccountable1" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccountable1')" ref="supportAccountable1Ref">
+                  <q-input dense outlined v-model="supportAccountable[index]" placeholder="Enter division/individual"
+                    class="full-width modern-input" :class="{ 'shake-animation': errors[`supportAccountable${index}`] }"
+                    :error="errors[`supportAccountable${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`supportAccountable${index}`)" :ref="`supportAccountableRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="people" />
                     </template>
                   </q-input>
                 </td>
                 <td class="text-center">
-                  <q-input dense outlined v-model="supportAccomplishment1" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment1 }"
-                    :error="errors.supportAccomplishment1" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccomplishment1')" ref="supportAccomplishment1Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- Daily Time Record -->
-              <tr>
-                <td class="text-center">
-                  Daily Time Record (DTR)
-                </td>
-                <td class="text-center">
-                  Not Applicable
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportBudget2" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget2 }"
-                    :error="errors.supportBudget2" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportBudget2')" ref="supportBudget2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccountable2" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable2 }"
-                    :error="errors.supportAccountable2" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccountable2')" ref="supportAccountable2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccomplishment2" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment2 }"
-                    :error="errors.supportAccomplishment2" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccomplishment2')" ref="supportAccomplishment2Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- Monitoring and Coaching -->
-              <tr>
-                <td class="text-center">
-                  Monitoring and Coaching
-                </td>
-                <td class="text-center">
-                  Not Applicable
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportBudget3" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget3 }"
-                    :error="errors.supportBudget3" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportBudget3')" ref="supportBudget3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccountable3" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable3 }"
-                    :error="errors.supportAccountable3" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccountable3')" ref="supportAccountable3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccomplishment3" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment3 }"
-                    :error="errors.supportAccomplishment3" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccomplishment3')" ref="supportAccomplishment3Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- OPCR -->
-              <tr>
-                <td class="text-center">
-                  Office Performance Commitment & Review (OPCR)
-                </td>
-                <td class="text-center">
-                  Not Applicable
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportBudget4" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget4 }"
-                    :error="errors.supportBudget4" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportBudget4')" ref="supportBudget4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccountable4" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable4 }"
-                    :error="errors.supportAccountable4" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccountable4')" ref="supportAccountable4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccomplishment4" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment4 }"
-                    :error="errors.supportAccomplishment4" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccomplishment4')" ref="supportAccomplishment4Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="description" />
-                    </template>
-                  </q-input>
-                </td>
-              </tr>
-
-              <!-- Personnel Mechanism Meetings -->
-              <tr>
-                <td class="text-center">
-                  Personnel Mechanism Meetings
-                </td>
-                <td class="text-center">
-                  Not Applicable
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportBudget5" placeholder="Enter budget"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportBudget5 }"
-                    :error="errors.supportBudget5" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportBudget5')" ref="supportBudget5Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="attach_money" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccountable5" placeholder="Enter division/individual"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccountable5 }"
-                    :error="errors.supportAccountable5" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccountable5')" ref="supportAccountable5Ref">
-                    <template v-slot:prepend>
-                      <q-icon name="people" />
-                    </template>
-                  </q-input>
-                </td>
-                <td class="text-center">
-                  <q-input dense outlined v-model="supportAccomplishment5" placeholder="Enter actual accomplishment"
-                    class="full-width modern-input" :class="{ 'shake-animation': errors.supportAccomplishment5 }"
-                    :error="errors.supportAccomplishment5" error-message="Field is required" lazy-rules
-                    @blur="validateField('supportAccomplishment5')" ref="supportAccomplishment5Ref">
+                  <q-input dense outlined v-model="supportAccomplishment[index]"
+                    placeholder="Enter actual accomplishment" class="full-width modern-input"
+                    :class="{ 'shake-animation': errors[`supportAccomplishment${index}`] }"
+                    :error="errors[`supportAccomplishment${index}`]" error-message="Field is required" lazy-rules
+                    @blur="validateField(`supportAccomplishment${index}`)" :ref="`supportAccomplishmentRef${index}`">
                     <template v-slot:prepend>
                       <q-icon name="description" />
                     </template>
@@ -685,185 +277,154 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
+import { useOpcrStore } from 'src/stores/office/opcrStore';
+import { useUserStore } from 'src/stores/userStore';
 
 export default {
   emits: ['save', 'close', 'error'],
-  setup(props, { emit }) {
+  setup({ emit }) {
     const $q = useQuasar();
+    const opcrStore = useOpcrStore();
+    const userStore = useUserStore();
 
-    // Strategic Function
-    const strategicBudget = ref('P 19,101,441.00 (Personal Services)');
-    const strategicAccountable = ref('ARPMID');
-    const strategicAccomplishment = ref('36 provision of total workforce were given intervention without lapses as per schedule');
+    // Dynamic data for functions
+    const strategicFunctions = ref([]);
+    const coreFunctions = ref([]);
+    const supportFunctions = ref([]);
+    const refs = ref({});
 
-    // Core Functions
-    const coreBudget1 = ref('P 19,101,441.00 (Personal Services)');
-    const coreAccountable1 = ref('ARPMID');
-    const coreAccomplishment1 = ref('9,712 Recruitment, Selection and Selection related documents/activities approved and signed with lapses within the schedule');
+    // Initialize form data arrays
+    const strategicBudget = ref([]);
+    const strategicAccountable = ref([]);
+    const strategicAccomplishment = ref([]);
 
-    const coreBudget2 = ref('P 19,101,441.00 (Personal Services)');
-    const coreAccountable2 = ref('ARPMID');
-    const coreAccomplishment2 = ref('1,482 Performance Management related documents/activities monitored without lapses before the schedule');
+    const coreBudget = ref([]);
+    const coreAccountable = ref([]);
+    const coreAccomplishment = ref([]);
 
-    const coreBudget3 = ref('P 19,101,441.00 (Personal Services)');
-    const coreAccountable3 = ref('BHRD, ARPMID');
-    const coreAccomplishment3 = ref('1,239 Employees Compensation and Benefits related documents/activities signed and approved with lapses within the schedule');
+    const supportBudget = ref([]);
+    const supportAccountable = ref([]);
+    const supportAccomplishment = ref([]);
 
-    const coreBudget4 = ref('P 19,101,441.00 (Personal Services)');
-    const coreAccountable4 = ref('ARPMID, ASD, BHRD');
-    const coreAccomplishment4 = ref(''); // Add appropriate value
+    // Load office head functions
+    onMounted(async () => {
+      try {
+        const functions = await opcrStore.fetchOfficeHeadFunctions(userStore.user.office_id);
 
-    const coreBudget5 = ref('P 19,101,441.00 (Personal Services)<br>P 565,000.00 (Personal Enhancement Program)<br>P 1,000,000.00 (Burial and/or Financial Assistance to Employees)<br>P 900,000.00 (Holistic Health and Wellness Program)<br>P 999,500.00 (PCSA Celebration and Sports Activities)');
-    const coreAccountable5 = ref('BHRD');
-    const coreAccomplishment5 = ref(''); // Add appropriate value
+        // Process strategic function
+        if (functions.strategic_function && functions.strategic_function.items) {
+          strategicFunctions.value = functions.strategic_function.items;
+          strategicBudget.value = Array(strategicFunctions.value.length).fill('');
+          strategicAccountable.value = Array(strategicFunctions.value.length).fill('');
+          strategicAccomplishment.value = Array(strategicFunctions.value.length).fill('');
+        }
 
-    const coreBudget6 = ref('P 270,000.00 (Operationalization of PRAISE Committee)');
-    const coreAccountable6 = ref('BHRD');
-    const coreAccomplishment6 = ref(''); // Add appropriate value
+        // Process core function (array of categories)
+        if (functions.core_function && functions.core_function.length > 0) {
+          // Flatten all core function items into one array
+          coreFunctions.value = functions.core_function.flatMap(category => category.items);
+          coreBudget.value = Array(coreFunctions.value.length).fill('');
+          coreAccountable.value = Array(coreFunctions.value.length).fill('');
+          coreAccomplishment.value = Array(coreFunctions.value.length).fill('');
+        }
 
-    // Support Functions
-    const supportBudget1 = ref('P 19,750,511.00 (Personal Services)');
-    const supportAccountable1 = ref('ASD, ARPMID, BHRDD');
-    const supportAccomplishment1 = ref('24 hours required Health & Wellness activities attended without lapses before scheduled time');
+        // Process support function
+        if (functions.support_function && functions.support_function.items) {
+          supportFunctions.value = functions.support_function.items;
+          supportBudget.value = Array(supportFunctions.value.length).fill('');
+          supportAccountable.value = Array(supportFunctions.value.length).fill('');
+          supportAccomplishment.value = Array(supportFunctions.value.length).fill('');
+        }
 
-    const supportBudget2 = ref('P 19,750,511.00 (Personal Services)');
-    const supportAccountable2 = ref('ASD, ARPMID, BHRDD');
-    const supportAccomplishment2 = ref('240 DTRs reviewed without lapses within the 2nd working day of the succeeding month');
+      } catch (error) {
+        $q.notify({
+          type: 'negative',
+          message: 'Failed to load office head functions',
+          position: 'top'
+        });
+        console.error('Error loading functions:', error);
+      }
+    });
 
-    const supportBudget3 = ref('P 19,750,511.00 (Personal Services)');
-    const supportAccountable3 = ref('ASD, ARPMID, BHRDD');
-    const supportAccomplishment3 = ref('12 Monitoring/ Coaching Journal evaluated and approved without lapses within schedule');
+    // Helper functions
+    const getCompetencyCode = (type, competency) => {
+      return opcrStore.codeMappings[type][competency] || competency.substring(0, 3).toUpperCase();
+    };
 
-    const supportBudget4 = ref('P 19,750,511.00 (Personal Services)');
-    const supportAccountable4 = ref('ASD,ARPMID,BHRDD');
-    const supportAccomplishment4 = ref('1 OPCR Accomplishment and 1 OPCR Target reviewed and submitted with 1 revision beyond deadline');
-
-    const supportBudget5 = ref('P50,000.00 (Program for Personnel Mechanisms)');
-    const supportAccountable5 = ref('CHRMO');
-    const supportAccomplishment5 = ref('10 Personnel Mechanism meetings administered without lapses as scheduled');
+    const getProficiencyLevel = (level) => {
+      const levels = {
+        1: 'B',
+        2: 'I',
+        3: 'A',
+        4: 'S'
+      };
+      return levels[level] || 'N/A';
+    };
 
     // Dialog controls
     const confirmDialogOpen = ref(false);
     const successDialogOpen = ref(false);
 
-    const errors = ref({
-      strategicBudget: false,
-      strategicAccountable: false,
-      strategicAccomplishment: false,
-      coreBudget1: false,
-      coreAccountable1: false,
-      coreAccomplishment1: false,
-      coreBudget2: false,
-      coreAccountable2: false,
-      coreAccomplishment2: false,
-      coreBudget3: false,
-      coreAccountable3: false,
-      coreAccomplishment3: false,
-      coreBudget4: false,
-      coreAccountable4: false,
-      coreAccomplishment4: false,
-      coreBudget5: false,
-      coreAccountable5: false,
-      coreAccomplishment5: false,
-      coreBudget6: false,
-      coreAccountable6: false,
-      coreAccomplishment6: false,
-      supportBudget1: false,
-      supportAccountable1: false,
-      supportAccomplishment1: false,
-      supportBudget2: false,
-      supportAccountable2: false,
-      supportAccomplishment2: false,
-      supportBudget3: false,
-      supportAccountable3: false,
-      supportAccomplishment3: false,
-      supportBudget4: false,
-      supportAccountable4: false,
-      supportAccomplishment4: false,
-      supportBudget5: false,
-      supportAccountable5: false,
-      supportAccomplishment5: false
-    });
-
+    // Error handling
+    const errors = ref({});
     const firstInvalidFieldFocused = ref(false);
-    const strategicBudgetRef = ref(null);
-    const strategicAccountableRef = ref(null);
-    const strategicAccomplishmentRef = ref(null);
-    const coreBudget1Ref = ref(null);
-    const coreAccountable1Ref = ref(null);
-    const coreAccomplishment1Ref = ref(null);
-    const coreBudget2Ref = ref(null);
-    const coreAccountable2Ref = ref(null);
-    const coreAccomplishment2Ref = ref(null);
-    const coreBudget3Ref = ref(null);
-    const coreAccountable3Ref = ref(null);
-    const coreAccomplishment3Ref = ref(null);
-    const coreBudget4Ref = ref(null);
-    const coreAccountable4Ref = ref(null);
-    const coreAccomplishment4Ref = ref(null);
-    const coreBudget5Ref = ref(null);
-    const coreAccountable5Ref = ref(null);
-    const coreAccomplishment5Ref = ref(null);
-    const coreBudget6Ref = ref(null);
-    const coreAccountable6Ref = ref(null);
-    const coreAccomplishment6Ref = ref(null);
-    const supportBudget1Ref = ref(null);
-    const supportAccountable1Ref = ref(null);
-    const supportAccomplishment1Ref = ref(null);
-    const supportBudget2Ref = ref(null);
-    const supportAccountable2Ref = ref(null);
-    const supportAccomplishment2Ref = ref(null);
-    const supportBudget3Ref = ref(null);
-    const supportAccountable3Ref = ref(null);
-    const supportAccomplishment3Ref = ref(null);
-    const supportBudget4Ref = ref(null);
-    const supportAccountable4Ref = ref(null);
-    const supportAccomplishment4Ref = ref(null);
-    const supportBudget5Ref = ref(null);
-    const supportAccountable5Ref = ref(null);
-    const supportAccomplishment5Ref = ref(null);
 
     const validateField = (fieldName) => {
-      const isValid = !!eval(fieldName + '.value');
+      // Extract the index from the field name (e.g., "strategicBudget0" -> index 0)
+      const index = parseInt(fieldName.match(/\d+/)?.[0] || 0);
+
+      let isValid = false;
+
+      if (fieldName.startsWith('strategicBudget')) {
+        isValid = !!strategicBudget.value[index];
+      } else if (fieldName.startsWith('strategicAccountable')) {
+        isValid = !!strategicAccountable.value[index];
+      } else if (fieldName.startsWith('strategicAccomplishment')) {
+        isValid = !!strategicAccomplishment.value[index];
+      } else if (fieldName.startsWith('coreBudget')) {
+        isValid = !!coreBudget.value[index];
+      } else if (fieldName.startsWith('coreAccountable')) {
+        isValid = !!coreAccountable.value[index];
+      } else if (fieldName.startsWith('coreAccomplishment')) {
+        isValid = !!coreAccomplishment.value[index];
+      } else if (fieldName.startsWith('supportBudget')) {
+        isValid = !!supportBudget.value[index];
+      } else if (fieldName.startsWith('supportAccountable')) {
+        isValid = !!supportAccountable.value[index];
+      } else if (fieldName.startsWith('supportAccomplishment')) {
+        isValid = !!supportAccomplishment.value[index];
+      }
+
       errors.value[fieldName] = !isValid;
       return isValid;
     };
 
     const validateForm = () => {
-      const requiredFields = [
-        'strategicBudget', 'strategicAccountable', 'strategicAccomplishment',
-        'coreBudget1', 'coreAccountable1', 'coreAccomplishment1',
-        'coreBudget2', 'coreAccountable2', 'coreAccomplishment2',
-        'coreBudget3', 'coreAccountable3', 'coreAccomplishment3',
-        'coreBudget4', 'coreAccountable4', 'coreAccomplishment4',
-        'coreBudget5', 'coreAccountable5', 'coreAccomplishment5',
-        'coreBudget6', 'coreAccountable6', 'coreAccomplishment6',
-        'supportBudget1', 'supportAccountable1', 'supportAccomplishment1',
-        'supportBudget2', 'supportAccountable2', 'supportAccomplishment2',
-        'supportBudget3', 'supportAccountable3', 'supportAccomplishment3',
-        'supportBudget4', 'supportAccountable4', 'supportAccomplishment4',
-        'supportBudget5', 'supportAccountable5', 'supportAccomplishment5'
-      ];
-
       let isValid = true;
-      let firstInvalidField = null;
+      firstInvalidFieldFocused.value = false;
 
-      requiredFields.forEach(field => {
-        const fieldValid = validateField(field);
-        if (!fieldValid) {
-          isValid = false;
-          if (!firstInvalidField) {
-            firstInvalidField = eval(field + 'Ref.value');
-          }
-        }
+      // Validate strategic functions
+      strategicFunctions.value.forEach((_, index) => {
+        if (!validateField(`strategicBudget${index}`)) isValid = false;
+        if (!validateField(`strategicAccountable${index}`)) isValid = false;
+        if (!validateField(`strategicAccomplishment${index}`)) isValid = false;
       });
 
-      if (firstInvalidField) {
-        firstInvalidField.$el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        firstInvalidField.focus();
-      }
+      // Validate core functions
+      coreFunctions.value.forEach((_, index) => {
+        if (!validateField(`coreBudget${index}`)) isValid = false;
+        if (!validateField(`coreAccountable${index}`)) isValid = false;
+        if (!validateField(`coreAccomplishment${index}`)) isValid = false;
+      });
+
+      // Validate support functions
+      supportFunctions.value.forEach((_, index) => {
+        if (!validateField(`supportBudget${index}`)) isValid = false;
+        if (!validateField(`supportAccountable${index}`)) isValid = false;
+        if (!validateField(`supportAccomplishment${index}`)) isValid = false;
+      });
 
       return isValid;
     };
@@ -871,9 +432,13 @@ export default {
     const shakeAllInvalidFields = () => {
       Object.keys(errors.value).forEach(field => {
         if (errors.value[field]) {
-          eval(field + 'Ref.value').$el.classList.remove('shake-animation');
-          void eval(field + 'Ref.value').$el.offsetWidth;
-          eval(field + 'Ref.value').$el.classList.add('shake-animation');
+          const refName = `${field}Ref`;
+          const ref = refs[refName]?.[0];
+          if (ref) {
+            ref.$el.classList.remove('shake-animation');
+            void ref.$el.offsetWidth;
+            ref.$el.classList.add('shake-animation');
+          }
         }
       });
     };
@@ -887,175 +452,79 @@ export default {
         return;
       }
 
-      // Show confirmation dialog
       confirmDialogOpen.value = true;
     };
 
-    const validateAndSave = () => {
-      // Close confirmation dialog
+    const validateAndSave = async () => {
       confirmDialogOpen.value = false;
 
       const opcrData = {
-        strategic: {
-          budget: strategicBudget.value,
-          accountable: strategicAccountable.value,
-          accomplishment: strategicAccomplishment.value
-        },
-        core: {
-          mfo1: {
-            budget: coreBudget1.value,
-            accountable: coreAccountable1.value,
-            accomplishment: coreAccomplishment1.value
-          },
-          mfo2: {
-            budget: coreBudget2.value,
-            accountable: coreAccountable2.value,
-            accomplishment: coreAccomplishment2.value
-          },
-          mfo3: {
-            budget: coreBudget3.value,
-            accountable: coreAccountable3.value,
-            accomplishment: coreAccomplishment3.value
-          },
-          mfo4: {
-            budget: coreBudget4.value,
-            accountable: coreAccountable4.value,
-            accomplishment: coreAccomplishment4.value
-          },
-          mfo5: {
-            budget: coreBudget5.value,
-            accountable: coreAccountable5.value,
-            accomplishment: coreAccomplishment5.value
-          },
-          mfo6: {
-            budget: coreBudget6.value,
-            accountable: coreAccountable6.value,
-            accomplishment: coreAccomplishment6.value
-          }
-        },
-        support: {
-          healthWellness: {
-            budget: supportBudget1.value,
-            accountable: supportAccountable1.value,
-            accomplishment: supportAccomplishment1.value
-          },
-          dtr: {
-            budget: supportBudget2.value,
-            accountable: supportAccountable2.value,
-            accomplishment: supportAccomplishment2.value
-          },
-          monitoring: {
-            budget: supportBudget3.value,
-            accountable: supportAccountable3.value,
-            accomplishment: supportAccomplishment3.value
-          },
-          opcr: {
-            budget: supportBudget4.value,
-            accountable: supportAccountable4.value,
-            accomplishment: supportAccomplishment4.value
-          },
-          personnelMeetings: {
-            budget: supportBudget5.value,
-            accountable: supportAccountable5.value,
-            accomplishment: supportAccomplishment5.value
-          }
-        }
+        strategic: strategicFunctions.value.map((item, index) => ({
+          function: item.mfo || `Strategic Function ${index + 1}`,
+          budget: strategicBudget.value[index],
+          accountable: strategicAccountable.value[index],
+          accomplishment: strategicAccomplishment.value[index]
+        })),
+        core: coreFunctions.value.map((item, index) => ({
+          function: item.mfo || `Core Function ${index + 1}`,
+          budget: coreBudget.value[index],
+          accountable: coreAccountable.value[index],
+          accomplishment: coreAccomplishment.value[index]
+        })),
+        support: supportFunctions.value.map((item, index) => ({
+          function: item.output || `Support Function ${index + 1}`,
+          budget: supportBudget.value[index],
+          accountable: supportAccountable.value[index],
+          accomplishment: supportAccomplishment.value[index]
+        }))
       };
 
-      // Show success dialog
-      successDialogOpen.value = true;
+      try {
+        // Show success dialog
+        successDialogOpen.value = true;
 
-      // Also show success notification
-      $q.notify({
-        type: 'positive',
-        message: 'OPCR saved successfully!',
-        position: 'top',
-        timeout: 2500,
-        actions: [{ icon: 'close', color: 'white' }]
-      });
+        // Also show success notification
+        $q.notify({
+          type: 'positive',
+          message: 'OPCR saved successfully!',
+          position: 'top',
+          timeout: 2500,
+          actions: [{ icon: 'close', color: 'white' }]
+        });
 
-      emit('save', opcrData);
+        emit('save', opcrData);
+      // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+        $q.notify({
+          type: 'negative',
+          message: 'Failed to save OPCR',
+          position: 'top'
+        });
+      }
     };
 
     return {
+      strategicFunctions,
+      coreFunctions,
+      supportFunctions,
       strategicBudget,
       strategicAccountable,
       strategicAccomplishment,
-      coreBudget1,
-      coreAccountable1,
-      coreAccomplishment1,
-      coreBudget2,
-      coreAccountable2,
-      coreAccomplishment2,
-      coreBudget3,
-      coreAccountable3,
-      coreAccomplishment3,
-      coreBudget4,
-      coreAccountable4,
-      coreAccomplishment4,
-      coreBudget5,
-      coreAccountable5,
-      coreAccomplishment5,
-      coreBudget6,
-      coreAccountable6,
-      coreAccomplishment6,
-      supportBudget1,
-      supportAccountable1,
-      supportAccomplishment1,
-      supportBudget2,
-      supportAccountable2,
-      supportAccomplishment2,
-      supportBudget3,
-      supportAccountable3,
-      supportAccomplishment3,
-      supportBudget4,
-      supportAccountable4,
-      supportAccomplishment4,
-      supportBudget5,
-      supportAccountable5,
-      supportAccomplishment5,
+      coreBudget,
+      coreAccountable,
+      coreAccomplishment,
+      supportBudget,
+      supportAccountable,
+      supportAccomplishment,
       errors,
       validateField,
       showConfirmDialog,
       validateAndSave,
       confirmDialogOpen,
       successDialogOpen,
-      strategicBudgetRef,
-      strategicAccountableRef,
-      strategicAccomplishmentRef,
-      coreBudget1Ref,
-      coreAccountable1Ref,
-      coreAccomplishment1Ref,
-      coreBudget2Ref,
-      coreAccountable2Ref,
-      coreAccomplishment2Ref,
-      coreBudget3Ref,
-      coreAccountable3Ref,
-      coreAccomplishment3Ref,
-      coreBudget4Ref,
-      coreAccountable4Ref,
-      coreAccomplishment4Ref,
-      coreBudget5Ref,
-      coreAccountable5Ref,
-      coreAccomplishment5Ref,
-      coreBudget6Ref,
-      coreAccountable6Ref,
-      coreAccomplishment6Ref,
-      supportBudget1Ref,
-      supportAccountable1Ref,
-      supportAccomplishment1Ref,
-      supportBudget2Ref,
-      supportAccountable2Ref,
-      supportAccomplishment2Ref,
-      supportBudget3Ref,
-      supportAccountable3Ref,
-      supportAccomplishment3Ref,
-      supportBudget4Ref,
-      supportAccountable4Ref,
-      supportAccomplishment4Ref,
-      supportBudget5Ref,
-      supportAccountable5Ref,
-      supportAccomplishment5Ref
+      getCompetencyCode,
+      getProficiencyLevel,
+      refs
     };
   }
 }

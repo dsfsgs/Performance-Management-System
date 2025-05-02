@@ -66,85 +66,224 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
       }).join('<br>');
     },
 
-    async fetchDivisionsWithWorkPlans(targetPeriod = null) {
-      this.loading = true;
-      try {
-        const response = await api.get('/division/status');
-        let divisions = response.data.filter(division => division.status);
+    // async fetchDivisionsWithWorkPlans(targetPeriod = null) {
+    //   this.loading = true;
+    //   try {
+    //     const response = await api.get('/division/status');
+    //     let divisions = response.data.filter(division => division.status);
 
-        if (targetPeriod) {
-          const [periodPart, yearPart] = targetPeriod.split(/(?=\d{4}$)/);
-          const period = periodPart.trim();
-          const year = yearPart.trim();
+    //     if (targetPeriod) {
+    //       const [periodPart, yearPart] = targetPeriod.split(/(?=\d{4}$)/);
+    //       const period = periodPart.trim();
+    //       const year = yearPart.trim();
 
-          divisions = divisions.filter(division => {
-            const divPeriod = division.target_period;
-            return divPeriod.includes(period) && divPeriod.includes(year);
-          });
-        }
+    //       divisions = divisions.filter(division => {
+    //         const divPeriod = division.target_period;
+    //         return divPeriod.includes(period) && divPeriod.includes(year);
+    //       });
+    //     }
 
-        this.divisions = divisions;
-        this.error = null;
-        return divisions; // Return divisions for immediate use
-      } catch (err) {
-        this.error = 'Failed to fetch divisions';
-        console.error(err);
-        throw err;
-      } finally {
-        this.loading = false;
+    //     this.divisions = divisions;
+    //     this.error = null;
+    //     return divisions; // Return divisions for immediate use
+    //   } catch (err) {
+    //     this.error = 'Failed to fetch divisions';
+    //     console.error(err);
+    //     throw err;
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
+
+async fetchDivisionsWithWorkPlans(targetPeriod = null) {
+  this.loading = true;
+  try {
+    const response = await api.get('/division/status');
+
+    // Access the nested data array from the response
+    let divisions = response.data.data.filter(division => division.status);
+
+    if (targetPeriod) {
+      const [periodPart, yearPart] = targetPeriod.split(/(?=\d{4}$)/);
+      const period = periodPart.trim();
+      const year = yearPart.trim();
+
+      divisions = divisions.filter(division => {
+        const divPeriod = division.target_period;
+        return divPeriod.includes(period) && divPeriod.includes(year);
+      });
+    }
+
+    this.divisions = divisions;
+    this.error = null;
+    return divisions;
+  } catch (err) {
+    this.error = 'Failed to fetch divisions';
+    console.error(err);
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+async fetchDivisionDetails(division, targetPeriod) {
+  this.loading = true;
+  try {
+    const [period, year] = targetPeriod.split(/(?=\d{4}$)/);
+    const response = await api.get('/division/employee/performance', {
+      params: {
+        division,
+        target_period: period.trim(),
+        year: year.trim()
       }
-    },
+    });
 
-    async fetchDivisionDetails(division, targetPeriod) {
-      this.loading = true;
-      try {
-        const [period, year] = targetPeriod.split(/(?=\d{4}$)/);
-        const response = await api.get('/division/employee/performance', {
-          params: {
-            division,
-            target_period: period.trim(),
-            year: year.trim()
-          }
-        });
+    console.log('API Response:', response.data); // Debug raw data
 
-        const formattedData = {
-          name: division,
-          employees: response.data.map(emp => ({
-            name: emp.employee_name,
-            position: emp.position,
-            rank: emp.rank,
-            outputs: [{
-              name: emp.mfo ? ` ${emp.mfo}<br>${emp.output}` : emp.output,
-              core: this.formatCompetencies(emp.performance_standards?.core_competency, 'core'),
-              technical: this.formatCompetencies(emp.performance_standards?.technical_competency, 'technical'),
-              leadership: this.formatCompetencies(emp.performance_standards?.leadership_competency, 'leadership'),
-              indicator: emp.performance_standards?.success_indicator || '',
-              required: emp.performance_standards?.required_output || '',
-              standard5: this.formatStandard(emp.performance_standards?.standard_outcomes, 5),
-              standard4: this.formatStandard(emp.performance_standards?.standard_outcomes, 4),
-              standard3: this.formatStandard(emp.performance_standards?.standard_outcomes, 3),
-              standard2: this.formatStandard(emp.performance_standards?.standard_outcomes, 2),
-              standard1: this.formatStandard(emp.performance_standards?.standard_outcomes, 1)
-            }]
-          }))
+    const employeesMap = {};
+
+    response.data.forEach(emp => {
+      if (!emp.employee_id) {
+        console.warn('Employee missing ID:', emp);
+        return;
+      }
+
+      if (!employeesMap[emp.employee_id]) {
+        employeesMap[emp.employee_id] = {
+          id: emp.employee_id,
+          name: emp.employee_name || 'Unknown',
+          position: emp.position || 'N/A',
+          rank: emp.rank || 'N/A',
+          outputs: []
         };
-
-        return formattedData;
-      } catch (err) {
-        console.error('Error fetching division details:', err);
-        throw err;
-      } finally {
-        this.loading = false;
       }
-    },
 
-    formatStandard(standards, rating) {
-      if (!standards || !Array.isArray(standards)) return '';
-      const standard = standards.find(s => s.rating === rating.toString());
-      if (!standard) return '';
-      return `Q - ${standard.quantity || ''}<br>E - ${standard.effectiveness || ''}<br>T - ${standard.timeliness || ''}`;
-    },
+      // Handle performance standards array
+      if (emp.performance_standards && emp.performance_standards.length > 0) {
+        emp.performance_standards.forEach(standard => {
+          employeesMap[emp.employee_id].outputs.push({
+            name: standard.mfo ? `${standard.mfo}<br><br>${standard.output}` : standard.output || 'N/A',
+            core: standard.core_competency
+                 ? this.formatCompetencies(standard.core_competency, 'core')
+                 : 'N/A',
+            technical: standard.technical_competency
+                     ? this.formatCompetencies(standard.technical_competency, 'technical')
+                     : 'N/A',
+            leadership: standard.leadership_competency
+                      ? this.formatCompetencies(standard.leadership_competency, 'leadership')
+                      : 'N/A',
+            indicator: standard.success_indicator || 'N/A',
+            required: standard.required_output || 'N/A',
+            standard5: standard.standard_outcomes
+                     ? this.formatStandard(standard.standard_outcomes, 5)
+                     : 'N/A',
+            standard4: standard.standard_outcomes
+                     ? this.formatStandard(standard.standard_outcomes, 4)
+                     : 'N/A',
+            standard3: standard.standard_outcomes
+                     ? this.formatStandard(standard.standard_outcomes, 3)
+                     : 'N/A',
+            standard2: standard.standard_outcomes
+                     ? this.formatStandard(standard.standard_outcomes, 2)
+                     : 'N/A',
+            standard1: standard.standard_outcomes
+                     ? this.formatStandard(standard.standard_outcomes, 1)
+                     : 'N/A'
+          });
+        });
+      } else {
+        console.warn('Missing performance standards for employee:', emp.employee_name);
+        employeesMap[emp.employee_id].outputs.push({
+          name: 'No performance data',
+          core: 'N/A',
+          technical: 'N/A',
+          leadership: 'N/A',
+          indicator: 'N/A',
+          required: 'N/A',
+          standard5: 'N/A',
+          standard4: 'N/A',
+          standard3: 'N/A',
+          standard2: 'N/A',
+          standard1: 'N/A'
+        });
+      }
+    });
 
+    const formattedData = {
+      name: division,
+      employees: Object.values(employeesMap)
+    };
+
+    console.log('Formatted Data:', formattedData); // Debug final structure
+    return formattedData;
+  } catch (err) {
+    console.error('Error fetching division details:', err);
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+    // async fetchDivisionDetails(division, targetPeriod) {
+    //   this.loading = true;
+    //   try {
+    //     const [period, year] = targetPeriod.split(/(?=\d{4}$)/);
+    //     const response = await api.get('/division/employee/performance', {
+    //       params: {
+    //         division,
+    //         target_period: period.trim(),
+    //         year: year.trim()
+    //       }
+    //     });
+
+    //     const formattedData = {
+    //       name: division,
+    //       employees: response.data.map(emp => ({
+    //         name: emp.employee_name,
+    //         position: emp.position,
+    //         rank: emp.rank,
+    //         outputs: [{
+    //           name: emp.mfo ? ` ${emp.mfo}<br>${emp.output}` : emp.output,
+    //           core: this.formatCompetencies(emp.performance_standards?.core_competency, 'core'),
+    //           technical: this.formatCompetencies(emp.performance_standards?.technical_competency, 'technical'),
+    //           leadership: this.formatCompetencies(emp.performance_standards?.leadership_competency, 'leadership'),
+    //           indicator: emp.performance_standards?.success_indicator || '',
+    //           required: emp.performance_standards?.required_output || '',
+    //           standard5: this.formatStandard(emp.performance_standards?.standard_outcomes, 5),
+    //           standard4: this.formatStandard(emp.performance_standards?.standard_outcomes, 4),
+    //           standard3: this.formatStandard(emp.performance_standards?.standard_outcomes, 3),
+    //           standard2: this.formatStandard(emp.performance_standards?.standard_outcomes, 2),
+    //           standard1: this.formatStandard(emp.performance_standards?.standard_outcomes, 1)
+    //         }]
+    //       }))
+    //     };
+
+    //     return formattedData;
+    //   } catch (err) {
+    //     console.error('Error fetching division details:', err);
+    //     throw err;
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
+
+    // formatStandard(standards, rating) {
+    //   if (!standards || !Array.isArray(standards)) return '';
+    //   const standard = standards.find(s => s.rating === rating.toString());
+    //   if (!standard) return '';
+    //   return `Q - ${standard.quantity || ''}<br>E - ${standard.effectiveness || ''}<br>T - ${standard.timeliness || ''}`;
+    // },
+formatStandard(standards, rating) {
+  if (!standards || !Array.isArray(standards)) {
+    console.warn('Invalid standards:', standards);
+    return 'N/A';
+  }
+
+  const standard = standards.find(s => s.rating == rating); // Note: using == instead of === to handle string/number
+  if (!standard) return 'N/A';
+
+  return `Q - ${standard.quantity || 'N/A'}<br>
+          E - ${standard.effectiveness || 'N/A'}<br>
+          T - ${standard.timeliness || 'N/A'}`;
+},
     setSelectedDivision(division) {
       this.selectedDivision = division;
     },
@@ -153,44 +292,133 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
       this.targetPeriod = period;
     },
 
+    // async fetchDivisionsWithStatus() {
+    //   this.loading = true;
+    //   try {
+    //     const response = await api.get('/division/status');
+    //     this.divisions = response.data;
+    //     this.error = null;
+    //   } catch (err) {
+    //     this.error = 'Failed to fetch divisions';
+    //     console.error(err);
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
     async fetchDivisionsWithStatus() {
-      this.loading = true;
-      try {
-        const response = await api.get('/division/status');
-        this.divisions = response.data;
-        this.error = null;
-      } catch (err) {
-        this.error = 'Failed to fetch divisions';
-        console.error(err);
-      } finally {
-        this.loading = false;
+  this.loading = true;
+  try {
+    const response = await api.get('/division/status');
+    // Return the response data which contains the data and total_divisions
+    this.divisions = response.data.data; // Access the nested data
+    this.error = null;
+    return response.data; // Return the full response
+  } catch (err) {
+    this.error = 'Failed to fetch divisions';
+    console.error(err);
+    throw err;
+  } finally {
+    this.loading = false;
+  }
+},
+async fetchEmployeesByDivision(division, targetPeriod) {
+  this.loading = true;
+
+  try {
+    // Validate targetPeriod format first
+    if (!targetPeriod || typeof targetPeriod !== 'string') {
+      throw new Error('Invalid target period format');
+    }
+
+    // Split targetPeriod into period and year
+    const [periodPart, yearPart] = targetPeriod.split(/(?=\d{4}$)/);
+    const period = periodPart?.trim() || '';
+    const year = yearPart?.trim() || '';
+
+    // Make sure we have both parts
+    if (!period || !year) {
+      throw new Error('Target period must include both period and year (e.g. "January - June 2023")');
+    }
+
+    const response = await api.get('/division/employee/performance', {
+      params: {
+        division,
+        target_period: period,
+        year: year
       }
-    },
+    });
 
-    async fetchEmployeesByDivision(division, targetPeriod) {
-      this.loading = true;
-      try {
-        this.selectedDivision = division;
-        this.selectedTargetPeriod = targetPeriod;
-        const [period, year] = targetPeriod.split(/(?=\d{4}$)/);
-
-        const response = await api.get('/division/employee/performance', {
-          params: {
-            division,
-            target_period: period.trim(),
-            year: year.trim()
-          }
-        });
-
-        this.employeesWithWorkPlans = response.data;
-        this.error = null;
-      } catch (err) {
-        this.error = 'Failed to fetch employees';
-        console.error(err);
-      } finally {
-        this.loading = false;
+    // Group performance standards by employee
+    const groupedEmployees = {};
+    response.data.forEach(emp => {
+      if (!groupedEmployees[emp.employee_id]) {
+        groupedEmployees[emp.employee_id] = {
+          id: emp.employee_id,
+          name: emp.employee_name,
+          position: emp.position,
+          rank: emp.rank,
+          status: emp.status || 'Pending',
+          performanceStandards: []
+        };
       }
-    },
+      groupedEmployees[emp.employee_id].performanceStandards.push(...emp.performance_standards);
+    });
+
+    this.employeesWithWorkPlans = Object.values(groupedEmployees);
+    this.error = null;
+    return Object.values(groupedEmployees); // Return the data for use in components
+  } catch (err) {
+    this.error = 'Failed to fetch employees: ' + (err.response?.data?.message || err.message);
+    console.error('Error fetching employees by division:', err);
+    throw err; // Re-throw the error to handle it in components
+  } finally {
+    this.loading = false;
+  }
+},
+
+
+    // async fetchEmployeesByDivision(division, targetPeriod) {
+    //   this.loading = true;
+
+    //   try {
+
+    // const [periodPart, yearPart] = targetPeriod.split(/(?=\d{4}$)/);
+    // const period = periodPart?.trim() || '';
+    // const year = yearPart?.trim() || '';
+
+    //     const response = await api.get('/division/employee/performance', {
+    //       params: {
+    //         division,
+    //         target_period: period.trim(),
+    //         year: year.trim()
+    //       }
+    //     });
+
+    //     // Group performance standards by employee
+    //     const groupedEmployees = {};
+    //     response.data.forEach(emp => {
+    //       if (!groupedEmployees[emp.employee_id]) {
+    //         groupedEmployees[emp.employee_id] = {
+    //           id: emp.employee_id,
+    //           name: emp.employee_name,
+    //           position: emp.position,
+    //           rank: emp.rank,
+    //           status: emp.status || 'Pending',
+    //           performanceStandards: []
+    //         };
+    //       }
+    //       groupedEmployees[emp.employee_id].performanceStandards.push(...emp.performance_standards);
+    //     });
+
+    //     this.employeesWithWorkPlans = Object.values(groupedEmployees);
+    //     this.error = null;
+    //   } catch (err) {
+    //     this.error = 'Failed to fetch employees';
+    //     console.error(err);
+    //   } finally {
+    //     this.loading = false;
+    //   }
+    // },
 
     clearSelection() {
       this.selectedDivision = null;
@@ -265,33 +493,78 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
       }
     },
 
-    async fetchEmployees() {
-  const userStore = useUserStore();
-  if (!userStore.officeId || !this.selectedDivision) return;
+//     async fetchEmployees() {
+//   const userStore = useUserStore();
+//   if (!userStore.officeId || !this.selectedDivision) return;
 
+//   try {
+//     const response = await api.get('/employees', {
+//       params: {
+//         office_id: userStore.officeId,
+//         division: this.selectedDivision
+//       }
+//     });
+
+//     this.employeeOptions = response.data.map(emp => ({
+//       id: emp.id,
+//       name: emp.name,
+//       position: emp.position,
+//       positionId: emp.position_id,
+//       rank: emp.rank,
+//       // Add a flag to identify office-head employees
+//       isOfficeHead: emp.rank.toLowerCase().includes('office-head')
+
+//     }));
+
+//     this.resetEmployeeSelection();
+//   } catch (error) {
+//     console.error('Error fetching employees:', error);
+//     throw error;
+//   }
+// },
+
+async fetchEmployees() {
+  this.loading = true;
   try {
-    const response = await api.get('/employees', {
+    const userStore = useUserStore();
+    if (!userStore.officeId || !this.selectedDivision) {
+      throw new Error('Office or division not selected');
+    }
+
+    // First get basic employee info
+    const employeesResponse = await api.get('/employees', {
       params: {
         office_id: userStore.officeId,
         division: this.selectedDivision
       }
     });
 
-    this.employeeOptions = response.data.map(emp => ({
+    this.employeeOptions = employeesResponse.data.map(emp => ({
       id: emp.id,
       name: emp.name,
       position: emp.position,
       positionId: emp.position_id,
       rank: emp.rank,
-      // Add a flag to identify office-head employees
       isOfficeHead: emp.rank.toLowerCase().includes('office-head')
-
     }));
 
+    // If we have a target period, also fetch their performance data
+    if (this.targetPeriod) {
+      await this.fetchEmployeesByDivision(this.selectedDivision, this.targetPeriod);
+    }
+
     this.resetEmployeeSelection();
+    return this.employeeOptions;
   } catch (error) {
     console.error('Error fetching employees:', error);
+    this.$q.notify({
+      message: 'Failed to fetch employees: ' + (error.response?.data?.message || error.message),
+      color: 'negative',
+      icon: 'error'
+    });
     throw error;
+  } finally {
+    this.loading = false;
   }
 },
     async fetchEmployeeCompetencies(employeeId) {

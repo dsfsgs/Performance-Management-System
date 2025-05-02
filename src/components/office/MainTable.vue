@@ -26,14 +26,14 @@
         <q-btn v-if="!hideOPCRButton && !hideInputButton" label="Input" icon="edit" color="green-9" elevated rounded
           class="action-btn" @click="$emit('input-click')" />
 
-        <q-btn v-if="!hideOPCRButton" elevated rounded color="primary" label="Generate OPCR" icon="print"
+        <q-btn v-if="!hideOPCRButton" elevated rounded color="primary" label="Preview OPCR" icon="print"
           @click="showGenerateModal = true" :disable="!targetPeriodFilter">
           <q-tooltip v-if="!targetPeriodFilter">
             Please select a target period first
           </q-tooltip>
         </q-btn>
 
-        <q-btn v-if="!hideUnitWorkPlanButton" elevated rounded color="primary" label="Generate Unit Work Plan"
+        <q-btn v-if="!hideUnitWorkPlanButton" elevated rounded color="primary" label="Preview Unit Work Plan"
           icon="print" @click="showUnitWorkPlanModal = true" :disable="!targetPeriodFilter">
           <q-tooltip v-if="!targetPeriodFilter">
             Please select a target period first

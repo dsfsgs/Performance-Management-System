@@ -31,52 +31,47 @@
       </q-card-section>
 
       <q-card-section>
-        <div v-if="!performanceStandards || Object.keys(performanceStandards).length === 0" class="empty-state">
+        <div v-if="!performanceStandards || performanceStandards.length === 0" class="empty-state">
           <q-icon name="sentiment_dissatisfied" size="36px" color="grey-5" />
           <div>No performance standards found for this employee.</div>
         </div>
 
         <div v-else class="standards-container">
-          <q-expansion-item label="Performance Standard 1" header-class="standard-header"
-            expand-icon-class="expand-icon" expand-separator class="section-title">
+          <q-expansion-item v-for="(standard, index) in performanceStandards" :key="index"
+            :label="`Performance Standard ${index + 1}`" header-class="standard-header" expand-icon-class="expand-icon"
+            expand-separator class="section-title">
             <div class="standard-content">
               <div class="section-subtitle">Performance Indicator</div>
 
-              <!-- Horizontal Layout -->
               <div class="row q-col-gutter-md">
-
-                <!-- Success Indicator Section -->
                 <div class="col-md-3 col-sm-12">
                   <div class="section-block">
-                    <div class="card-title">MFO detials</div>
+                    <div class="card-title">MFO Details</div>
                     <div class="card-content">
-                      <strong>Category:</strong>
-                      {{ employee.category|| 'N/A' }}
+                      <strong>Category:</strong> {{ standard.category || 'N/A' }}
                     </div>
                     <br>
                     <div class="card-content">
-                      <strong>MFO:</strong>{{ employee.mfo || 'N/A' }}
+                      <strong>MFO:</strong> {{ standard.mfo || 'N/A' }}
                     </div>
                     <br>
                     <div class="card-content">
-                      <strong>Output:</strong>{{ employee.output || 'N/A' }}
+                      <strong>Output:</strong> {{ standard.output || 'N/A' }}
                     </div>
                   </div>
                 </div>
 
-                <!-- Competencies Section -->
                 <div class="col-md-6 col-sm-12">
                   <div class="section-block">
                     <div class="card-title">Competencies</div>
                     <div class="row q-col-gutter-xs">
-                      <!-- Core -->
                       <div class="col-4">
                         <div class="competency-subblock">
                           <div class="competency-subtitle">Core</div>
                           <div class="competency-value">
-                            <div v-if="performanceStandards.core_competency">
-                              <div v-for="(value, key) in performanceStandards.core_competency" :key="key">
-                                {{ getCompetencyCode('core', key) }}-{{ value }}<span v-if="value == 4"></span>
+                            <div v-if="standard.core_competency">
+                              <div v-for="(value, key) in standard.core_competency" :key="key">
+                                {{ getCompetencyCode('core', key) }}-{{ value }}
                               </div>
                             </div>
                             <div v-else>N/A</div>
@@ -84,13 +79,12 @@
                         </div>
                       </div>
 
-                      <!-- Technical -->
                       <div class="col-4">
                         <div class="competency-subblock">
                           <div class="competency-subtitle">Technical</div>
                           <div class="competency-value">
-                            <div v-if="performanceStandards.technical_competency">
-                              <div v-for="(value, key) in performanceStandards.technical_competency" :key="key">
+                            <div v-if="standard.technical_competency">
+                              <div v-for="(value, key) in standard.technical_competency" :key="key">
                                 {{ getCompetencyCode('technical', key) }}-{{ value }}
                               </div>
                             </div>
@@ -99,13 +93,12 @@
                         </div>
                       </div>
 
-                      <!-- Leadership -->
                       <div class="col-4">
                         <div class="competency-subblock">
                           <div class="competency-subtitle">Leadership</div>
                           <div class="competency-value">
-                            <div v-if="performanceStandards.leadership_competency">
-                              <div v-for="(value, key) in performanceStandards.leadership_competency" :key="key">
+                            <div v-if="standard.leadership_competency">
+                              <div v-for="(value, key) in standard.leadership_competency" :key="key">
                                 {{ getCompetencyCode('leadership', key) }}-{{ value }}
                               </div>
                             </div>
@@ -115,28 +108,17 @@
                       </div>
                     </div>
                   </div>
-
                 </div>
-
 
                 <div class="col-md-3 col-sm-12">
                   <div class="section-block">
                     <div class="card-title">Success Indicator</div>
-                    <div class="card-content">{{ performanceStandards.success_indicator || 'N/A' }}</div>
-                  </div>
-                </div>
-
-                <!-- Required Output Section -->
-                <div class="col-md-3 col-sm-12">
-                  <div class="section-block">
-                    <div class="card-title">Required Output</div>
-                    <div class="card-content">{{ performanceStandards.required_output || 'N/A' }}</div>
+                    <div class="card-content">{{ standard.success_indicator || 'N/A' }}</div>
                   </div>
                 </div>
               </div>
 
-              <!-- Standard Outcome Section -->
-              <div class="standard-outcome-section q-mt-md" v-if="performanceStandards.standard_outcomes">
+              <div class="standard-outcome-section q-mt-md" v-if="standard.standard_outcomes">
                 <div class="section-subtitle">Standard Outcome</div>
                 <div class="outcome-table">
                   <div class="table-header row">
@@ -145,8 +127,7 @@
                     <div class="col-3 header-cell">Timeliness</div>
                     <div class="col-3 header-cell">Effectiveness</div>
                   </div>
-                  <div v-for="(outcome, index) in performanceStandards.standard_outcomes" :key="index"
-                    class="table-row row">
+                  <div v-for="(outcome, i) in standard.standard_outcomes" :key="i" class="table-row row">
                     <div class="col-3 table-cell">{{ outcome.rating || 'N/A' }}</div>
                     <div class="col-3 table-cell">{{ outcome.quantity || 'N/A' }}</div>
                     <div class="col-3 table-cell">{{ outcome.timeliness || 'N/A' }}</div>
@@ -165,6 +146,7 @@
     </q-card>
   </q-dialog>
 </template>
+
 <script>
 export default {
   props: {
@@ -177,8 +159,8 @@ export default {
       default: null
     },
     performanceStandards: {
-      type: Object,
-      default: () => ({})
+      type: Array,
+      default: () => []
     }
   },
   emits: ['update:modelValue'],

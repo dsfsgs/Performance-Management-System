@@ -4,7 +4,7 @@
     <!-- App Header -->
     <div class="app-header">
       <div class="header-content">
-        <div class="text-h6 text-white">CITY OF TAGUM - HUMAN RESOURCE MANAGEMENT OFFICE</div>
+        <div class="text-h6 text-white">{{ userStore.officeName }}</div>
       </div>
       <div class="col-auto">
         <q-btn flat round dense text-color="white" icon="close" @click="$emit('close')" />
@@ -86,7 +86,7 @@
                   <div class="text-green-9 text-h5 text-weight-bold padded-text">CITY OF TAGUM</div>
 
                   <div class="green-banner">
-                    <div class="padded-text">CITY HUMAN RESOURCE MANAGEMENT OFFICE</div>
+                    <div class="padded-text">{{ userStore.officeName }}</div>
                   </div>
                 </div>
               </div>
@@ -143,7 +143,7 @@
                           <td>Employee Rank:</td>
                           <td colspan="10">{{ employee.rank }}</td>
                         </tr>
-                        <tr v-for="(output, outIndex) in employee.outputs" :key="`${empIndex}-${outIndex}`">
+                        <!-- <tr v-for="(output, outIndex) in employee.outputs" :key="`${empIndex}-${outIndex}`">
                           <td class="mfo-cell" v-html="output.name"></td>
                           <td v-html="output.core"></td>
                           <td v-html="output.technical"></td>
@@ -155,6 +155,19 @@
                           <td v-html="output.standard3"></td>
                           <td v-html="output.standard2"></td>
                           <td v-html="output.standard1"></td>
+                        </tr> -->
+                        <tr v-for="(output, outIndex) in employee.outputs" :key="`${empIndex}-${outIndex}`">
+                          <td class="mfo-cell" v-html="output.name || 'N/A'"></td>
+                          <td v-html="output.core || 'N/A'"></td>
+                          <td v-html="output.technical || 'N/A'"></td>
+                          <td v-html="output.leadership || 'N/A'"></td>
+                          <td v-html="output.indicator || 'N/A'"></td>
+                          <td v-html="output.required || 'N/A'"></td>
+                          <td v-html="output.standard5 || 'N/A'"></td>
+                          <td v-html="output.standard4 || 'N/A'"></td>
+                          <td v-html="output.standard3 || 'N/A'"></td>
+                          <td v-html="output.standard2 || 'N/A'"></td>
+                          <td v-html="output.standard1 || 'N/A'"></td>
                         </tr>
                       </template>
                     </tbody>
@@ -198,6 +211,7 @@ import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 import { useUnitWorkPlanStore } from 'src/stores/office/unit_work_plantStore'
 import { onMounted, ref, watch } from 'vue'
+import { useUserStore } from 'src/stores/userStore'
 
 
 export default {
@@ -213,6 +227,11 @@ export default {
     const currentDivisionData = ref(null)
     const isGeneratingPdf = ref(false)
     const isPrinting = ref(false)
+    const userStore = useUserStore()
+
+    onMounted(() => {
+      userStore.loadUserData();
+    });
 
     // Function to select the first division automatically
     const selectFirstDivisionAvailable = async () => {
@@ -433,7 +452,8 @@ export default {
       directPrint,
       downloadPdf,
       selectDivision,
-      selectFirstDivisionAvailable
+      selectFirstDivisionAvailable,
+      userStore
     }
   }
 }
