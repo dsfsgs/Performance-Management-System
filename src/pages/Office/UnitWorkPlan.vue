@@ -17,10 +17,13 @@
     <!-- <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
       :showOfficeFilter="false" :showOfficeColumn="false" :hideOPCRButton="true" :hideUnitWorkPlanButton="false"
       :showTargetPeriodFilter="true" @generate-uwp="generateUnitWorkPlan" /> -->
+    <!-- <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
+      :showOfficeFilter="false" :showOfficeColumn="false" :hideOPCRButton="true" :hideUnitWorkPlanButton="false"
+      :showTargetPeriodFilter="true" :isUnitWorkPlanPage="true" @generate-uwp="generateUnitWorkPlan" /> -->
     <MainTable v-if="!showUWP && !selectedDivision" :rows="rows" @create="showUWP = true" @row-click="onDivisionClick"
       :showOfficeFilter="false" :showOfficeColumn="false" :hideOPCRButton="true" :hideUnitWorkPlanButton="false"
       :showTargetPeriodFilter="true" :isUnitWorkPlanPage="true" @generate-uwp="generateUnitWorkPlan" />
-      
+
     <!-- Division Detail -->
     <div v-if="selectedDivision && !showUWP" class="division-employee-container">
       <DivisionEmployee :division="selectedDivision" :targetPeriod="selectedRow ? selectedRow.targetPeriod : ''"
@@ -57,11 +60,57 @@ export default {
   },
   methods: {
 
+    // async fetchDivisionStatus() {
+    //   const store = useUnitWorkPlanStore();
+    //   try {
+    //     await store.fetchDivisionsWithStatus();
+    //     this.rows = store.divisions.map(division => ({
+    //       id: division.id,
+    //       division: division.division,
+    //       targetPeriod: division.target_period,
+    //       dateCreated: new Date(division.created_at).toLocaleDateString('en-US', {
+    //         year: 'numeric',
+    //         month: 'long',
+    //         day: 'numeric'
+    //       }),
+    //       status: division.status
+    //     }));
+    // async fetchDivisionStatus() {
+    //   const store = useUnitWorkPlanStore();
+    //   try {
+    //     // Pass the target period if you have one
+    //     await store.fetchDivisionsWithStatus(this.selectedTargetPeriod);
+
+    //     // Transform the data to match your table structure
+    //     this.rows = store.divisions.map(division => ({
+    //       id: division.id,
+    //       division: division.division,
+    //       targetPeriod: division.target_period,
+    //       dateCreated: new Date(division.created_at).toLocaleDateString('en-US', {
+    //         year: 'numeric',
+    //         month: 'long',
+    //         day: 'numeric'
+    //       }),
+    //       status: division.status || 'pending'
+    //     }));
+
+    //     // If no divisions are showing, check the response data
+    //     console.log('Fetched divisions:', store.divisions);
+    //   } catch (error) {
+    //     console.error('Error fetching division status:', error);
+    //     this.$q.notify({
+    //       message: 'Failed to load division data',
+    //       color: 'negative',
+    //       icon: 'error'
+    //     });
+    //   }
+    // },
     async fetchDivisionStatus() {
       const store = useUnitWorkPlanStore();
       try {
-        await store.fetchDivisionsWithStatus();
-        this.rows = store.divisions.map(division => ({
+        const response = await store.fetchDivisionsWithStatus();
+        // Access the data property from the response
+        this.rows = response.data.map(division => ({
           id: division.id,
           division: division.division,
           targetPeriod: division.target_period,
@@ -144,6 +193,7 @@ export default {
         position: 'top-right'
       });
     },
+
     async generateUnitWorkPlan() {
       try {
         const divisions = await this.store.fetchDivisionsWithWorkPlans(this.targetPeriodFilter);

@@ -406,11 +406,22 @@ export default {
   computed: {
 
 
+    // categoryOptions() {
+    //   return this.categories?.map(cat => ({
+    //     label: cat.name,
+    //     value: Number(cat.id) // Ensure this is a number
+    //   })) || []
+    // },
     categoryOptions() {
-      return this.categories?.map(cat => ({
-        label: cat.name,
-        value: Number(cat.id) // Ensure this is a number
-      })) || []
+      // Ensure we're working with the latest categories from the store
+      const uniqueCategories = [...new Set(this.categories?.map(cat => cat.name))];
+      return uniqueCategories.map(name => {
+        const category = this.categories.find(cat => cat.name === name);
+        return {
+          label: category.name,
+          value: Number(category.id)
+        };
+      }) || [];
     },
 
     filteredMfoOptions() {
