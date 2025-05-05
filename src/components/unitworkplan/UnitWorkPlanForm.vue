@@ -106,7 +106,9 @@
                     :employee-competencies="employeeWorkPlans[empIndex].competencies"
                     :initial-success-indicator="standard.successIndicator"
                     :initial-required-output="standard.requiredOutput" :initial-rows="standard.rows"
+
                     :initial-standard-outcome-rows="standard.standardOutcomeRows"
+                    
                     :initial-quantity-indicator-type="standard.quantityIndicatorType"
                     @update:successIndicator="val => standard.successIndicator = val"
                     @update:requiredOutput="val => standard.requiredOutput = val" @update:rows="val => standard.rows = val"
@@ -278,7 +280,7 @@ export default {
       const employee = employeeWorkPlans.value[empIndex];
       if (employee) {
         console.log('Collapsing standards for employee:', empIndex);
-        
+
         // First update all states to true (expanded)
         employee.performanceStandards.forEach((standard, stdIndex) => {
           setExpansionState(empIndex, stdIndex, true);
@@ -294,14 +296,14 @@ export default {
               standard.mergedSuccessIndicator ||
               standard.mergedRequiredOutput ||
               standard.rows.some(row => row.category || row.mfo || row.output) ||
-              standard.standardOutcomeRows.some(row => 
-                row.quantity || 
-                row.effectiveness || 
+              standard.standardOutcomeRows.some(row =>
+                row.quantity ||
+                row.effectiveness ||
                 row.timeliness
               );
-            
+
             console.log(`Standard ${stdIndex} has value:`, hasAnyValue);
-            
+
             // Collapse if it has any value
             if (hasAnyValue) {
               console.log(`Collapsing standard ${stdIndex}`);
