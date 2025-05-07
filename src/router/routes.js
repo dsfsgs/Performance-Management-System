@@ -17,6 +17,7 @@ import OfficeEmployee from 'src/pages/Office/Employee.vue'
 import OfficeUnitWorkPlan from 'src/pages/Office/UnitWorkPlan.vue'
 import OfficeOPCR from 'src/pages/Office/OPCR.vue'
 import OfficeIPCR from 'src/pages/Office/IPCR.vue'
+import OfficeSPMS from 'src/pages/Office/SPMS.vue'
 import OfficeAccount from 'src/pages/Office/Account.vue'
 
 // Planning Admin Pages
@@ -26,46 +27,40 @@ import PlanningOPCR from 'src/pages/Planning/OPCR.vue'
 import PlanningAccount from 'src/pages/Planning/Account.vue'
 import Library from 'src/pages/Office/Library.vue'
 
-
-
 export const routes = [
   {
     path: '/login',
     component: AuthLayout,
-    children: [{ path: '',
-       component: Login,
-
-
-      }],
+    children: [{ path: '', component: Login }],
   },
   {
     path: '/',
     component: AdminLayout,
     children: [
       // Root redirect
-   {
-  path: '',
-  redirect: () => {
-          const userStore = useUserStore();
-          userStore.loadUserData();
-          const role = userStore.role;
+      {
+        path: '',
+        redirect: () => {
+          const userStore = useUserStore()
+          userStore.loadUserData()
+          const role = userStore.role
 
           if (!role) {
-            return '/login';
+            return '/login'
           }
 
-    switch (role) {
-      case 'hr-admin':
-        return '/hr/dashboard'
-      case 'office-admin':
-        return '/office/dashboard'
-      case 'planning-admin':
-        return '/planning/dashboard'
-      default:
-        return '/login'
-    }
-  },
-},
+          switch (role) {
+            case 'hr-admin':
+              return '/hr/dashboard'
+            case 'office-admin':
+              return '/office/dashboard'
+            case 'planning-admin':
+              return '/planning/dashboard'
+            default:
+              return '/login'
+          }
+        },
+      },
 
       // HR Admin Routes
       {
@@ -130,9 +125,14 @@ export const routes = [
         component: OfficeIPCR,
         meta: { role: 'office-admin' },
       },
-        {
+      {
         path: 'office/library',
         component: Library,
+        meta: { role: 'office-admin' },
+      },
+      {
+        path: 'office/spms',
+        component: OfficeSPMS,
         meta: { role: 'office-admin' },
       },
       {
@@ -172,7 +172,7 @@ export function setupRouterGuard(router) {
 
     // Ensure user data is loaded properly
     // await userStore.loadUser()
-   await userStore.loadUserData()  // <-- Change this line
+    await userStore.loadUserData() // <-- Change this line
 
     const isAuthenticated = !!userStore.user?.role_id
     const userRole = userStore.role
@@ -204,4 +204,3 @@ export function setupRouterGuard(router) {
     next()
   })
 }
-
