@@ -11,6 +11,7 @@ export const useMfoStore = defineStore('mfo', {
     error: null,
     skipMfo: false,
     supportOutputs: []
+
   }),
 
   actions: {
