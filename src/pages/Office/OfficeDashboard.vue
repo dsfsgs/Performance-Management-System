@@ -124,7 +124,7 @@
     <!-- Charts Row -->
     <div class="row q-col-gutter-md q-mb-lg">
       <!-- Employee Distribution Doughnut Chart -->
-      <div class="col-xs-12 col-sm-6">
+      <!-- <div class="col-xs-12 col-sm-6">
         <q-card class="bg-white shadow-3 chart-card">
           <q-card-section class="q-pa-md">
             <div class="text-h6 chart-title">Employee Distribution</div>
@@ -139,10 +139,10 @@
             </div>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Performance Status Doughnut Chart with Enhanced Toggle -->
-      <div class="col-xs-12 col-sm-6">
+      <!-- <div class="col-xs-12 col-sm-6">
         <q-card class="bg-white shadow-3 chart-card">
           <q-card-section class="q-pa-md">
             <div class="row items-center justify-between chart-title">
@@ -187,7 +187,7 @@
             </q-tab-panels>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
     </div>
 
     <!-- Activity Logs Section -->
@@ -205,6 +205,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
+// eslint-disable-next-line no-unused-vars
 import { Doughnut } from 'vue-chartjs';
 
 // Register Chart.js components
@@ -250,6 +251,7 @@ const chartOptions = {
 };
 
 // For employee distribution chart with center text
+// eslint-disable-next-line no-unused-vars
 const employeeChartOptions = {
   ...chartOptions,
   plugins: {
@@ -264,6 +266,7 @@ const employeeChartOptions = {
 };
 
 // Chart options with centerText plugin
+// eslint-disable-next-line no-unused-vars
 const chartOptionsWithCenterText = {
   ...chartOptions,
   plugins: {
@@ -346,6 +349,7 @@ ChartJS.register({
 });
 
 // Employee Distribution Data
+// eslint-disable-next-line no-unused-vars
 const employeeDistributionData = {
   labels: ['Office', 'Division', 'Section', 'Unit'],
   datasets: [
@@ -394,6 +398,7 @@ const workPlanStatusData = {
 };
 
 // Get selected chart data based on toggle
+// eslint-disable-next-line no-unused-vars
 const getSelectedChartData = computed(() => {
   switch (selectedStatusChart.value) {
     case 'opcr':

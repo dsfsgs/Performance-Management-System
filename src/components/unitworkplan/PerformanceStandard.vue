@@ -180,7 +180,7 @@
 </template>
 
 <script>
-import { useMfoStore } from 'src/stores/office/mfoStore'
+import { useMfoStore } from 'src/stores/office/LibraryStore'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 
