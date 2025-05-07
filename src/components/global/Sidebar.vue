@@ -93,6 +93,7 @@ export default {
           { label: 'Unit Work Plan', icon: 'event_note', route: '/office/unit-work-plan' },
           { label: 'OPCR', icon: 'assignment', route: '/office/opcr' },
           { label: 'IPCR', icon: 'fact_check', route: '/office/ipcr' },
+          { label: 'SPMS', icon: 'fact_check', route: '/office/spms' },
           { label: 'Library', icon: 'fact_check', route: '/office/library' },
           { label: 'Account', icon: 'person', route: '/office/account' },
         ],
