@@ -1,15 +1,6 @@
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  color: #555;
-}
-/* All the previous styles remain exactly the same */
 .employee-container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -22,142 +13,34 @@
   position: relative;
 }
 
-.tree-view {
-  margin-top: 10px;
+.q-tree {
+  font-size: 0.9rem;
 }
 
-.tree-item {
-  position: relative;
-  margin-bottom: 5px;
+.q-tree__node--selected {
+  background-color: rgba(25, 118, 210, 0.1);
+  font-weight: bold;
 }
 
-.tree-node {
-  position: relative;
-  padding: 10px 15px 10px 40px;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.2s;
-
-  &.division {
-    padding-left: 20px;
-    font-weight: 600;
-    color: #2c3e50;
-  }
-
-  &.section {
-    padding-left: 50px;
-    font-weight: 500;
-    color: #34495e;
-  }
-
-  &.unit {
-    padding-left: 80px;
-    color: #4a5568;
-  }
-
-  &:hover {
-    background-color: #e9ecef;
-  }
-
-  &.active {
-    background-color: #e3f2fd;
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #e3f2fd;
-      z-index: 0;
-      border-radius: 4px;
-    }
-  }
-}
-
-.node-content {
+.node-label {
   display: flex;
   align-items: center;
   flex-grow: 1;
-  position: relative;
-  z-index: 1;
 }
 
-.sub-items {
-  position: relative;
-
-  &.division-items {
-    &::before {
-      content: '';
-      position: absolute;
-      left: 30px;
-      top: -10px;
-      bottom: 10px;
-      width: 1px;
-      background-color: #ccc;
-    }
-  }
-
-  &.section-items {
-    &::before {
-      content: '';
-      position: absolute;
-      left: 60px;
-      top: -10px;
-      bottom: 10px;
-      width: 1px;
-      background-color: #ccc;
-    }
-  }
-}
-
-.tree-node.section::before {
-  content: '';
-  position: absolute;
-  left: 30px;
-  top: 50%;
-  height: 1px;
-  width: 20px;
-  background-color: #ccc;
-}
-
-.tree-node.unit::before {
-  content: '';
-  position: absolute;
-  left: 60px;
-  top: 50%;
-  height: 1px;
-  width: 20px;
-  background-color: #ccc;
-}
-
-.toggle-icon {
-  margin-right: 8px;
-  width: 24px;
-  display: inline-flex;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 1;
-}
-
-.unit-icon {
+.node-icon {
+  font-size: 1rem;
   margin-right: 8px;
   color: #666;
-  z-index: 1;
 }
 
 .employee-count {
   margin-left: auto;
   background: #e0e0e0;
-  color: #333;
+  color: #222;
   border-radius: 10px;
   padding: 2px 8px;
-  font-size: 0.75rem;
-  z-index: 1;
+  font-size: 0.7rem;
 }
 
 .employee-list-panel {
@@ -197,121 +80,23 @@ h3 {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+}
 
-  &:hover {
-    background: #2980b9;
-  }
+.add-employee-btn:hover {
+  background: #2980b9;
 }
 
 .employee-table {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   overflow: hidden;
 }
 
-.table-header {
-  display: flex;
-  background-color: #f8f9fa;
-  font-weight: 600;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.header-cell {
-  padding: 12px 15px;
-  flex: 1;
-
-  &.action-cell {
-    flex: 0.5;
-    text-align: center;
-  }
-}
-
-.table-row {
-  display: flex;
-  border-bottom: 1px solid #dee2e6;
-  align-items: center;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.table-cell {
-  padding: 12px 15px;
-  flex: 1;
-
-  &.action-cell {
-    flex: 0.5;
-    display: flex;
-    justify-content: center;
-  }
-}
-
-.action-btn {
-  padding: 5px;
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-}
-
-.empty-row {
-  display: flex;
-  border-bottom: 1px solid #dee2e6;
-  padding: 12px 15px;
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.empty-row .table-cell {
-  flex: 1;
-}
-
-.rank-select {
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  width: 100%;
-  max-width: 150px;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-  }
-}
-
-select option:disabled {
-  color: #ccc;
-  background-color: #f5f5f5;
-}
-
-@media (max-width: 768px) {
-  .employee-container {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .organization-panel {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
-  .rank-select {
-    max-width: 100%;
-  }
-  
-}
-.employee-table {
-  height: calc(100% - 60px);
-  /* Adjust based on your layout */
-}
-
 .q-table {
-  height: 100%;
+  flex-grow: 1;
 }
 
 .empty-row {
@@ -340,87 +125,41 @@ select option:disabled {
   padding: 8px 16px;
 }
 
-/* Add office-specific styles */
-.tree-node.office {
-  padding-left: 10px;
-  font-weight: 700;
-  color: #1a237e;
-  font-size: 1.1em;
-}
-
-.sub-items.office-items {
-  padding-left: 20px;
-}
-
-/* Update existing styles to accommodate new hierarchy */
-.tree-node.division {
-  padding-left: 40px;
-}
-
-.tree-node.section {
-  padding-left: 70px;
-}
-
-.tree-node.unit {
-  padding-left: 100px;
-}
-
-/* Adjust the connecting lines for the new hierarchy */
-.sub-items.office-items::before {
-  content: '';
-  position: absolute;
-  left: 20px;
-  top: -10px;
-  bottom: 10px;
-  width: 1px;
-  background-color: #ccc;
-}
-
-.tree-node.division::before {
-  left: 30px;
-}
-
-.tree-node.section::before {
-  left: 60px;
-}
-
-.tree-node.unit::before {
-  left: 90px;
-}
-
-/* Add new styles for better clicking */
-.toggle-icon {
-  display: inline-block;
-  cursor: pointer;
-  padding: 5px;
-  margin-right: 5px;
-}
-
-.node-content {
-  display: inline-block;
-  cursor: pointer;
-  flex-grow: 1;
-}
-
-.tree-node {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
+.rank-select {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  width: 100%;
+  max-width: 150px;
   cursor: pointer;
 }
 
-.unit-icon {
-  display: inline-block;
-  margin-right: 5px;
+.rank-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-/* Add hover effect for better UX */
-.tree-node:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
+@media (max-width: 768px) {
+  .employee-container {
+    flex-direction: column;
+    min-height: auto;
+  }
 
-/* Active node styling */
-.tree-node.active {
-  background-color: rgba(25, 118, 210, 0.1);
-  font-weight: bold;
+  .organization-panel {
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .employee-table {
+    overflow-x: auto;
+  }
+
+  .rank-select {
+    max-width: 100%;
+  }
 }

@@ -1,85 +1,22 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-<!-- employee.vue -->
 <template>
   <div class="employee-container">
     <!-- Organization Panel -->
     <div class="organization-panel">
-      <div class="tree-view">
-        <div v-if="loading" class="loading-container">
-          <q-spinner-gears color="cyan" />
-          <span>Loading organization structure...</span>
-        </div>
-
-        <div v-else>
-          <div class="tree-item">
-            <div class="tree-node office" @click="selectOffice" :class="{ active: selectedNode?.type === 'office' }">
-              <div class="toggle-icon" @click.stop="toggleOffice">
-                <q-icon :name="officeExpanded ? 'expand_more' : 'chevron_right'" />
-              </div>
-              <div class="node-content">
-                {{ officeName }}
-                <span class="employee-count">{{ employeeStore.employeeCounts?.office || 0 }}</span>
-              </div>
-            </div>
-
-            <div v-if="officeExpanded" class="sub-items office-items">
-              <div v-for="division in divisions" :key="division.id" class="tree-item">
-                <div class="tree-node division" @click="selectDivision(division)"
-                  :class="{ active: selectedNode?.type === 'division' && selectedNode?.id === division.id }">
-                  <div class="toggle-icon" @click.stop="toggleDivision(division)">
-                    <q-icon :name="division.expanded ? 'expand_more' : 'chevron_right'" />
-                  </div>
-                  <div class="node-content">
-                    {{ division.name }}
-                    <span class="employee-count">{{ division.count || 0 }}</span>
-                  </div>
-                </div>
-
-                <div v-if="division.expanded" class="sub-items division-items">
-                  <div v-for="section in division.sections" :key="section.id" class="tree-item">
-                    <div class="tree-node section" @click="selectSection(section)"
-                      :class="{ active: selectedNode?.type === 'section' && selectedNode?.id === section.id }">
-                      <div class="toggle-icon" @click.stop="toggleSection(section)">
-                        <q-icon :name="section.expanded ? 'expand_more' : 'chevron_right'" />
-                      </div>
-                      <div class="node-content">
-                        {{ section.name }}
-                        <span class="employee-count">{{ section.count || 0 }}</span>
-                      </div>
-                    </div>
-
-                    <div v-if="section.expanded" class="sub-items section-items">
-                      <div v-for="unit in section.units" :key="unit.id" class="tree-item">
-                        <div class="tree-node unit" @click="selectUnit(unit)"
-                          :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
-                          <div class="unit-icon">•</div>
-                          <div class="node-content">
-                            {{ unit.name }}
-                            <span class="employee-count">{{ unit.count || 0 }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div v-if="division.units?.length" class="sub-items">
-                    <div v-for="unit in division.units" :key="unit.id" class="tree-item">
-                      <div class="tree-node unit" @click="selectUnit(unit)"
-                        :class="{ active: selectedNode?.type === 'unit' && selectedNode?.id === unit.id }">
-                        <div class="unit-icon">•</div>
-                        <div class="node-content">
-                          {{ unit.name }}
-                          <span class="employee-count">{{ unit.count || 0 }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="loading" class="loading-container">
+        <q-spinner-gears color="cyan" />
+        <span>Loading organization structure...</span>
       </div>
+      <q-tree v-else :nodes="treeNodes" node-key="id" v-model:expanded="expandedNodes" v-model:selected="selectedNodeId"
+        @update:expanded="updateExpanded" @update:selected="selectNode" default-expand-all>
+        <template v-slot:default-header="{ node }">
+          <div class="node-label">
+            <q-icon :name="node.icon" class="node-icon" />
+            {{ node.label }}
+            <span class="employee-count">{{ node.count || 0 }}</span>
+          </div>
+        </template>
+      </q-tree>
     </div>
 
     <!-- Employee List Panel -->
@@ -94,10 +31,9 @@
         </div>
 
         <div class="employee-table">
-          <q-table v-if="!loading && !employeeStore.loading" :rows="filteredEmployees" :columns="columns" row-key="id"
-            flat bordered :loading="employeeStore.loading" :pagination="{ rowsPerPage: 10 }"
-            :rows-per-page-options="[10, 20, 50]">
-
+          <q-table v-if="selectedNode && !loading && !employeeStore.loading" :rows="filteredEmployees"
+            :columns="columns" row-key="id" flat bordered :loading="employeeStore.loading"
+            :pagination="{ rowsPerPage: 10 }" :rows-per-page-options="[10, 20, 50]">
             <template v-slot:loading>
               <div class="loading-container">
                 <q-spinner-gears color="cyan" />
@@ -152,19 +88,11 @@ export default {
   data() {
     return {
       showAddModal: false,
+      selectedNodeId: null,
       selectedNode: null,
       loading: false,
-      officeExpanded: false,
-      divisions: [],
-  //     columns: [
-  //       { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
-  //       { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
-  //       { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
-  //       { name: 'actions', label: 'Actions', align: 'center', sortable: false }
-  //     ],
-
-  //   };
-  // },
+      treeNodes: [],
+      expandedNodes: [],
       columns: [
         { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
         { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
@@ -174,29 +102,6 @@ export default {
     };
   },
   computed: {
-    // rankOptions() {
-    //   return [
-    //     { value: 'Employee', label: 'Employee' },
-    //     { value: 'Supervisor', label: 'Supervisor' },
-    //     { value: 'Rank-in-File', label: 'Rank-in-File' },
-    //     { value: 'Managerial', label: 'Managerial' },
-    //     {
-    //       value: 'Office-Head',
-    //       label: 'Office-Head',
-    //       disable: (employee) => this.isHeadOptionDisabled(employee)
-    //     },
-    //       {
-    //       value: 'Division-Head',
-    //         label: 'Division-Head',
-    //       disable: (employee) => this.isHeadOptionDisabled(employee)
-    //     },
-    //     {
-    //       value: 'Section-Head',
-    //       label: 'Section-Head',
-    //       disable: (employee) => this.isHeadOptionDisabled(employee)
-    //     }
-    //   ];
-    // },
     rankOptions() {
       const baseOptions = [
         { value: 'Employee', label: 'Employee' },
@@ -205,7 +110,6 @@ export default {
         { value: 'Managerial', label: 'Managerial' }
       ];
 
-      // Add head options based on selected node type
       if (this.selectedNode) {
         switch (this.selectedNode.type) {
           case 'office':
@@ -251,7 +155,7 @@ export default {
       });
     },
     selectedNodeTitle() {
-      return this.selectedNode?.name || '';
+      return this.selectedNode?.label || this.selectedNode?.name || '';
     },
     officeName() {
       return useUserStore().officeName;
@@ -261,17 +165,22 @@ export default {
     await this.fetchOrganizationStructure();
   },
   methods: {
+    findNodeById(nodes, id) {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        if (node.children) {
+          const found = this.findNodeById(node.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    },
     isHeadOptionDisabled(employee, headType) {
       if (!this.selectedNode) return false;
 
-      // Check if there's already a head of this type in the same organizational unit
       return this.filteredEmployees.some(emp => {
         if (emp.id === employee.id) return false;
-
-        // Check if the employee is the current head of this type
         if (emp.rank !== headType) return false;
-
-        // Check if they're in the same organizational unit
         return this.isSameOrganizationalUnit(emp, employee);
       });
     },
@@ -279,27 +188,19 @@ export default {
       this.showAddModal = true;
       this.employeeStore.fetchUnassignedEmployees();
     },
-    toggleOffice(event) {
-      if (event) event.stopPropagation();
-      this.officeExpanded = !this.officeExpanded;
-      if (this.officeExpanded && !this.selectedNode) {
-        this.selectOffice();
+    updateExpanded(expanded) {
+      this.expandedNodes = expanded;
+    },
+    async selectNode(nodeId) {
+      this.selectedNode = this.findNodeById(this.treeNodes, nodeId);
+      this.employeeStore.currentNode = this.selectedNode;
+      try {
+        await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
+      } catch (error) {
+        console.error('Error fetching employees for node:', error);
+        this.$q.notify({ type: 'negative', message: 'Failed to load employees' });
       }
     },
-    selectOffice() {
-      this.selectedNode = {
-        type: 'office',
-        id: useUserStore().user?.office_id,
-        name: this.officeName
-      };
-      this.employeeStore.currentNode = this.selectedNode;
-      this.employeeStore.fetchEmployeesByNode(this.selectedNode)
-        .catch(error => {
-          console.error("Error fetching employees:", error);
-          this.$q.notify({ type: 'negative', message: 'Failed to load employees' });
-        });
-    },
-
     async deleteEmployee(employeeId) {
       this.$q.dialog({
         title: 'Confirm Delete',
@@ -313,7 +214,6 @@ export default {
             this.$q.notify({ type: 'positive', message: result.message || 'Employee moved to trash' });
             if (result.deletedEmployee) this.updateLocalCountsAfterDelete(result.deletedEmployee);
             if (this.selectedNode) await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-            this.$forceUpdate();
           } else {
             throw new Error(result?.message || 'Failed to delete employee');
           }
@@ -322,13 +222,12 @@ export default {
         }
       });
     },
-
     // eslint-disable-next-line no-unused-vars
     updateLocalCountsAfterDelete(deletedEmployee) {
       if (this.employeeStore.employeeCounts?.office > 0) {
         this.employeeStore.employeeCounts.office--;
       }
-      // Similar updates for division, section, unit counts...
+      this.updateTreeCounts();
     },
     async fetchOrganizationStructure() {
       this.loading = true;
@@ -343,146 +242,138 @@ export default {
         );
 
         if (officeData) {
-          this.divisions = this.processOrganizationData(officeData, counts);
+          this.treeNodes = [this.processOrganizationData(officeData, counts)];
+          this.expandedNodes = [this.treeNodes[0].id];
+          // Set initial selectedNode to office
+          this.selectedNodeId = this.treeNodes[0].id;
+          this.selectedNode = this.treeNodes[0];
+          this.employeeStore.currentNode = this.selectedNode;
+          await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
         }
       } catch (error) {
         console.error('Error fetching organization structure:', error);
+        this.$q.notify({ type: 'negative', message: 'Failed to load organization structure' });
       } finally {
         this.loading = false;
       }
     },
-
     processOrganizationData(officeData, counts) {
-      // Process divisions with their sections and units
+      const officeNode = {
+        id: useUserStore().user?.office_id,
+        label: this.officeName,
+        name: this.officeName,
+        type: 'office',
+        icon: 'business',
+        count: counts.office || 0,
+        children: []
+      };
+
       const divisions = officeData.divisions.map((div, divIndex) => {
         const divisionCount = counts.divisions[div.division]?.count || 0;
-        const divisionObj = {
+        return {
           id: divIndex + 1,
+          label: div.division,
           name: div.division,
-          expanded: false,
+          type: 'division',
+          icon: 'apartment',
           count: divisionCount,
-          sections: [],
-          units: []
-        };
-
-        // Process sections within division
-        if (div.sections?.length) {
-          divisionObj.sections = div.sections.map((sec, secIndex) => {
-            const sectionCount = counts.sections[sec.section]?.count || 0;
-            return {
+          children: [
+            ...(div.sections?.map((sec, secIndex) => ({
               id: (divIndex + 1) * 100 + secIndex + 1,
+              label: sec.section,
               name: sec.section,
-              expanded: false,
-              count: sectionCount,
-              units: sec.units?.map((unit, unitIndex) => ({
+              type: 'section',
+              icon: 'group',
+              count: counts.sections[sec.section]?.count || 0,
+              children: sec.units?.map((unit, unitIndex) => ({
                 id: ((divIndex + 1) * 100 + secIndex + 1) * 100 + unitIndex + 1,
+                label: unit,
                 name: unit,
+                type: 'unit',
+                icon: 'person',
                 count: counts.units[unit]?.count || 0
               })) || []
-            };
-          });
-        }
-
-        // Process units directly under division
-        if (div.units_without_section?.length) {
-          divisionObj.units = div.units_without_section.map((unit, unitIndex) => ({
-            id: (divIndex + 1) * 1000 + unitIndex + 1,
-            name: unit,
-            count: counts.units[unit]?.count || 0
-          }));
-        }
-
-        return divisionObj;
+            })) || []),
+            ...(div.units_without_section?.map((unit, unitIndex) => ({
+              id: (divIndex + 1) * 1000 + unitIndex + 1,
+              label: unit,
+              name: unit,
+              type: 'unit',
+              icon: 'person',
+              count: counts.units[unit]?.count || 0
+            })) || [])
+          ]
+        };
       });
 
-      // Process sections without division
       if (officeData.sections_without_division?.length) {
-        const noDivisionSection = {
-          id: 9999, // Special ID for no-division sections
+        divisions.push({
+          id: 9999,
+          label: 'SECTIONS WITHOUT DIVISION',
           name: 'Sections Without Division',
-          expanded: false,
+          type: 'division',
+          icon: 'apartment',
           count: 0,
-          sections: officeData.sections_without_division.map((sec, secIndex) => {
-            const sectionCount = counts.sections[sec.section]?.count || 0;
-            return {
-              id: 9999 * 100 + secIndex + 1,
-              name: sec.section,
-              expanded: false,
-              count: sectionCount,
-              units: sec.units?.map((unit, unitIndex) => ({
-                id: (9999 * 100 + secIndex + 1) * 100 + unitIndex + 1,
-                name: unit,
-                count: counts.units[unit]?.count || 0
-              })) || []
-            };
-          })
-        };
-        divisions.push(noDivisionSection);
+          children: officeData.sections_without_division.map((sec, secIndex) => ({
+            id: 9999 * 100 + secIndex + 1,
+            label: sec.section,
+            name: sec.section,
+            type: 'section',
+            icon: 'group',
+            count: counts.sections[sec.section]?.count || 0,
+            children: sec.units?.map((unit, unitIndex) => ({
+              id: (9999 * 100 + secIndex + 1) * 100 + unitIndex + 1,
+              label: unit,
+              name: unit,
+              type: 'unit',
+              icon: 'person',
+              count: counts.units[unit]?.count || 0
+            })) || []
+          }))
+        });
       }
 
-      // Process units without division or section
       if (officeData.units_without_division?.length) {
-        const noDivisionUnit = {
-          id: 9998, // Special ID for no-division units
+        divisions.push({
+          id: 9998,
+          label: 'Units Without Division',
           name: 'Units Without Division',
-          expanded: false,
+          type: 'division',
+          icon: 'apartment',
           count: 0,
-          units: officeData.units_without_division.map((unit, unitIndex) => ({
+          children: officeData.units_without_division.map((unit, unitIndex) => ({
             id: 9998 * 100 + unitIndex + 1,
+            label: unit,
             name: unit,
+            type: 'unit',
+            icon: 'person',
             count: counts.units[unit]?.count || 0
           }))
-        };
-        divisions.push(noDivisionUnit);
+        });
       }
 
-      return divisions;
+      officeNode.children = divisions;
+      return officeNode;
     },
-    toggleDivision(division, event) {
-      if (event) event.stopPropagation();
-      division.expanded = !division.expanded;
-    },
-    toggleSection(section, event) {
-      if (event) event.stopPropagation();
-      section.expanded = !section.expanded;
-    },
-
-    async selectDivision(division) {
-      this.selectedNode = { type: 'division', id: division.id, name: division.name };
-      await this.loadNodeEmployees();
-    },
-
-    async selectSection(section) {
-      this.selectedNode = { type: 'section', id: section.id, name: section.name };
-      await this.loadNodeEmployees();
-    },
-
-    async selectUnit(unit) {
-      this.selectedNode = { type: 'unit', id: unit.id, name: unit.name };
-      await this.loadNodeEmployees();
-    },
-
-    async loadNodeEmployees() {
-      await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-      const counts = await this.employeeStore.fetchEmployeeCounts(useUserStore().user?.office_id);
-      this.updateLocalCounts(counts);
-    },
-
-    updateLocalCounts(counts) {
-      this.divisions.forEach(division => {
-        division.count = counts.divisions[division.name]?.count || 0;
-        division.sections.forEach(section => {
-          section.count = counts.sections[section.name]?.count || 0;
-          section.units.forEach(unit => {
-            unit.count = counts.units[unit.name]?.count || 0;
-          });
-        });
-        division.units?.forEach(unit => {
-          unit.count = counts.units[unit.name]?.count || 0;
-        });
+    updateTreeCounts() {
+      this.employeeStore.fetchEmployeeCounts(useUserStore().user?.office_id).then(counts => {
+        const updateNodeCounts = (node) => {
+          if (node.type === 'office') {
+            node.count = counts.office || 0;
+          } else if (node.type === 'division') {
+            node.count = counts.divisions[node.name]?.count || 0;
+          } else if (node.type === 'section') {
+            node.count = counts.sections[node.name]?.count || 0;
+          } else if (node.type === 'unit') {
+            node.count = counts.units[node.name]?.count || 0;
+          }
+          if (node.children) {
+            node.children.forEach(child => updateNodeCounts(child));
+          }
+        };
+        this.treeNodes.forEach(node => updateNodeCounts(node));
       });
     },
-
     async handleAddEmployees(selectedEmployees) {
       try {
         const userStore = useUserStore();
@@ -509,8 +400,7 @@ export default {
 
         if (this.selectedNode) {
           await this.employeeStore.fetchEmployeesByNode(this.selectedNode);
-          const counts = await this.employeeStore.fetchEmployeeCounts(officeId);
-          this.updateLocalCounts(counts);
+          this.updateTreeCounts();
         }
 
         this.$q.notify({ type: 'positive', message: 'Employees added successfully' });
@@ -521,44 +411,45 @@ export default {
         this.showAddModal = false;
       }
     },
-
     getDivisionForSelectedNode() {
       if (this.selectedNode.type === 'division') return this.selectedNode.name;
-
       if (this.selectedNode.type === 'section' || this.selectedNode.type === 'unit') {
-        for (const division of this.divisions) {
-          if (this.selectedNode.type === 'section') {
-            if (division.sections.some(s => s.id === this.selectedNode.id)) {
-              return division.name;
-            }
-          } else {
-            if (division.sections.some(s => s.units.some(u => u.id === this.selectedNode.id))) {
-              return division.name;
-            }
-            if (division.units?.some(u => u.id === this.selectedNode.id)) {
-              return division.name;
+        const findDivision = (nodes) => {
+          for (const node of nodes) {
+            if (node.type === 'division') {
+              if (node.children.some(child => child.id === this.selectedNode.id)) {
+                return node.name;
+              }
+              const found = findDivision(node.children);
+              if (found) return found;
             }
           }
-        }
+          return null;
+        };
+        return findDivision(this.treeNodes);
       }
       return null;
     },
     getSectionForSelectedNode() {
       if (this.selectedNode.type === 'section') return this.selectedNode.name;
       if (this.selectedNode.type === 'unit') {
-        for (const division of this.divisions) {
-          for (const section of division.sections) {
-            if (section.units.some(u => u.id === this.selectedNode.id)) return section.name;
+        const findSection = (nodes) => {
+          for (const node of nodes) {
+            if (node.type === 'section' && node.children.some(child => child.id === this.selectedNode.id)) {
+              return node.name;
+            }
+            const found = findSection(node.children);
+            if (found) return found;
           }
-        }
+          return null;
+        };
+        return findSection(this.treeNodes);
       }
       return null;
     },
     async updateEmployeeRank(employee, newRank) {
-      // Store the original rank in case user cancels
       const originalRank = employee.rank;
 
-      // Show confirmation dialog
       this.$q.dialog({
         title: 'Confirm Rank Change',
         message: `Are you sure you want to change ${employee.name}'s rank to ${newRank}?`,
@@ -566,19 +457,17 @@ export default {
         persistent: true
       }).onOk(async () => {
         try {
-          // If changing to Head, ensure no other Heads in same unit
-          if (newRank === 'Head') {
+          if (['Office-Head', 'Division-Head', 'Section-Head'].includes(newRank)) {
             const currentHead = this.filteredEmployees.find(emp =>
               emp.id !== employee.id &&
               this.isSameOrganizationalUnit(emp, employee) &&
-              emp.rank === 'Head'
+              emp.rank === newRank
             );
 
             if (currentHead) {
-              // Ask if they want to demote the current head
               this.$q.dialog({
                 title: 'Current Head Exists',
-                message: `There is already a Head (${currentHead.name}) in this unit. Do you want to demote them to Employee?`,
+                message: `There is already a ${newRank} (${currentHead.name}) in this unit. Do you want to demote them to Employee?`,
                 cancel: true,
                 persistent: true
               }).onOk(async () => {
@@ -612,13 +501,9 @@ export default {
           });
         }
       }).onCancel(() => {
-        // Revert the change if user cancels
         employee.rank = originalRank;
       });
     },
-
-
-
     async saveRankChange(employee, newRank) {
       await this.employeeStore.updateEmployeeRank(employee.id, newRank);
       employee.rank = newRank;
@@ -627,27 +512,13 @@ export default {
         message: `${employee.name}'s rank updated to ${newRank}`
       });
     },
-
-    // isHeadOptionDisabled(employee) {
-    //   // If no node is selected, allow Head selection
-    //   if (!this.selectedNode) return false;
-
-    //   // Check if there's already a Head in the same organizational unit
-    //   return this.filteredEmployees.some(emp =>
-    //     emp.id !== employee.id &&
-    //     emp.rank === 'Head' &&
-    //     this.isSameOrganizationalUnit(emp, employee)
-    //   );
-    // },
     isSameOrganizationalUnit(emp1, emp2) {
-      // For office-level comparison
       if (this.selectedNode?.type === 'office') {
         return emp1.office_id === emp2.office_id &&
           !emp1.division && !emp1.section && !emp1.unit &&
           !emp2.division && !emp2.section && !emp2.unit;
       }
 
-      // For division-level comparison
       if (this.selectedNode?.type === 'division') {
         return emp1.division === emp2.division &&
           emp1.division === this.selectedNode.name &&
@@ -655,14 +526,12 @@ export default {
           !emp1.unit && !emp2.unit;
       }
 
-      // For section-level comparison
       if (this.selectedNode?.type === 'section') {
         return emp1.section === emp2.section &&
           emp1.section === this.selectedNode.name &&
           (!emp1.unit || emp1.unit === emp2.unit);
       }
 
-      // For unit-level comparison
       if (this.selectedNode?.type === 'unit') {
         return emp1.unit === emp2.unit &&
           emp1.unit === this.selectedNode.name;
@@ -674,8 +543,171 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
-
 <style src="../../assets/office/employee.css" scoped></style>
+
+
+.employee-container {
+display: flex;
+min-height: 100vh;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.organization-panel {
+width: 350px;
+background: #f8f9fa;
+border-right: 1px solid #e0e0e0;
+padding: 20px;
+overflow-y: auto;
+position: relative;
+}
+
+.q-tree {
+font-size: 0.9rem;
+}
+
+.q-tree__node--selected {
+background-color: rgba(25, 118, 210, 0.1);
+font-weight: bold;
+}
+
+.node-label {
+display: flex;
+align-items: center;
+flex-grow: 1;
+}
+
+.node-icon {
+font-size: 1rem;
+margin-right: 8px;
+color: #666;
+}
+
+.employee-count {
+margin-left: auto;
+background: #e0e0e0;
+color: #222;
+border-radius: 10px;
+padding: 2px 8px;
+font-size: 0.7rem;
+}
+
+.employee-list-panel {
+flex: 1;
+padding: 20px;
+overflow-y: auto;
+}
+
+h2 {
+color: #2c3e50;
+margin-bottom: 20px;
+font-size: 1.4rem;
+}
+
+h3 {
+color: #34495e;
+margin-bottom: 15px;
+font-size: 1.2rem;
+}
+
+.table-title-container {
+display: flex;
+justify-content: space-between;
+align-items: flex-end;
+margin-bottom: 15px;
+}
+
+.add-employee-btn {
+background: #3498db;
+color: white;
+border: none;
+border-radius: 6px;
+padding: 8px 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+cursor: pointer;
+font-size: 0.9rem;
+transition: background 0.2s;
+}
+
+.add-employee-btn:hover {
+background: #2980b9;
+}
+
+.employee-table {
+flex-grow: 1;
+display: flex;
+flex-direction: column;
+border: 1px solid #dee2e6;
+border-radius: 8px;
+overflow: hidden;
+}
+
+.q-table {
+flex-grow: 1;
+}
+
+.empty-row {
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100%;
+color: rgba(0, 0, 0, 0.54);
+text-align: center;
+}
+
+.loading-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 24px;
+color: rgba(0, 0, 0, 0.54);
+}
+
+.q-table__top {
+padding: 8px 16px;
+}
+
+.q-table__bottom {
+padding: 8px 16px;
+}
+
+.rank-select {
+padding: 6px 10px;
+border: 1px solid #ddd;
+border-radius: 4px;
+background-color: white;
+width: 100%;
+max-width: 150px;
+cursor: pointer;
+}
+
+.rank-select:focus {
+outline: none;
+border-color: #3498db;
+box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+@media (max-width: 768px) {
+.employee-container {
+flex-direction: column;
+min-height: auto;
+}
+
+.organization-panel {
+width: 100%;
+max-height: 50vh;
+overflow-y: auto;
+border-right: none;
+border-bottom: 1px solid #dee2e6;
+}
+
+.employee-table {
+overflow-x: auto;
+}
+
+.rank-select {
+max-width: 100%;
+}
+}

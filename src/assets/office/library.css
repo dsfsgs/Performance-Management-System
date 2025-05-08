@@ -1,7 +1,7 @@
-/* Main table styling */
 .mfo-table {
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
 }
 
 .category-column {
@@ -9,6 +9,10 @@
   background-color: #f8f9fa;
   border-right: 1px solid #e0e0e0;
   vertical-align: top;
+  width: 33.33%;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .category-column:last-child {
@@ -20,13 +24,13 @@
   vertical-align: top;
   border-right: 1px solid #e0e0e0;
   width: 33.33%;
+  height: 100%;
 }
 
 .category-cell:last-child {
   border-right: none;
 }
 
-/* List styling */
 .mfo-list,
 .output-list {
   list-style: none;
@@ -50,13 +54,11 @@
 .output-item {
   background-color: #f8f9fa;
   border-radius: 4px;
-  padding: 8px 12px;
-  margin: 6px 0;
+  padding: 10px 12px;
+  margin: 8px 0;
 }
 
-/* Content styling - Updated for uniform alignment */
-.mfo-content,
-.output-content {
+.mfo-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -66,37 +68,55 @@
   flex-grow: 1;
   padding-right: 12px;
   min-width: 0;
-  /* Allows text truncation */
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  cursor: pointer;
 }
 
-.mfo-text,
-.output-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mfo-text {
+.mfo-number {
   font-size: 0.85rem;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.mfo-name {
   font-weight: bold;
+  word-break: break-word;
 }
 
-.output-text {
+.output-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.output-number {
   font-size: 0.8rem;
+  white-space: nowrap;
+  margin-right: 8px;
 }
 
-/* Action buttons - Updated for uniform alignment */
-.mfo-actions,
-.output-actions {
+.output-name {
+  font-weight: bold;
+  word-break: break-word;
+  flex-grow: 1;
+}
+
+.mfo-actions {
   display: flex;
   gap: 4px;
   min-width: 56px;
-  /* Fixed width for action buttons */
   flex-shrink: 0;
-  /* Prevents shrinking */
+  align-items: center;
 }
 
-/* Empty state styling */
+.output-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 .empty-state {
   display: flex;
   align-items: center;
@@ -105,20 +125,30 @@
   color: #6c757d;
 }
 
-/* Header content */
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Modal styling */
 .modal-card {
   border-radius: 8px;
   overflow: hidden;
 }
 
-/* Input styling with validation */
+.modal-scrollable-content {
+  max-height: calc(80vh - urged by 200px);
+  overflow-y: auto;
+}
+
+.modal-fixed-actions {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  z-index: 1;
+  border-top: 1px solid #e0e0e0;
+}
+
 .modern-input {
   :deep(.q-field__control) {
     border-radius: 6px;
@@ -145,11 +175,40 @@
 }
 
 .shake-animation {
-  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shake-animation {
+    animation: none;
+  }
+}
+
+.add-output-btn {
+  background-color: #00703c !important;
+  color: white !important;
+  border-radius: 20px !important;
+  padding: 4px 16px !important;
+  text-transform: none !important;
+  width: auto !important;
+  margin: 8px 0 !important;
+}
+
+.output-list {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.confirmation-list {
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.confirmation-list li {
+  margin-bottom: 4px;
 }
 
 @keyframes shake {
-
   10%,
   90% {
     transform: translate3d(-1px, 0, 0);
@@ -172,7 +231,6 @@
   }
 }
 
-
 :deep(.q-field--outlined .q-field__control) {
   height: 40px;
   min-height: 40px;
@@ -185,7 +243,6 @@
   font-size: 0.75rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1024px) {
   .category-cell {
     padding: 12px;
@@ -205,6 +262,8 @@
   .category-column,
   .category-cell {
     min-width: 280px;
+    display: block;
+    width: 100%;
   }
 
   .header-content {
@@ -215,5 +274,10 @@
   .header-content .q-btn {
     margin-left: 0;
     margin-top: 8px;
+  }
+
+  .mfo-item {
+    margin-bottom: 16px;
+    border-radius: 8px;
   }
 }
