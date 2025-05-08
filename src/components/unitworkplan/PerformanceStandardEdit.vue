@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import { useMfoStore } from 'src/stores/office/mfoStore';
+import { useMfoStore } from 'src/stores/office/LibraryStore';
 
 export default {
   props: {

@@ -94,7 +94,7 @@ export default {
       treeNodes: [],
       expandedNodes: [],
       columns: [
-        { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
+        { name: 'name', required: true, label: 'Name1', align: 'left', field: row => row.name, sortable: true },
         { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
         { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
         { name: 'actions', label: 'Actions', align: 'center', sortable: false }
