@@ -10,14 +10,14 @@
       <div class="section-container q-mb-lg" v-if="strategicFunctions.length > 0">
         <div class="section-title q-mb-sm">A. STRATEGIC FUNCTION</div>
         <div class="competency-table">
-          <table class="full-width">
+          <table class="fixed-table">
             <thead>
               <tr>
-                <th class="text-center" rowspan="2" width="20%">Function</th>
-                <th class="text-center" colspan="3" width="25%">Required Competency & Proficiency Level</th>
-                <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
-                <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
+                <th class="text-center" rowspan="2" style="width: 20%">Function</th>
+                <th class="text-center" colspan="3" style="width: 25%">Required Competency & Proficiency Level</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Alloted Budget</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Actual Accomplishment</th>
               </tr>
               <tr>
                 <th class="text-center">Core</th>
@@ -27,24 +27,24 @@
             </thead>
             <tbody>
               <tr v-for="(item, index) in strategicFunctions" :key="'strategic-' + index">
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   {{ item.mfo || 'Strategic Function ' + (index + 1) }}
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.core_competency">
                     <div v-for="(level, competency) in item.core_competency" :key="'core-' + competency">
                       {{ getCompetencyCode('core', competency) }} ({{ getProficiencyLevel(level) }})
                     </div>
                   </span>
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.technical_competency">
                     <div v-for="(level, competency) in item.technical_competency" :key="'tech-' + competency">
                       {{ getCompetencyCode('technical', competency) }} ({{ getProficiencyLevel(level) }})
                     </div>
                   </span>
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.leadership_competency">
                     <div v-for="(level, competency) in item.leadership_competency" :key="'leader-' + competency">
                       {{ getCompetencyCode('leadership', competency) }} ({{ getProficiencyLevel(level) }})
@@ -57,7 +57,7 @@
                     :error="errors[`strategicBudget${index}`]" error-message="Field is required" lazy-rules
                     @blur="validateField(`strategicBudget${index}`)" :ref="`strategicBudgetRef${index}`">
                     <template v-slot:prepend>
-                      <q-icon name="attach_money" />
+                      <q-icon name="money" />
                     </template>
                   </q-input>
                 </td>
@@ -94,14 +94,14 @@
       <div class="section-container q-mb-lg" v-if="coreFunctions.length > 0">
         <div class="section-title q-mb-sm">B. CORE FUNCTION</div>
         <div class="competency-table">
-          <table class="full-width">
+          <table class="fixed-table">
             <thead>
               <tr>
-                <th class="text-center" rowspan="2" width="15%">Function</th>
-                <th class="text-center" colspan="3" width="25%">Required Competency & Proficiency Level</th>
-                <th class="text-center" rowspan="2" width="10%">Alloted Budget</th>
-                <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
+                <th class="text-center" rowspan="2" style="width: 20%">Function</th>
+                <th class="text-center" colspan="3" style="width: 25%">Required Competency & Proficiency Level</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Alloted Budget</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Actual Accomplishment</th>
               </tr>
               <tr>
                 <th class="text-center">Core</th>
@@ -111,24 +111,24 @@
             </thead>
             <tbody>
               <tr v-for="(item, index) in coreFunctions" :key="'core-' + index">
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   {{ item.mfo || 'Core Function ' + (index + 1) }}
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.core_competency">
                     <div v-for="(level, competency) in item.core_competency" :key="'core-' + competency">
                       {{ getCompetencyCode('core', competency) }} ({{ getProficiencyLevel(level) }})
                     </div>
                   </span>
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.technical_competency">
                     <div v-for="(level, competency) in item.technical_competency" :key="'tech-' + competency">
                       {{ getCompetencyCode('technical', competency) }} ({{ getProficiencyLevel(level) }})
                     </div>
                   </span>
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   <span v-if="item.leadership_competency">
                     <div v-for="(level, competency) in item.leadership_competency" :key="'leader-' + competency">
                       {{ getCompetencyCode('leadership', competency) }} ({{ getProficiencyLevel(level) }})
@@ -141,7 +141,7 @@
                     :error="errors[`coreBudget${index}`]" error-message="Field is required" lazy-rules
                     @blur="validateField(`coreBudget${index}`)" :ref="`coreBudgetRef${index}`">
                     <template v-slot:prepend>
-                      <q-icon name="attach_money" />
+                      <q-icon name="money" />
                     </template>
                   </q-input>
                 </td>
@@ -175,22 +175,25 @@
       <div class="section-container q-mb-lg" v-if="supportFunctions.length > 0">
         <div class="section-title q-mb-sm">C. SUPPORT FUNCTION</div>
         <div class="competency-table">
-          <table class="full-width">
+          <table class="fixed-table">
             <thead>
               <tr>
-                <th class="text-center" rowspan="2" width="20%">Function</th>
-                <th class="text-center" rowspan="2" width="25%">Required Competency & Proficiency Level</th>
-                <th class="text-center" rowspan="2" width="15%">Alloted Budget</th>
-                <th class="text-center" rowspan="2" width="15%">Division/Individual Accountable</th>
-                <th class="text-center" rowspan="2" width="15%">Actual Accomplishment</th>
+                <th class="text-center" rowspan="2" style="width: 20%">Function</th>
+                <th class="text-center" colspan="3" style="width: 25%">Required Competency & Proficiency Level</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Alloted Budget</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Division/Individual Accountable</th>
+                <th class="text-center" rowspan="2" style="width: 15%">Actual Accomplishment</th>
+              </tr>
+              <tr>
+                <th class="text-center" colspan="3">Not Applicable</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in supportFunctions" :key="'support-' + index">
-                <td class="text-center">
+                <td class="text-center word-wrap">
                   {{ item.output || 'Support Function ' + (index + 1) }}
                 </td>
-                <td class="text-center">
+                <td class="text-center word-wrap" colspan="3">
                   Not Applicable
                 </td>
                 <td class="text-center">
@@ -199,7 +202,7 @@
                     :error="errors[`supportBudget${index}`]" error-message="Field is required" lazy-rules
                     @blur="validateField(`supportBudget${index}`)" :ref="`supportBudgetRef${index}`">
                     <template v-slot:prepend>
-                      <q-icon name="attach_money" />
+                      <q-icon name="money" />
                     </template>
                   </q-input>
                 </td>
@@ -284,7 +287,7 @@ import { useUserStore } from 'src/stores/userStore';
 
 export default {
   emits: ['save', 'close', 'error'],
-  setup({ emit }) {
+  setup(props, { emit }) {
     const $q = useQuasar();
     const opcrStore = useOpcrStore();
     const userStore = useUserStore();
@@ -433,7 +436,7 @@ export default {
       Object.keys(errors.value).forEach(field => {
         if (errors.value[field]) {
           const refName = `${field}Ref`;
-          const ref = refs[refName]?.[0];
+          const ref = refs.value[refName]?.[0];
           if (ref) {
             ref.$el.classList.remove('shake-animation');
             void ref.$el.offsetWidth;
@@ -493,7 +496,7 @@ export default {
         });
 
         emit('save', opcrData);
-      // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars
       } catch (error) {
         $q.notify({
           type: 'negative',
@@ -531,6 +534,34 @@ export default {
 </script>
 
 <style scoped>
+/* Fixed table layout to prevent resizing */
+.fixed-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Word wrapping for table cells */
+.word-wrap {
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Ensure consistent column widths across all tables */
+.competency-table table {
+  min-width: 100%;
+}
+
+.competency-table th,
+.competency-table td {
+  padding: 8px 10px;
+}
+
+/* Make sure the tables align properly */
+.section-container {
+  margin-bottom: 24px;
+}
+
 .header-section {
   padding-left: 16px;
   padding-right: 8px;

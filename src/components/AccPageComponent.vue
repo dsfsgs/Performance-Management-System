@@ -1,29 +1,28 @@
-<!--Account.vue-->
 <template>
-  <div class="account-container">
+  <div class="account-page">
     <!-- Employee Details Card -->
-    <q-card class="details-card elevated-card">
+    <q-card class="account-card">
       <q-card-section>
-        <div class="card-header">
-          <h2 class="card-title">Employee Details1</h2>
-          <q-icon name="person" class="card-icon" />
+        <div class="account-card__header">
+          <h2 class="account-card__title">Employee Details</h2>
+          <q-icon name="person" class="account-card__icon" />
         </div>
 
-        <div class="details-grid q-mt-md">
-          <div class="details-column">
-            <div class="detail-item">
-              <strong class="detail-label">Employee Name</strong>
-              <p class="detail-value">{{ userStore.user?.name || "N/A" }}</p>
+        <div class="account-details">
+          <div class="account-details__column">
+            <div class="account-detail">
+              <label class="account-detail__label">Employee Name</label>
+              <p class="account-detail__value">{{ userStore.user?.name || "N/A" }}</p>
             </div>
-            <div class="detail-item">
-              <strong class="detail-label">Position</strong>
-              <p class="detail-value">{{ userStore.user?.designation || "N/A" }}</p>
+            <div class="account-detail">
+              <label class="account-detail__label">Position</label>
+              <p class="account-detail__value">{{ userStore.user?.designation || "N/A" }}</p>
             </div>
           </div>
-          <div class="details-column">
-            <div class="detail-item">
-              <strong class="detail-label">Office</strong>
-              <p class="detail-value">{{ userStore.officeName }}</p>
+          <div class="account-details__column">
+            <div class="account-detail">
+              <label class="account-detail__label">Office</label>
+              <p class="account-detail__value">{{ userStore.officeName }}</p>
             </div>
           </div>
         </div>
@@ -31,47 +30,47 @@
     </q-card>
 
     <!-- Account Details Card -->
-    <q-card class="details-card elevated-card">
+    <q-card class="account-card">
       <q-card-section>
-        <div class="card-header">
-          <h2 class="card-title">Account Details</h2>
-          <q-btn class="edit-btn" icon="edit" label="Edit" @click="openEditModal" outline color="primary" />
+        <div class="account-card__header">
+          <h2 class="account-card__title">Account Details</h2>
+          <q-btn class="account-card__action" icon="edit" label="Edit" @click="openEditModal" outline color="primary" />
         </div>
 
-        <div class="details-grid q-mt-md">
-          <div class="details-column">
-            <div class="detail-item">
-              <strong class="detail-label">Username</strong>
-              <p class="detail-value">{{ userStore.user?.name }}</p>
+        <div class="account-details">
+          <div class="account-details__column">
+            <div class="account-detail">
+              <label class="account-detail__label">Username</label>
+              <p class="account-detail__value">{{ userStore.user?.name }}</p>
             </div>
           </div>
-          <div class="details-column">
-            <div class="detail-item">
-              <strong class="detail-label">Password</strong>
-              <p class="detail-value">••••••••</p>
+          <div class="account-details__column">
+            <div class="account-detail">
+              <label class="account-detail__label">Password</label>
+              <p class="account-detail__value">••••••••</p>
             </div>
           </div>
         </div>
 
-        <div class="last-updated q-mt-md">
+        <div class="account-card__footer">
           <q-icon name="schedule" size="sm" />
-          <span>Last updated: {{ lastUpdated }}</span>
+          <span>Last updated: {{ formatDate(lastUpdated) }}</span>
         </div>
       </q-card-section>
     </q-card>
 
     <!-- Edit Modal -->
     <q-dialog v-model="isModalOpen">
-      <q-card class="edit-modal">
-        <q-card-section class="modal-header">
-          <div class="text-h6">Edit Account</div>
+      <q-card class="account-modal">
+        <q-card-section class="account-modal__header">
+          <h3 class="account-modal__title">Edit Account</h3>
         </q-card-section>
 
-        <q-card-section class="modal-body">
-          <q-input v-model="formData.username" label="Username" outlined dense class="q-mb-md" readonly />
+        <q-card-section class="account-modal__body">
+          <q-input v-model="formData.username" label="Username" outlined dense class="account-modal__input" readonly />
 
           <q-input v-model="formData.oldPassword" label="Old Password" :type="showOldPassword ? 'text' : 'password'"
-            outlined dense class="q-mb-md" :rules="[val => !!val || 'Old password is required']">
+            outlined dense class="account-modal__input" :rules="[val => !!val || 'Old password is required']">
             <template v-slot:append>
               <q-icon :name="showOldPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
                 @click="showOldPassword = !showOldPassword" />
@@ -79,9 +78,9 @@
           </q-input>
 
           <q-input v-model="formData.newPassword" label="New Password" :type="showNewPassword ? 'text' : 'password'"
-            outlined dense class="q-mb-md" :rules="[
+            outlined dense class="account-modal__input" :rules="[
               val => !val || val.length >= 6 || 'Password must be at least 6 characters',
-              val => !val || val !== formData.oldPassword || 'New password must be different from old password'
+              val => !val || val !== formData.oldPassword || 'New password must be different'
             ]">
             <template v-slot:append>
               <q-icon :name="showNewPassword ? 'visibility_off' : 'visibility'" class="cursor-pointer"
@@ -90,7 +89,7 @@
           </q-input>
 
           <q-input v-model="formData.confirmPassword" label="Confirm New Password"
-            :type="showConfirmPassword ? 'text' : 'password'" outlined dense :rules="[
+            :type="showConfirmPassword ? 'text' : 'password'" outlined dense class="account-modal__input" :rules="[
               val => !formData.newPassword || val === formData.newPassword || 'Passwords do not match'
             ]">
             <template v-slot:append>
@@ -100,46 +99,56 @@
           </q-input>
         </q-card-section>
 
-        <q-card-actions align="right" class="modal-footer">
-          <q-btn flat label="Cancel" v-close-popup class="q-mr-sm" />
-          <q-btn color="primary" label="Save Changes" @click="saveChanges" :loading="isSaving" :disable="!formData.oldPassword ||
-            (formData.newPassword && formData.newPassword !== formData.confirmPassword)" />
+        <q-card-actions align="right" class="account-modal__footer">
+          <q-btn flat label="Cancel" v-close-popup color="grey-7" />
+          <q-btn color="primary" label="Save Changes" @click="saveChanges" :loading="isSaving"
+            :disable="!isFormValid" />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
 </template>
 
-
 <script>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useQuasar } from "quasar";
 import { useUserStore } from "src/stores/userStore";
+import { date } from 'quasar'
 
 export default {
   name: "UserAccount",
 
   setup() {
     const $q = useQuasar();
+    const userStore = useUserStore();
+
+    // State
     const isModalOpen = ref(false);
     const isSaving = ref(false);
-    const userStore = useUserStore();
+    const lastUpdated = ref(new Date());
     const showOldPassword = ref(false);
     const showNewPassword = ref(false);
     const showConfirmPassword = ref(false);
 
     const formData = ref({
-      username: userStore.user?.name || "",
+      username: "",
       oldPassword: "",
       newPassword: "",
       confirmPassword: ""
     });
 
-    const lastUpdated = ref(new Date().toLocaleString());
-
-    onMounted(() => {
-      userStore.loadUserData();
+    // Computed
+    const isFormValid = computed(() => {
+      return formData.value.oldPassword &&
+        (!formData.value.newPassword ||
+          (formData.value.newPassword === formData.value.confirmPassword &&
+            formData.value.newPassword !== formData.value.oldPassword));
     });
+
+    // Methods
+    const formatDate = (dateValue) => {
+      return date.formatDate(dateValue, 'MMMM D, YYYY [at] h:mm A');
+    };
 
     const openEditModal = () => {
       formData.value = {
@@ -148,30 +157,33 @@ export default {
         newPassword: "",
         confirmPassword: ""
       };
-      // Reset visibility toggles when opening modal
+
+      // Reset visibility toggles
       showOldPassword.value = false;
       showNewPassword.value = false;
       showConfirmPassword.value = false;
+
       isModalOpen.value = true;
     };
 
     const saveChanges = async () => {
       isSaving.value = true;
       try {
-        // Only send password fields if new password is provided
         const updateData = {
           oldPassword: formData.value.oldPassword,
           ...(formData.value.newPassword && { newPassword: formData.value.newPassword })
         };
 
         await userStore.updateUserCredentials(updateData);
-        lastUpdated.value = new Date().toLocaleString();
+        lastUpdated.value = new Date();
+
         $q.notify({
           type: "positive",
           message: "Password updated successfully!",
           position: "top",
           timeout: 2000
         });
+
         isModalOpen.value = false;
       } catch (error) {
         $q.notify({
@@ -185,6 +197,10 @@ export default {
       }
     };
 
+    onMounted(() => {
+      userStore.loadUserData();
+    });
+
     return {
       isModalOpen,
       isSaving,
@@ -194,6 +210,8 @@ export default {
       showOldPassword,
       showNewPassword,
       showConfirmPassword,
+      isFormValid,
+      formatDate,
       openEditModal,
       saveChanges,
     };
@@ -201,103 +219,114 @@ export default {
 };
 </script>
 
-
-<style scoped>
-.account-container {
+<style lang="scss" scoped>
+.account-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.5rem;
 }
 
-.elevated-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.account-card {
   border-radius: 12px;
-  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
   border: none;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--q-primary);
+  }
+
+  &__icon {
+    font-size: 1.5rem;
+    color: var(--q-secondary);
+  }
+
+  &__action {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--q-grey);
+    margin-top: 1rem;
+  }
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
-}
-
-.card-icon {
-  font-size: 1.5rem;
-  color: #666;
-}
-
-.details-grid {
+.account-details {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 1.5rem;
+
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
 
-.detail-item {
-  margin-bottom: 16px;
+.account-detail {
+  &__label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--q-grey);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 1rem;
+    color: var(--q-dark);
+    margin: 0;
+    padding: 0.75rem;
+    background: var(--q-light);
+    border-radius: 8px;
+    word-break: break-word;
+  }
 }
 
-.detail-label {
-  display: block;
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.detail-value {
-  font-size: 1rem;
-  color: #333;
-  margin: 0;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.last-updated {
-  font-size: 0.75rem;
-  color: #888;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.edit-btn {
-  font-weight: 500;
-}
-
-.edit-modal {
+.account-modal {
   width: 100%;
   max-width: 450px;
   border-radius: 12px;
-}
 
-.modal-header {
-  border-bottom: 1px solid #eee;
-  padding-bottom: 12px;
-}
+  &__header {
+    border-bottom: 1px solid var(--q-separator);
+    padding: 1rem 1.5rem;
+  }
 
-.modal-body {
-  padding-top: 16px;
-  padding-bottom: 16px;
-}
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--q-primary);
+  }
 
-.modal-footer {
-  border-top: 1px solid #eee;
-  padding-top: 16px;
-}
+  &__body {
+    padding: 1.5rem;
+  }
 
-.password-hint {
-  font-size: 0.75rem;
-  color: #888;
-  margin-top: 8px;
-  margin-bottom: 0;
+  &__input {
+    margin-bottom: 1rem;
+  }
+
+  &__footer {
+    border-top: 1px solid var(--q-separator);
+    padding: 1rem 1.5rem;
+  }
 }
 </style>

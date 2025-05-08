@@ -213,29 +213,60 @@
 
     <!-- Confirmation Dialog -->
     <q-dialog v-model="confirmDialog.show" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Confirm Save</div>
+      <q-card class="modal-card" style="min-width: 500px; max-width: 600px">
+        <q-card-section class="row items-center q-pb-none" style="background-color: #00703C">
+          <div class="text-subtitle1 text-white">Confirm Details</div>
+          <q-space />
+          <q-icon name="task_alt" size="md" class="text-white" />
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <p>Are you sure you want to save the following?</p>
-          <ul class="confirmation-list">
-            <li v-for="(item, index) in form.items" :key="index">
-              <strong>{{ form.isOutput ? 'Output' : 'MFO' }} {{ index + 1 }}:</strong> {{ item.name }}
-            </li>
-          </ul>
-          <div v-if="form.parentMfo" class="q-mt-sm">
-            <strong>Parent MFO:</strong> {{ form.parentMfo.name }}
-          </div>
-          <div class="q-mt-sm">
-            <strong>Category:</strong> {{ form.category.name }}
-          </div>
-        </q-card-section>
+        <div class="modal-scrollable-content">
+          <q-card-section class="q-pt-md">
+            <div class="text-subtitle2 text-grey-8 q-mb-sm">Please review the details before saving:</div>
 
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn flat label="Confirm" color="primary" @click="proceedWithSave" />
+            <!-- Category/Function first -->
+            <q-item>
+              <q-item-section avatar>
+                <q-icon name="category" color="orange" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-weight-medium">Category/Function</q-item-label>
+                <q-item-label caption>{{ form.category.name }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <!-- Parent MFO if exists -->
+            <q-item v-if="form.parentMfo">
+              <q-item-section avatar>
+                <q-icon name="account_tree" color="green" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-weight-medium">Parent MFO</q-item-label>
+                <q-item-label caption>{{ form.parentMfo.name }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <!-- Items list -->
+            <q-list bordered separator class="rounded-borders q-mt-sm">
+              <q-item v-for="(item, index) in form.items" :key="index">
+                <q-item-section avatar>
+                  <q-icon :name="form.isOutput ? 'description' : 'folder'" color="primary" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">
+                    {{ form.isOutput ? 'Output' : 'MFO' }} {{ index + 1 }}
+                  </q-item-label>
+                  <q-item-label caption>{{ item.name }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </div>
+
+        <q-card-actions align="right" class="q-pa-md modal-fixed-actions">
+          <q-btn flat label="Cancel" color="grey-7" v-close-popup />
+          <q-btn label="Confirm & Save" color="primary" @click="proceedWithSave" icon="save" unelevated
+            class="q-px-sm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
