@@ -166,6 +166,7 @@ const columns = [
   { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
   { name: 'position', label: 'Position', field: 'position', align: 'left', sortable: true },
   { name: 'strategic', label: 'Strategic Function', field: 'strategic', align: 'center' },
+
   { name: 'core', label: 'Core Function', field: 'core', align: 'center' },
   { name: 'support', label: 'Support Function', field: 'support', align: 'center' },
   { name: 'rating', label: 'Adjectival Rating', field: 'rating', align: 'center' },
@@ -180,7 +181,7 @@ const { getStatusColor, getStatusTextColor, getStatusIcon } = useIPCRStatus();
 // Computed
 const filteredEmployees = computed(() => {
   const searchLower = searchText.value.toLowerCase().trim();
-  
+
   if (!searchLower) {
     return sortByStatus([...employeeRows.value]);
   }
@@ -202,7 +203,7 @@ const sortByStatus = (employees) => {
     'Not Reviewed': 1,
     'Approved': 2
   };
-  
+
   return employees.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 };
 
@@ -241,9 +242,9 @@ const approveIPCR = async () => {
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     employeeRows.value[index].status = 'Approved';
-    
+
     $q.notify({
       type: 'positive',
       message: 'IPCR approved successfully!',

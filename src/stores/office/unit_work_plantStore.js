@@ -100,16 +100,19 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
         this.loading = false
       }
     },
+
     async fetchDivisionDetails(division, targetPeriod) {
       this.loading = true
       try {
         const [period, year] = targetPeriod.split(/(?=\d{4}$)/)
+
         const response = await api.get('/division/employee/performance', {
           params: {
             division,
             target_period: period.trim(),
             year: year.trim(),
           },
+
         })
 
         console.log('API Response:', response.data) // Debug raw data
@@ -300,7 +303,7 @@ export const useUnitWorkPlanStore = defineStore('unitWorkPlan', {
       this.employeesWithWorkPlans = []
     },
 
-   
+
 
     async saveWorkPlan(workPlans) {
       const userStore = useUserStore()
