@@ -15,7 +15,6 @@ export const useMfoStore = defineStore('mfo', {
   }),
 
   actions: {
-
         async fetchCategories() {
           this.loading = true
           this.error = null

@@ -283,12 +283,7 @@ export default {
         this.loading = false;
       }
     },
-    // handleAddEmployee() {
-    //   this.$emit('add-employee', {
-    //     division: this.division,
-    //     targetPeriod: this.targetPeriod
-    //   });
-    // }
+ 
     handleAddEmployee() {
       // Remove the year if it's included
       let cleanedTargetPeriod = this.targetPeriod.replace(/\s\d{4}$/, '');

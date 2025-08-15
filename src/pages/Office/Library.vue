@@ -277,6 +277,7 @@
 import { api } from 'src/boot/axios';
 import { useUserStore } from 'src/stores/userStore';
 import { mapState } from 'pinia';
+import Swal from 'sweetalert2';
 
 export default {
   name: "MFOComponent",
@@ -412,51 +413,95 @@ export default {
 
       return isValid;
     },
-    confirmSave() {
+    async confirmSave() {
       if (!this.validateForm()) {
         return;
       }
-      this.confirmDialog.show = true;
+
+      // Temporarily close the modal while showing SweetAlert
+      const modalWasOpen = this.modal.show;
+      this.modal.show = false;
+
+      try {
+        const result = await Swal.fire({
+          title: 'Confirm Save',
+          text: 'Do you want to save these changes?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#00703C', // Your app's primary color
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, save it!',
+          allowOutsideClick: false, // Prevent closing by clicking outside
+          backdrop: 'rgba(0,0,0,0.5)', // Semi-transparent backdrop
+          focusConfirm: false // Don't auto-focus the confirm button
+        });
+
+        if (result.isConfirmed) {
+          await this.proceedWithSave();
+        } else if (modalWasOpen) {
+          this.modal.show = true; // Reopen modal if canceled
+        }
+      } catch (error) {
+        console.error('Confirmation error:', error);
+        if (modalWasOpen) this.modal.show = true;
+      }
     },
+
+
     async proceedWithSave() {
-      this.confirmDialog.show = false;
       try {
         this.modal.loading = true;
 
+        // Save logic based on form type
         if (this.form.isOutput) {
           await this.saveOutputs();
+        } else if (!this.isSupportCategory) {
+          await this.saveMfos();
         } else {
-          if (!this.isSupportCategory) {
-            await this.saveMfos();
-          } else {
-            await this.saveOutputs();
-            return;
-          }
+          await this.saveOutputs();
+          return;
         }
 
-        this.$q.notify({
-          type: 'positive',
-          message: this.modal.mode === 'add'
-            ? (this.form.isOutput
-              ? 'Output saved successfully'
-              : 'MFO saved successfully')
-            : (this.form.isOutput
-              ? 'Output updated successfully'
-              : 'MFO updated successfully'),
-          position: 'top'
+        // Show success message
+        await Swal.fire({
+          title: 'Success!',
+          text: this.getSuccessMessage(),
+          icon: 'success',
+          confirmButtonColor: '#00703C',
+          timer: 2000, // Auto-close after 2 seconds
+          timerProgressBar: true,
+          showConfirmButton: false
         });
 
         await this.fetchData();
         this.closeModal();
       } catch (error) {
         console.error('Save error:', error);
-        this.$q.notify({
-          type: 'negative',
-          message: error.response?.data?.message || error.message || 'Failed to save entries',
-          position: 'top'
+
+        // Show error message
+        await Swal.fire({
+          title: 'Error!',
+          text: error.response?.data?.message || 'Failed to save entries',
+          icon: 'error',
+          confirmButtonColor: '#d33'
         });
+
+        // Reopen modal on error
+        this.modal.show = true;
       } finally {
         this.modal.loading = false;
+      }
+    },
+
+    getSuccessMessage() {
+      if (this.modal.mode === 'add') {
+        return this.form.isOutput
+          ? 'Output added successfully!'
+          : 'MFO added successfully!';
+      } else {
+        return this.form.isOutput
+          ? 'Output updated successfully!'
+          : 'MFO updated successfully!';
       }
     },
     shakeInvalidFields() {
@@ -482,6 +527,8 @@ export default {
         });
       });
     },
+
+
     scrollToInvalidField(index) {
       this.$nextTick(() => {
         const containerRef = `itemContainer_${index}`;
@@ -506,6 +553,7 @@ export default {
         }
       });
     },
+
     scrollToNewField() {
       this.$nextTick(() => {
         const lastIndex = this.form.items.length - 1;
@@ -791,25 +839,71 @@ export default {
         throw error;
       }
     },
-    confirmDelete(mfo) {
-      this.$q.dialog({
-        title: 'Confirm Delete',
-        message: 'Are you sure you want to delete this MFO?',
-        cancel: true,
-        persistent: true
-      }).onOk(async () => {
-        await this.deleteMfo(mfo);
-      });
+
+    async confirmDelete(mfo) {
+      const modalWasOpen = this.modal.show;
+      this.modal.show = false;
+
+      try {
+        const result = await Swal.fire({
+          title: 'Delete MFO?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#00703C',
+          confirmButtonText: 'Yes, delete it!',
+          backdrop: 'rgba(0,0,0,0.5)',
+          allowOutsideClick: false
+        });
+
+        if (result.isConfirmed) {
+          await this.deleteMfo(mfo);
+          await Swal.fire({
+            title: 'Deleted!',
+            text: 'MFO has been deleted.',
+            icon: 'success',
+            confirmButtonColor: '#00703C',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else if (modalWasOpen) {
+          this.modal.show = true;
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        if (modalWasOpen) this.modal.show = true;
+      }
     },
-    confirmDeleteOutput(output) {
-      this.$q.dialog({
-        title: 'Confirm Delete',
-        message: 'Are you sure you want to delete this output?',
-        cancel: true,
-        persistent: true
-      }).onOk(async () => {
-        await this.deleteOutput(output);
-      });
+    async confirmDeleteOutput(output) {
+      const modalWasOpen = this.modal.show;
+      this.modal.show = false;
+
+      try {
+        const result = await Swal.fire({
+          title: 'Confirm Delete',
+          text: 'Are you sure you want to delete this output?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#00703C',
+          confirmButtonText: 'Yes, delete it!',
+          allowOutsideClick: false,
+          focusConfirm: false,
+          backdrop: true
+        });
+
+        if (result.isConfirmed) {
+          await this.deleteOutput(output);
+        } else if (modalWasOpen) {
+          this.modal.show = true;
+        }
+      } catch (error) {
+        console.error('Delete confirmation error:', error);
+        if (modalWasOpen) {
+          this.modal.show = true;
+        }
+      }
     },
     async deleteMfo(mfo) {
       try {

@@ -91,8 +91,17 @@ export default {
       selectedNodeId: null,
       selectedNode: null,
       loading: false,
-      treeNodes: [],
-      expandedNodes: [],
+      officeExpanded: false,
+      divisions: [],
+  //     columns: [
+  //       { name: 'name', required: true, label: 'Name', align: 'left', field: row => row.name, sortable: true },
+  //       { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
+  //       { name: 'rank', label: 'Rank', align: 'left', field: row => row.rank, sortable: true },
+  //       { name: 'actions', label: 'Actions', align: 'center', sortable: false }
+  //     ],
+
+  //   };
+  // },
       columns: [
         { name: 'name', required: true, label: 'Name1', align: 'left', field: row => row.name, sortable: true },
         { name: 'position', label: 'Position', align: 'left', field: row => row.position, sortable: true },
@@ -102,6 +111,29 @@ export default {
     };
   },
   computed: {
+    // rankOptions() {
+    //   return [
+    //     { value: 'Employee', label: 'Employee' },
+    //     { value: 'Supervisor', label: 'Supervisor' },
+    //     { value: 'Rank-in-File', label: 'Rank-in-File' },
+    //     { value: 'Managerial', label: 'Managerial' },
+    //     {
+    //       value: 'Office-Head',
+    //       label: 'Office-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     },
+    //       {
+    //       value: 'Division-Head',
+    //         label: 'Division-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     },
+    //     {
+    //       value: 'Section-Head',
+    //       label: 'Section-Head',
+    //       disable: (employee) => this.isHeadOptionDisabled(employee)
+    //     }
+    //   ];
+    // },
     rankOptions() {
       const baseOptions = [
         { value: 'Employee', label: 'Employee' },
@@ -229,6 +261,7 @@ export default {
       }
       this.updateTreeCounts();
     },
+    
     async fetchOrganizationStructure() {
       this.loading = true;
       try {

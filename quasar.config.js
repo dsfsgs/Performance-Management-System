@@ -15,7 +15,7 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss',
-      
+
 
     ],
 
@@ -75,7 +75,10 @@ export default defineConfig((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
+      port: 9000, // change to any free port like 9002, 9003 etc.
       // https: true,
+      host: '0.0.0.0',
+
       open: true, // opens browser window automatically
     },
 
@@ -94,7 +97,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Notify','Dialog'],
+      plugins: ['Notify','Dialog',],
     },
 
     // animations: 'all', // --- includes all animations

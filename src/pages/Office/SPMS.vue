@@ -1,355 +1,286 @@
+// Vue component update
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-      <q-page padding>
-        <!-- Target Period Filter -->
-        <div class="row justify-end q-mb-md">
-          <q-select outlined dense v-model="targetPeriod" :options="periodOptions" label="Target Period"
-            style="width: 200px" />
+      <q-page padding class="q-pa-md">
+        <!-- Page Header -->
+        <div class="row items-center justify-between q-mb-lg">
+          <!-- <h4 class="q-my-none text-primary">{{ officeName }}</h4> -->
+          <div class="row q-gutter-sm">
+            <!-- <q-select outlined dense v-model="targetPeriod" :options="periodOptions" label="Target Period"
+              class="period-select" style="width: 180px" /> -->
+            <!-- <q-btn color="primary" icon="refresh" flat round @click="refreshData">
+              <q-tooltip>Refresh Data</q-tooltip>
+            </q-btn> -->
+          </div>
         </div>
 
-        <!-- Main Office Section -->
-        <div class="org-section q-mb-lg">
-          <div class="org-header row items-center justify-between q-pa-sm q-mb-md">
-            <div class="text-h6">{{ mainOffice.label }}</div>
-            <div>
-              <q-btn color="positive" label="Create UWP" size="sm" class="q-mr-xs" />
-              <q-btn color="primary" label="OPCR" size="sm" class="q-mr-xs" />
-              <q-btn color="primary" label="UWP" size="sm" />
-            </div>
-          </div>
+        <!-- Organization Tree -->
+        <div class="row q-mb-lg">
+          <div class="col-12 col-md-4">
+            <q-card flat bordered>
+              <q-card-section>
+                <q-tree :nodes="organizationTree" node-key="id" v-model:selected="selectedNodeId"
+                  :filter-method="filterMethod" default-expand-all @update:selected="onNodeSelect"
+                  :loading="orgStore.loading">
 
-          <!-- Main Office Employees Table -->
-          <q-table :rows="[mainOffice.employee, ...mainOffice.subordinates]" :columns="columns" row-key="id" bordered
-            class="clean-table" :pagination="{ rowsPerPage: 0 }">
-            <template v-slot:body="props">
-              <q-tr :props="props" :class="{ 'head-row': props.row.isHead }">
-                <!-- Name column with dropdown for head -->
-                <q-td key="name" :props="props">
-                  <div class="row items-center no-wrap">
-                    <q-btn v-if="props.row.isHead" flat round dense
-                      :icon="expandedEmployees[props.row.id] ? 'expand_more' : 'chevron_right'"
-                      @click.stop="toggleEmployee(props.row.id)" color="primary" size="sm" class="q-mr-md" />
-                    <span :class="{ 'text-weight-bold': props.row.isHead }">{{ props.row.name }}</span>
-                  </div>
-                </q-td>
-
-                <!-- Regular columns -->
-                <q-td key="rank" :props="props">
-                  {{ props.row.rank }}
-                </q-td>
-                <q-td key="ipcr_status" :props="props">
-                  <q-badge :color="getStatusColor(props.row)" :label="getIPCRStatusLabel(props.row)" />
-                </q-td>
-                <q-td key="actions" :props="props" class="text-center">
-                  <div>
-                    <!-- Special actions for main office head -->
-                    <template v-if="props.row.id === mainOffice.employee.id">
-                      <q-btn flat round color="teal" icon="add" size="sm">
-                        <q-tooltip>Add Input</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="primary" icon="assessment" size="sm">
-                        <q-tooltip>OPCR</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="primary" icon="assignment" size="sm">
-                        <q-tooltip>UWP</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="primary" icon="edit" size="sm">
-                        <q-tooltip>Edit</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="negative" icon="delete" size="sm">
-                        <q-tooltip>Delete</q-tooltip>
-                      </q-btn>
-                    </template>
-                    <!-- Standard actions for other employees -->
-                    <template v-else>
-                      <q-btn flat round color="primary" icon="description" size="sm">
-                        <q-tooltip>IPCR</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="primary" icon="assignment" size="sm">
-                        <q-tooltip>UWP</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="primary" icon="edit" size="sm">
-                        <q-tooltip>Edit</q-tooltip>
-                      </q-btn>
-                      <q-btn flat round color="negative" icon="delete" size="sm">
-                        <q-tooltip>Delete</q-tooltip>
-                      </q-btn>
-                    </template>
-                  </div>
-                </q-td>
-              </q-tr>
-
-              <!-- Expanded divisions row when main office head is expanded -->
-              <q-tr
-                v-if="props.row.isHead && expandedEmployees[props.row.id] && props.row.id === mainOffice.employee.id">
-                <q-td colspan="4">
-                  <div class="q-pa-md q-my-sm nested-content">
-                    <!-- Divisions under the main office -->
-                    <div v-for="division in divisions" :key="division.id" class="q-mb-md">
-                      <div class="org-header row items-center justify-between q-pa-sm q-mb-md">
-                        <div class="text-subtitle1 text-weight-medium">{{ division.label }}</div>
-                        <div>
-                          <q-btn color="primary" icon="person_add" size="sm" class="q-mr-xs">
-                            <q-tooltip>Add Employee</q-tooltip>
-                          </q-btn>
-                          <q-btn color="secondary" icon="preview" size="sm">
-                            <q-tooltip>Preview UWP</q-tooltip>
-                          </q-btn>
+                  <template v-slot:default-header="scope">
+                    <div class="row items-center">
+                      <q-icon :name="getNodeIcon(scope.node)" :color="getNodeColor(scope.node)" size="md"
+                        class="q-mr-sm" />
+                      <div>
+                        <div :class="{ 'text-weight-bold': scope.node.isHead }">
+                          {{ scope.node.label }}
+                        </div>
+                        <div class="text-caption text-grey-7" v-if="scope.node.isHead">
+                          {{ scope.node.position }}
                         </div>
                       </div>
-
-                      <!-- Division Employees Table -->
-                      <q-table :rows="[division.employee, ...division.subordinates]" :columns="columns" row-key="id"
-                        bordered class="clean-table" :pagination="{ rowsPerPage: 0 }">
-                        <template v-slot:body="divProps">
-                          <q-tr :props="divProps" :class="{ 'head-row': divProps.row.isHead }">
-                            <!-- Name column with dropdown for head -->
-                            <q-td key="name" :props="divProps">
-                              <div class="row items-center no-wrap">
-                                <q-btn v-if="divProps.row.isHead" flat round dense
-                                  :icon="expandedEmployees[divProps.row.id] ? 'expand_more' : 'chevron_right'"
-                                  @click.stop="toggleEmployee(divProps.row.id)" color="primary" size="sm"
-                                  class="q-mr-md" />
-                                <span :class="{ 'text-weight-bold': divProps.row.isHead }">{{ divProps.row.name
-                                }}</span>
-                              </div>
-                            </q-td>
-
-                            <!-- Regular columns -->
-                            <q-td key="rank" :props="divProps">
-                              {{ divProps.row.rank }}
-                            </q-td>
-                            <q-td key="ipcr_status" :props="divProps">
-                              <q-badge :color="getStatusColor(divProps.row)"
-                                :label="getIPCRStatusLabel(divProps.row)" />
-                            </q-td>
-                            <q-td key="actions" :props="divProps" class="text-center">
-                              <div>
-                                <q-btn flat round color="primary" icon="description" size="sm">
-                                  <q-tooltip>IPCR</q-tooltip>
-                                </q-btn>
-                                <q-btn flat round color="primary" icon="assignment" size="sm">
-                                  <q-tooltip>UWP</q-tooltip>
-                                </q-btn>
-                                <q-btn flat round color="primary" icon="edit" size="sm">
-                                  <q-tooltip>Edit</q-tooltip>
-                                </q-btn>
-                                <q-btn flat round color="negative" icon="delete" size="sm">
-                                  <q-tooltip>Delete</q-tooltip>
-                                </q-btn>
-                              </div>
-                            </q-td>
-                          </q-tr>
-
-                          <!-- Expanded sections row when division head is expanded -->
-                          <q-tr
-                            v-if="divProps.row.isHead && expandedEmployees[divProps.row.id] && divProps.row.id === division.employee.id">
-                            <q-td colspan="4">
-                              <div class="q-pa-md q-my-sm nested-content">
-                                <!-- Sections under this division -->
-                                <div v-for="section in getSectionsForDivision(division.id)" :key="section.id"
-                                  class="q-mb-md">
-                                  <div class="org-header row items-center justify-between q-pa-sm q-mb-md">
-                                    <div class="text-subtitle1 text-weight-medium">{{ section.label }}</div>
-                                    <div>
-                                      <q-btn color="primary" icon="person_add" size="sm" class="q-mr-xs">
-                                        <q-tooltip>Add Employee</q-tooltip>
-                                      </q-btn>
-                                      <q-btn color="secondary" icon="preview" size="sm">
-                                        <q-tooltip>Preview UWP</q-tooltip>
-                                      </q-btn>
-                                    </div>
-                                  </div>
-
-                                  <!-- Section Employees Table -->
-                                  <q-table :rows="[section.employee, ...section.subordinates]" :columns="columns"
-                                    row-key="id" bordered class="clean-table" :pagination="{ rowsPerPage: 0 }">
-                                    <template v-slot:body="secProps">
-                                      <q-tr :props="secProps" :class="{ 'head-row': secProps.row.isHead }">
-                                        <q-td key="name" :props="secProps">
-                                          <div class="row items-center no-wrap">
-                                            <div class="q-pl-xl"><!-- Empty space to align with levels above --></div>
-                                            <span :class="{ 'text-weight-bold': secProps.row.isHead }">{{
-                                              secProps.row.name }}</span>
-                                          </div>
-                                        </q-td>
-                                        <q-td key="rank" :props="secProps">
-                                          {{ secProps.row.rank }}
-                                        </q-td>
-                                        <q-td key="ipcr_status" :props="secProps">
-                                          <q-badge :color="getStatusColor(secProps.row)"
-                                            :label="getIPCRStatusLabel(secProps.row)" />
-                                        </q-td>
-                                        <q-td key="actions" :props="secProps" class="text-center">
-                                          <div>
-                                            <q-btn flat round color="primary" icon="description" size="sm">
-                                              <q-tooltip>IPCR</q-tooltip>
-                                            </q-btn>
-                                            <q-btn flat round color="primary" icon="assignment" size="sm">
-                                              <q-tooltip>UWP</q-tooltip>
-                                            </q-btn>
-                                            <q-btn flat round color="primary" icon="edit" size="sm">
-                                              <q-tooltip>Edit</q-tooltip>
-                                            </q-btn>
-                                            <q-btn flat round color="negative" icon="delete" size="sm">
-                                              <q-tooltip>Delete</q-tooltip>
-                                            </q-btn>
-                                          </div>
-                                        </q-td>
-                                      </q-tr>
-                                    </template>
-                                  </q-table>
-                                </div>
-                              </div>
-                            </q-td>
-                          </q-tr>
-                        </template>
-                      </q-table>
                     </div>
+                  </template>
+
+                </q-tree>
+              </q-card-section>
+            </q-card>
+          </div>
+
+          <!-- Employee Table -->
+          <div class="col-12 col-md-8">
+            <q-card flat bordered>
+              <q-card-section>
+                <div class="text-h6 q-mb-md" v-if="selectedNode">
+                  {{ selectedNode.label }}
+                  <!-- <q-btn color="primary" icon="person_add" label="Add Employee" dense class="q-ml-sm"
+                    @click="addEmployee" /> -->
+
+                  <div class="row justify-end q-mt-sm">
+                    <q-btn color="green" icon="person_add" label="Create Unit Work Plan" dense @click="addEmployee" />
                   </div>
-                </q-td>
-              </q-tr>
-            </template>
-          </q-table>
+
+                </div>
+                <q-table :rows="employees" :columns="columns" row-key="id" flat bordered class="clean-table"
+                  :pagination="{ rowsPerPage: 0 }" :loading="loading">
+                  <template v-slot:body="props">
+                    <q-tr :props="props">
+                      <q-td key="name" :props="props">
+                        <div class="row items-center">
+                          <q-icon name="person" color="grey" size="md" class="q-mr-sm" />
+                          <div>
+                            <div>{{ props.row.label }}</div>
+                            <div class="text-caption text-grey-7">{{ props.row.position }}</div>
+                          </div>
+                        </div>
+                      </q-td>
+                      <q-td key="rank" :props="props">
+                        <div class="text-body2">{{ props.row.rank || '-' }}</div>
+                      </q-td>
+                      <q-td key="ipcr_status" :props="props">
+                        <q-badge :color="getStatusColor(props.row)" :label="props.row.ipcrStatus || '-'"
+                          class="status-badge" />
+                      </q-td>
+                      <q-td key="actions" :props="props" class="text-center">
+                        <div class="row justify-center q-gutter-xs">
+                          <q-btn flat round color="blue" icon="assignment_ind" size="md"
+                            @click="unitWorkplanEmployee(props.row)">
+                            <q-tooltip>Iprc</q-tooltip>
+                          </q-btn>
+                          <q-btn flat round color="green" icon="article" size="md"
+                            @click="unitWorkplanEmployee(props.row)">
+                            <q-tooltip>UnitWorkPlan</q-tooltip>
+                          </q-btn>
+                          <q-btn flat round color="amber" icon="edit" size="md" @click="editEmployee(props.row)">
+                            <q-tooltip>Edit</q-tooltip>
+                          </q-btn>
+                          <q-btn flat round color="negative" icon="delete" size="md" @click="deleteEmployee(props.row)">
+                            <q-tooltip>Delete</q-tooltip>
+                          </q-btn>
+                        </div>
+                      </q-td>
+                    </q-tr>
+                  </template>
+                </q-table>
+              </q-card-section>
+            </q-card>
+          </div>
         </div>
+
+
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue';
 
-const targetPeriod = ref('Jan-June 2024');
-const periodOptions = ref([
-  'Jan-June 2024', 'July-Dec 2024', 'Jan-June 2025', 'July-Dec 2025'
-]);
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useOrganizationStore } from 'src/stores/office/spmsStore';
+import { useUserStore } from 'src/stores/userStore';
+
+const orgStore = useOrganizationStore();
+const userStore = useUserStore();
+
+// const targetPeriod = ref('Jan-June 2024');
+// const periodOptions = ref([
+//   'Jan-June 2024',
+//   'July-Dec 2024',
+//   'Jan-June 2025',
+//   'July-Dec 2025',
+// ]);
+
+const getNodeIcon = (node) => {
+  if (node.isHead) {
+    // Heads get person icons with different styles
+    switch (node.type) {
+      case 'office': return 'account_balance';
+      case 'division': return 'supervisor_account';
+      case 'section': return 'manage_accounts';
+      case 'unit': return 'person';
+      default: return 'person';
+    }
+  }
+
+  // Non-head nodes get type-specific icons
+  switch (node.type) {
+    case 'office': return 'account_balance';
+    case 'division': return 'corporate_fare'; // Building icon for divisions
+    case 'section': return 'view_quilt'; // Grid icon for sections
+    case 'unit': return 'widgets'; // Puzzle pieces for units
+    case 'employee': return 'person';
+    default: return 'help_outline';
+  }
+};
+
+const getNodeColor = (node) => {
+  if (node.isHead) return 'blue';
+  switch (node.type) {
+    case 'office': return 'purple';
+    case 'division': return 'deep-purple';
+    case 'section': return 'teal';
+    case 'unit': return 'indigo';
+    case 'employee': return 'grey';
+    default: return 'grey';
+  }
+};
+
+const selectedNodeId = ref(null);
+const loading = ref(false);
 
 const columns = ref([
-  { name: 'name', align: 'left', label: 'Name', field: 'name', sortable: true },
-  { name: 'rank', align: 'left', label: 'Rank', field: 'rank', sortable: true },
-  { name: 'ipcr_status', align: 'left', label: 'IPCR Status', field: 'ipcr_status' },
+  { name: 'name', align: 'left', label: 'Name', field: 'label', sortable: true },
+  { name: 'rank', align: 'left', label: 'Rank', field: 'rank' },
+  { name: 'ipcr_status', align: 'left', label: 'IPCR Status', field: 'ipcrStatus' },
   { name: 'actions', align: 'center', label: 'Actions', field: 'actions' },
 ]);
 
-// Track expanded employees
-const expandedEmployees = reactive({});
-
-// Toggle employee expansion
-const toggleEmployee = (employeeId) => {
-  expandedEmployees[employeeId] = !expandedEmployees[employeeId];
+// Required method for q-tree but not implemented in your code
+const filterMethod = (node, filter) => {
+  return node.label && node.label.toLowerCase().indexOf(filter.toLowerCase()) > -1;
 };
 
-// Status helper functions
-const getStatusColor = (employee) => {
-  if (employee.isHead) return 'blue';
-  const id = employee.id;
-  if (id % 2 === 0) return 'green';
-  return 'orange';
+// Implement onNodeSelect function which was referenced but not defined
+const onNodeSelect = (nodeId) => {
+  selectedNodeId.value = nodeId;
+  // Additional logic can be added here if needed
 };
 
-const getIPCRStatusLabel = (employee) => {
-  if (employee.isHead) return 'Managerial';
-
-  // Determine based on rank
-  const rank = employee.rank.toLowerCase();
-  if (rank.includes('deputy') || rank.includes('supervisor')) {
-    return 'Supervisory';
-  }
-  return 'Rank and File';
+// Implement getStatusColor function which was referenced but not defined
+const getStatusColor = (row) => {
+  const status = row.ipcrStatus?.toLowerCase() || '';
+  if (status.includes('approved')) return 'positive';
+  if (status.includes('pending')) return 'warning';
+  if (status.includes('review')) return 'info';
+  if (status.includes('rejected')) return 'negative';
+  return 'grey';
 };
 
-// Main Office data
-const mainOffice = ref({
-  id: 'cictmo',
-  label: 'CICTMO',
-  employee: { id: 1, name: 'John Doe', rank: 'Director', isHead: true },
-  subordinates: [
-    { id: 2, name: 'Jane Smith', rank: 'Deputy Director', isHead: false },
-    { id: 3, name: 'Alice Johnson', rank: 'Staff', isHead: false },
-  ]
+// Implement employee-related functions
+
+// eslint-disable-next-line no-unused-vars
+const UnitWorkPlanEmployee = (employee) => {
+  // Implementation for editing employee
+  console.log('Edit employee:', employee.label);
+};
+
+const editEmployee = (employee) => {
+  // Implementation for editing employee
+  console.log('Edit employee:', employee.label);
+};
+
+const deleteEmployee = (employee) => {
+  // Implementation for deleting employee
+  console.log('Delete employee:', employee.label);
+};
+
+// Computed properties
+const organizationTree = computed(() => orgStore.structure);
+// const officeName = computed(() => orgStore.officeName || userStore.officeName || 'Organization');
+
+const selectedNode = computed(() => {
+  if (!selectedNodeId.value) return null;
+
+  // Find the node in the tree
+  const findNode = (nodes) => {
+    for (const node of nodes) {
+      if (node.id === selectedNodeId.value) return node;
+      if (node.children) {
+        const found = findNode(node.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  return findNode(orgStore.structure);
 });
 
-// Division data with their employees
-const divisions = ref([
-  {
-    id: 'technical_division',
-    label: 'Technical Division',
-    employee: { id: 4, name: 'Bob Wilson', rank: 'Division Head', isHead: true },
-    subordinates: [
-      { id: 5, name: 'Carol Brown', rank: 'Engineer', isHead: false },
-    ],
-  },
-  {
-    id: 'network_division',
-    label: 'Network Division',
-    employee: { id: 8, name: 'Frank Martin', rank: 'Division Head', isHead: true },
-    subordinates: [
-      { id: 9, name: 'Grace Taylor', rank: 'Network Admin', isHead: false },
-    ],
+const employees = computed(() => {
+  if (!selectedNode.value) return [];
+
+  // If the selected node is an employee itself (shouldn't happen as they're leaf nodes)
+  if (selectedNode.value.type === 'employee') {
+    return [selectedNode.value];
   }
-]);
 
-// Sections data grouped by division
-const sections = ref([
-  {
-    id: 'section_1',
-    divisionId: 'technical_division',
-    label: 'Section 1',
-    employee: { id: 6, name: 'David Lee', rank: 'Section Head', isHead: true },
-    subordinates: [
-      { id: 7, name: 'Emma Davis', rank: 'Technician', isHead: false },
-    ],
-  },
-  {
-    id: 'section_a',
-    divisionId: 'network_division',
-    label: 'Section A',
-    employee: { id: 10, name: 'Henry Clark', rank: 'Section Head', isHead: true },
-    subordinates: [
-      { id: 11, name: 'Isabella White', rank: 'Analyst', isHead: false },
-    ],
-  },
-]);
+  // If the node has children that are employees
+  if (selectedNode.value.children) {
+    return selectedNode.value.children.filter(child => child.type === 'employee');
+  }
 
-// Helper function to get sections for a specific division
-const getSectionsForDivision = (divisionId) => {
-  return sections.value.filter(section => section.divisionId === divisionId);
+  return [];
+});
+
+// Methods
+const refreshData = async () => {
+  loading.value = true;
+  await orgStore.fetchStructure();
+  loading.value = false;
 };
+
+// Watch for changes in the user's office ID
+watch(() => userStore.officeId, async (newOfficeId) => {
+  if (newOfficeId) {
+    await refreshData();
+  }
+});
+
+// Lifecycle hooks
+onMounted(async () => {
+  await userStore.loadUserData(); // Ensure user data is loaded first
+  await refreshData();
+});
 </script>
 
 <style scoped>
-.nested-content {
-  background-color: #f9f9f9;
-  border-left: 3px solid #1976d2;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.org-header {
-  background-color: #e3f2fd;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+.q-page {
+  background-color: #f7fafc;
 }
 
 .clean-table {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-/* Highlight head rows */
-.head-row {
-  background-color: #f5f5f5;
-}
-
-/* Override Quasar table styles for a cleaner look */
-:deep(.q-table th) {
-  font-weight: bold;
-  background-color: #e3f2fd;
-}
-
-:deep(.q-table) {
+.status-badge {
   border-radius: 4px;
-  overflow: hidden;
+  padding: 4px 8px;
 }
 </style>

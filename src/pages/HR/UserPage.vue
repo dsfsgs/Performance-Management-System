@@ -95,7 +95,7 @@
     </q-dialog>
 
     <!-- Role Selection Modal -->
-    <q-dialog v-model="showRoleModal" persistent transition-show="scale" transition-hide="scale">
+    <!-- <q-dialog v-model="showRoleModal" persistent transition-show="scale" transition-hide="scale">
       <q-card style="width: 100%; max-width: 50vw;">
         <q-card-section>
           <div class="text-h6">Assign Role</div>
@@ -117,7 +117,40 @@
           </q-btn>
         </q-card-actions>
       </q-card>
+    </q-dialog> -->
+    <!-- Role Selection Modal -->
+    <q-dialog v-model="showRoleModal" persistent transition-show="scale" transition-hide="scale">
+      <q-card style="width: 100%; max-width: 50vw;">
+        <q-card-section>
+          <div class="text-h6">Assign Role</div>
+          <div class="text-caption text-grey-7">Step 3 of 3</div>
+        </q-card-section>
+
+        <q-card-section>
+          <p class="text-grey-8 q-mb-md">Select the appropriate role for this user.</p>
+          <q-select v-model="selectedRole" :options="roles" label="Role *" option-label="label"
+            :rules="[(val) => !!val || 'Role is required']" :loading="loading">
+            <template v-slot:prepend>
+              <q-icon name="security" />
+            </template>
+          </q-select>
+
+          <!-- Permissions Checklist -->
+          <div class="q-mt-lg">
+            <div class="text-subtitle2 q-mb-sm">Permissions</div>
+            <q-option-group v-model="selectedPermissions" :options="permissions" type="checkbox" color="primary" />
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Back" color="grey-7" @click="goBackToEmployeeModal" />
+          <q-btn unelevated label="Save" color="primary" @click="saveUser" :disabled="!selectedRole" :loading="saving">
+            <q-tooltip v-if="!selectedRole">Please select a role to continue</q-tooltip>
+          </q-btn>
+        </q-card-actions>
+      </q-card>
     </q-dialog>
+
 
     <!-- Confirmation Dialog -->
     <q-dialog v-model="showConfirmation" persistent transition-show="scale" transition-hide="scale">
@@ -447,6 +480,16 @@ export default {
     });
 
     return {
+      rolesPermission: [], // [{ label: 'Admin', value: 'admin' }, ...]
+      permissions: [
+        { label: 'View Dashboard', value: 'view_dashboard' },
+        { label: 'Edit Users', value: 'edit_users' },
+        { label: 'Manage Roles', value: 'manage_roles' },
+        { label: 'Access Reports', value: 'access_reports' }
+        // Add more permissions as needed
+      ],
+      selectedPermissions: [],
+ 
       columns,
       rows,
       userAccounts,
